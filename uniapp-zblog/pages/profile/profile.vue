@@ -41,6 +41,33 @@
         </view>
       </view>
 
+      <!-- 博客运行卡片 -->
+      <view class="section">
+        <view class="section-title">⏱️ 博客运行</view>
+        <view class="runtime-card">
+          <view class="runtime-item">
+            <text class="runtime-num">{{ runtimeDays }}</text>
+            <text class="runtime-label">天</text>
+          </view>
+          <view class="runtime-divider"></view>
+          <view class="runtime-item">
+            <text class="runtime-num">{{ runtimeHours }}</text>
+            <text class="runtime-label">时</text>
+          </view>
+          <view class="runtime-divider"></view>
+          <view class="runtime-item">
+            <text class="runtime-num">{{ runtimeMins }}</text>
+            <text class="runtime-label">分</text>
+          </view>
+          <view class="runtime-divider"></view>
+          <view class="runtime-item">
+            <text class="runtime-num">{{ runtimeSecs }}</text>
+            <text class="runtime-label">秒</text>
+          </view>
+        </view>
+        <text class="runtime-since">自 {{ config.siteStartDate || '2026-03-26' }} 起持续运行</text>
+      </view>
+
       <!-- 关于博客 -->
       <view class="section">
         <view class="section-title">ℹ️ 关于</view>
@@ -50,8 +77,12 @@
             <text class="info-val link" @click="openGitHub">{{ config.owner }}/{{ config.repo }}</text>
           </view>
           <view class="info-row">
-            <text class="info-key">⏱️ 运行时间</text>
-            <text class="info-val">{{ runtimeStr }}</text>
+            <text class="info-key">📝 文章总数</text>
+            <text class="info-val">{{ totalArticles }} 篇</text>
+          </view>
+          <view class="info-row">
+            <text class="info-key">🖼️ 图片总数</text>
+            <text class="info-val">{{ catCount['image'] || 0 }} 张</text>
           </view>
         </view>
       </view>
@@ -103,7 +134,6 @@ import TabBar     from '../../components/TabBar.vue'
 import TokenModal from '../../components/TokenModal.vue'
 import CONFIG from '../../config.js'
 import api    from '../../utils/api.js'
-import { getRuntimeStr } from '../../utils/helper.js'
 
 export default {
   components: { TabBar, TokenModal },
@@ -119,14 +149,18 @@ export default {
       stars:           0,
       forks:           0,
       catCount:        {},
-      runtimeStr:      getRuntimeStr(),
+      runtimeDays:     0,
+      runtimeHours:    0,
+      runtimeMins:     0,
+      runtimeSecs:     0,
       _timer:          null,
       statusBarHeight: 0,
     }
   },
   computed: {
-    displayName() { return this.name || this.login || CONFIG.siteTitle },
-    hasToken() { return !!uni.getStorageSync('zblog_user_token') },
+    displayName()   { return this.name || this.login || CONFIG.siteTitle },
+    hasToken()      { return !!uni.getStorageSync('zblog_user_token') },
+    totalArticles() { return Object.values(this.catCount).reduce((a, b) => a + b, 0) },
     blogDisplay() {
       return (this.blog || '').replace(/^https?:\/\//, '').replace(/\/$/, '')
     },
@@ -151,8 +185,8 @@ export default {
     this.loadCatCounts()
   },
   onShow() {
-    this.runtimeStr = getRuntimeStr()
-    this._timer = setInterval(() => { this.runtimeStr = getRuntimeStr() }, 1000)
+    this._tickRuntime()
+    this._timer = setInterval(() => this._tickRuntime(), 1000)
   },
   onHide() { clearInterval(this._timer) },
   methods: {
@@ -180,6 +214,15 @@ export default {
         }))
         this.catCount = counts
       } catch (e) {}
+    },
+
+    _tickRuntime() {
+      const start = new Date(CONFIG.siteStartDate || '2026-03-26')
+      const s = Math.floor((Date.now() - start) / 1000)
+      this.runtimeDays  = Math.floor(s / 86400)
+      this.runtimeHours = Math.floor((s % 86400) / 3600)
+      this.runtimeMins  = Math.floor((s % 3600) / 60)
+      this.runtimeSecs  = s % 60
     },
 
     openTokenModal() {
@@ -315,6 +358,32 @@ export default {
 .action-text { flex: 1; font-size: 28rpx; color: #1e293b; }
 .action-tag   { font-size: 22rpx; color: #94a3b8; margin-right: 4rpx; }
 .action-arrow { font-size: 36rpx; color: #94a3b8; }
+
+/* 运行时间卡片 */
+.runtime-card {
+  background: #fff; border-radius: 14rpx;
+  display: flex; flex-direction: row; align-items: center;
+  box-shadow: 0 1rpx 4rpx rgba(0,0,0,.05);
+  overflow: hidden;
+}
+.runtime-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 24rpx 8rpx;
+}
+.runtime-num {
+  font-size: 40rpx; font-weight: 800; color: #2563eb; line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.runtime-label {
+  font-size: 22rpx; color: #94a3b8; margin-top: 6rpx;
+}
+.runtime-divider {
+  width: 1rpx; height: 60rpx; background: #f1f5f9; flex-shrink: 0;
+}
+.runtime-since {
+  font-size: 22rpx; color: #94a3b8; text-align: center;
+  display: block; margin-top: 14rpx;
+}
 
 /* 版权 */
 .footer-credit { text-align: center; padding: 30rpx; }

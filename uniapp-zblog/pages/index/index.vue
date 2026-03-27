@@ -418,7 +418,7 @@ export default {
 .search-cancel { font-size: 28rpx; color: #2563eb; white-space: nowrap; }
 
 /* ── 列表 ────────────────────────────────────────────────── */
-.list-scroll { flex: 1; }
+.list-scroll { flex: 1; height: 0; }
 .list-inner  { padding: 16rpx 20rpx 160rpx; }
 
 .search-result-bar {

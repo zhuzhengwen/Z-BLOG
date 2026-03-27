@@ -3,12 +3,11 @@
     <!-- 顶部 -->
     <view class="hero">
       <text class="hero-title">🖼️ 照片墙</text>
-      <text class="hero-count">{{ totalCount > 0 ? `共 ${totalCount} 张` : '加载中…' }}</text>
+      <text class="hero-count">{{ totalCount > 0 ? `共 ${totalCount} 张` : (loading ? '加载中…' : '') }}</text>
     </view>
 
-    <view v-if="loading" class="loading-wrap">
-      <view class="spinner"></view>
-      <text class="loading-text">正在加载所有图片…</text>
+    <view v-if="loading && !photos.length" class="skeleton-grid">
+      <view v-for="i in 9" :key="i" class="skeleton-cell"></view>
     </view>
     <view v-else-if="error" class="error-box"><text>⚠️ {{ error }}</text></view>
     <view v-else-if="!photos.length" class="empty">
@@ -17,26 +16,28 @@
       <text class="empty-sub">请在 GitHub 创建带 image 标签的 Issue</text>
     </view>
 
-    <!-- 三列瀑布流 -->
+    <!-- 三列等尺寸方形网格 -->
     <scroll-view v-else scroll-y class="wall-scroll">
-      <view class="waterfall">
-        <view class="wf-col" v-for="col in 3" :key="col">
-          <view
-            v-for="item in getCol(col - 1)" :key="item.id"
-            class="photo-item"
-            @click="preview(item)">
-            <image :src="item.src" mode="widthFix" lazy-load class="photo-img"></image>
-            <view class="photo-overlay">
-              <text class="photo-title">{{ item.title }}</text>
-              <text class="photo-date">{{ item.date }}</text>
-            </view>
-          </view>
+      <view class="grid">
+        <view
+          v-for="item in photos" :key="item.id"
+          class="grid-cell"
+          @click="preview(item)">
+          <!-- 骨架占位（图片加载前显示） -->
+          <view v-if="!item.loaded" class="cell-skeleton"></view>
+          <image
+            class="cell-img"
+            :src="thumbUrl(item.src)"
+            mode="aspectFill"
+            lazy-load
+            @load="item.loaded = true"
+            @error="item.loaded = true">
+          </image>
         </view>
       </view>
       <view style="height:160rpx"></view>
     </scroll-view>
 
-    <!-- 自定义底部导航 -->
     <tab-bar current="photos"></tab-bar>
     <token-modal></token-modal>
   </view>
@@ -45,7 +46,7 @@
 <script>
 import TabBar     from '../../components/TabBar.vue'
 import TokenModal from '../../components/TokenModal.vue'
-import api    from '../../utils/api.js'
+import api        from '../../utils/api.js'
 import { extractImages, formatDate } from '../../utils/helper.js'
 
 export default {
@@ -59,9 +60,14 @@ export default {
   },
   onLoad() { this.loadAll() },
   methods: {
-    getCol(colIndex) {
-      return this.photos.filter((_, i) => i % 3 === colIndex)
+    // GitHub user-images CDN 支持 width 参数，加速缩略图加载
+    thumbUrl(src) {
+      if (src && src.includes('user-images.githubusercontent.com')) {
+        return src + (src.includes('?') ? '&' : '?') + 'width=400'
+      }
+      return src
     },
+
     async loadAll() {
       try {
         let page = 1, allIssues = []
@@ -74,7 +80,7 @@ export default {
         let id = 0
         allIssues.forEach(issue => {
           extractImages(issue.body || '').forEach(src => {
-            this.photos.push({ id: id++, src, title: issue.title, date: formatDate(issue.created_at) })
+            this.photos.push({ id: id++, src, title: issue.title, date: formatDate(issue.created_at), loaded: false })
           })
         })
       } catch (e) {
@@ -83,6 +89,7 @@ export default {
         this.loading = false
       }
     },
+
     preview(item) {
       const idx = this.allUrls.indexOf(item.src)
       uni.previewImage({ urls: this.allUrls, current: this.allUrls[idx] })
@@ -101,10 +108,25 @@ export default {
 .hero-title { font-size: 30rpx; font-weight: 700; color: #fff; flex: 1; }
 .hero-count { font-size: 24rpx; color: rgba(255,255,255,.5); }
 
-.loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20rpx; }
-.spinner { width: 60rpx; height: 60rpx; border: 4rpx solid rgba(255,255,255,.2); border-top-color: #2563eb; border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 28rpx; color: rgba(255,255,255,.5); }
+/* 骨架屏网格 */
+.skeleton-grid {
+  display: flex; flex-wrap: wrap;
+  padding: 3rpx;
+}
+.skeleton-cell {
+  width: 33.333%; aspect-ratio: 1;
+  padding: 3rpx; box-sizing: border-box;
+}
+.skeleton-cell::after {
+  content: ''; display: block; width: 100%; height: 100%;
+  background: #1e293b;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
 .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14rpx; }
 .empty-icon { font-size: 80rpx; }
 .empty-text { font-size: 32rpx; color: rgba(255,255,255,.8); font-weight: 600; }
@@ -112,26 +134,32 @@ export default {
 .error-box  { margin: 40rpx; padding: 30rpx; background: #450a0a; border-radius: 10rpx; }
 .error-box text { color: #fca5a5; font-size: 28rpx; }
 
-/* 三列瀑布流 */
-.wall-scroll { flex: 1; }
-.waterfall { display: flex; flex-direction: row; padding: 8rpx; gap: 8rpx; }
-.wf-col    { flex: 1; display: flex; flex-direction: column; gap: 8rpx; }
-
-.photo-item {
-  border-radius: 8rpx; overflow: hidden; position: relative; background: #1e293b;
+/* 等尺寸方形三列网格 */
+.wall-scroll { flex: 1; height: 0; }
+.grid {
+  display: flex; flex-wrap: wrap;
+  padding: 3rpx;
 }
-.photo-img { width: 100%; display: block; }
-.photo-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,.75));
-  padding: 24rpx 10rpx 10rpx; opacity: 0;
-  /* #ifdef H5 */
-  transition: opacity .2s;
-  /* #endif */
+.grid-cell {
+  width: 33.333%;
+  aspect-ratio: 1;
+  padding: 3rpx;
+  box-sizing: border-box;
+  position: relative;
+  background: #1e293b;
 }
-/* #ifdef H5 */
-.photo-item:hover .photo-overlay { opacity: 1; }
-/* #endif */
-.photo-title { font-size: 18rpx; color: #fff; font-weight: 600; display: block; overflow: hidden; }
-.photo-date  { font-size: 16rpx; color: rgba(255,255,255,.7); display: block; margin-top: 2rpx; }
+.cell-skeleton {
+  position: absolute; inset: 3rpx;
+  background: linear-gradient(110deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.cell-img {
+  position: absolute; inset: 3rpx;
+  width: calc(100% - 6rpx); height: calc(100% - 6rpx);
+}
 </style>

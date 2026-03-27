@@ -5,9 +5,12 @@
       class="tabbar__item"
       :class="{ 'tabbar__item--active': current === item.key }"
       @click="go(item)">
-      <text class="tabbar__icon">{{ item.icon }}</text>
-      <text class="tabbar__label">{{ item.label }}</text>
-      <!-- 活跃指示点 -->
+      <image
+        class="tabbar__icon-img"
+        :src="current === item.key ? item.iconActive : item.iconNormal"
+        mode="aspectFit">
+      </image>
+      <text class="tabbar__label" :class="{ 'tabbar__label--active': current === item.key }">{{ item.label }}</text>
       <view v-if="current === item.key" class="tabbar__dot"></view>
     </view>
   </view>
@@ -22,10 +25,34 @@ export default {
   data() {
     return {
       tabs: [
-        { key: 'index',    label: '首页',   icon: '🏠', page: '/pages/index/index' },
-        { key: 'photos',   label: '照片墙', icon: '🖼️', page: '/pages/photos/photos' },
-        { key: 'category', label: '分类',   icon: '📋', page: '/pages/category/category' },
-        { key: 'profile',  label: '我的',   icon: '👤', page: '/pages/profile/profile' },
+        {
+          key: 'index',
+          label: '首页',
+          iconNormal: '/static/icons/tab-home-normal.png',
+          iconActive: '/static/icons/tab-home-active.png',
+          page: '/pages/index/index',
+        },
+        {
+          key: 'photos',
+          label: '照片墙',
+          iconNormal: '/static/icons/tab-photos-normal.png',
+          iconActive: '/static/icons/tab-photos-active.png',
+          page: '/pages/photos/photos',
+        },
+        {
+          key: 'category',
+          label: '分类',
+          iconNormal: '/static/icons/tab-category-normal.png',
+          iconActive: '/static/icons/tab-category-active.png',
+          page: '/pages/category/category',
+        },
+        {
+          key: 'profile',
+          label: '我的',
+          iconNormal: '/static/icons/tab-profile-normal.png',
+          iconActive: '/static/icons/tab-profile-active.png',
+          page: '/pages/profile/profile',
+        },
       ]
     }
   },
@@ -46,57 +73,28 @@ export default {
   padding-bottom: env(safe-area-inset-bottom);
   background: #fff;
   border-top: 1rpx solid #e2e8f0;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
+  display: flex; flex-direction: row; align-items: stretch;
   box-shadow: 0 -2rpx 12rpx rgba(0,0,0,.06);
   z-index: 999;
 }
-
 .tabbar__item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4rpx;
-  position: relative;
-  transition: all .15s;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6rpx; position: relative;
 }
-
-.tabbar__icon {
-  font-size: 42rpx;
-  line-height: 1;
-  filter: grayscale(60%);
-  transition: filter .15s, transform .15s;
+.tabbar__icon-img {
+  width: 48rpx; height: 48rpx;
 }
-
 .tabbar__label {
-  font-size: 20rpx;
-  color: #94a3b8;
-  font-weight: 500;
-  transition: color .15s;
+  font-size: 20rpx; color: #94a3b8; font-weight: 500;
 }
-
-/* 激活状态 */
-.tabbar__item--active .tabbar__icon {
-  filter: none;
-  transform: translateY(-2rpx);
+.tabbar__label--active {
+  color: #2563eb; font-weight: 700;
 }
-.tabbar__item--active .tabbar__label {
-  color: #2563eb;
-  font-weight: 700;
-}
-
-/* 活跃指示点 */
 .tabbar__dot {
-  position: absolute;
-  bottom: 8rpx;
-  left: 50%;
+  position: absolute; bottom: 8rpx; left: 50%;
   transform: translateX(-50%);
-  width: 8rpx;
-  height: 8rpx;
-  border-radius: 50%;
+  width: 8rpx; height: 8rpx; border-radius: 50%;
   background: #2563eb;
 }
 </style>

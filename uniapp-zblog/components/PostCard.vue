@@ -75,14 +75,14 @@ export default {
 }
 .card__date { font-size: 22rpx; color: #64748b; margin-left: auto; white-space: nowrap; }
 .card__title {
-  font-size: 28rpx; font-weight: 700; color: #1e293b; line-height: 1.4; display: block;
+  font-size: 32rpx; font-weight: 700; color: #1e293b; line-height: 1.45; display: block;
   overflow: hidden;
   /* #ifndef APP-NVUE */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   /* #endif */
 }
 .card__excerpt {
-  font-size: 24rpx; color: #64748b; line-height: 1.5; margin-top: 8rpx; flex: 1; display: block;
+  font-size: 27rpx; color: #64748b; line-height: 1.55; margin-top: 10rpx; flex: 1; display: block;
   /* #ifndef APP-NVUE */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   /* #endif */
