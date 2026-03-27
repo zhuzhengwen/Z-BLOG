@@ -11,7 +11,6 @@
             mode="aspectFill">
           </image>
           <text class="profile-name">{{ displayName }}</text>
-          <text class="profile-handle">@{{ login }}</text>
           <text v-if="bio" class="profile-bio">{{ bio }}</text>
           <view class="profile-stats">
             <view class="stat-item" v-for="s in stats" :key="s.label">
