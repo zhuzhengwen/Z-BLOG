@@ -6,11 +6,21 @@ class GitHubAPI {
   constructor({ owner, repo, token, cacheDuration }) {
     this.owner = owner;
     this.repo = repo;
-    this.token = token;
+    // 优先用 localStorage 中用户自己设置的 token
+    this.token = localStorage.getItem('zblog_user_token') || token || '';
     this.baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
     this.cacheDuration = cacheDuration || 5 * 60 * 1000;
     this._cache = {};
   }
+
+  // 更新 token（存入 localStorage 并立即生效）
+  setToken(token) {
+    this.token = token;
+    if (token) localStorage.setItem('zblog_user_token', token);
+    else localStorage.removeItem('zblog_user_token');
+  }
+
+  getToken() { return this.token; }
 
   // ── 缓存 ──────────────────────────────────────────────────
   _cacheKey(url) { return `zblog_${url}`; }
@@ -45,7 +55,9 @@ class GitHubAPI {
     if (res.status === 403) {
       const reset = res.headers.get('X-RateLimit-Reset');
       const resetTime = reset ? new Date(reset * 1000).toLocaleTimeString() : '稍后';
-      throw new Error(`GitHub API 频率限制，请于 ${resetTime} 后重试，或在 config.js 中配置 token`);
+      // 自动弹出 token 设置对话框
+      if (typeof showTokenDialog === 'function') showTokenDialog(resetTime);
+      throw new Error(`GitHub API 频率限制，请于 ${resetTime} 后重试`);
     }
     if (!res.ok) throw new Error(`GitHub API 错误: ${res.status} ${res.statusText}`);
 

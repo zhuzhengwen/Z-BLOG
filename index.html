@@ -120,7 +120,8 @@
       由 <a href="https://github.com" target="_blank">GitHub Issues</a> 驱动 ·
       <a href="photos.html">🖼️ 照片墙</a> ·
       <a href="mobile.html">📱 手机版</a> ·
-      <a href="#" onclick="app&&app.api.clearCache();showToast('缓存已清除');return false">刷新缓存</a>
+      <a href="#" onclick="app&&app.api.clearCache();showToast('缓存已清除');return false">刷新缓存</a> ·
+      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">⚙️ Token</a>
     </p>
     <p style="margin-top:6px">
       <span id="siteRuntime"></span> ·
@@ -138,6 +139,125 @@
 
 <!-- ── Toast ─────────────────────────────────────────────── -->
 <div id="toast" class="toast"></div>
+
+<!-- ── Token 设置弹窗 ─────────────────────────────────────── -->
+<div id="tokenModal" style="
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,.5);align-items:center;justify-content:center;">
+  <div style="
+    background:var(--surface);border-radius:12px;padding:28px;
+    width:min(460px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <h3 style="margin:0 0 6px;font-size:1.1rem">⚙️ 设置 GitHub Token</h3>
+    <p style="margin:0 0 16px;font-size:.82rem;color:var(--text-muted);line-height:1.6">
+      Token 仅保存在<strong>你的浏览器</strong>中，不会上传到任何地方。<br>
+      设置后 API 限额从 60次/小时 提升至 5000次/小时。
+    </p>
+    <p id="tokenRateMsg" style="display:none;margin:0 0 14px;padding:10px 14px;
+      background:#fef9c3;border-radius:7px;font-size:.82rem;color:#854d0e">
+      ⚠️ 当前 IP 已触发频率限制，设置 Token 后即可继续使用。
+    </p>
+    <input id="tokenInput" type="password"
+      placeholder="ghp_xxxxxxxxxxxxxxxx"
+      style="width:100%;box-sizing:border-box;padding:10px 14px;
+        border:1px solid var(--border);border-radius:8px;
+        font-size:.9rem;font-family:monospace;background:var(--surface);
+        color:var(--text);outline:none;margin-bottom:8px">
+    <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 18px">
+      前往 GitHub → Settings → Developer settings → Personal access tokens → 勾选 <code>public_repo</code> 生成
+    </p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeTokenDialog()"
+        style="padding:8px 18px;border-radius:7px;border:1px solid var(--border);
+          background:var(--surface);color:var(--text);cursor:pointer;font-size:.875rem">
+        取消
+      </button>
+      <button onclick="clearTokenDialog()"
+        style="padding:8px 18px;border-radius:7px;border:1px solid var(--border);
+          background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:.875rem">
+        清除 Token
+      </button>
+      <button onclick="saveTokenDialog()"
+        style="padding:8px 20px;border-radius:7px;border:none;
+          background:var(--primary);color:#fff;cursor:pointer;font-size:.875rem;font-weight:600">
+        保存
+      </button>
+    </div>
+    <p id="tokenStatus" style="margin:12px 0 0;font-size:.8rem;text-align:center;color:var(--text-muted)"></p>
+  </div>
+</div>
+
+<script>
+function showTokenDialog(resetTime) {
+  const modal = document.getElementById('tokenModal');
+  const input = document.getElementById('tokenInput');
+  const msg   = document.getElementById('tokenRateMsg');
+  modal.style.display = 'flex';
+  if (app && app.api) input.value = app.api.getToken() || '';
+  if (resetTime) {
+    msg.style.display = 'block';
+    msg.textContent = `⚠️ 已触发 API 频率限制，请 ${resetTime} 后重试，或设置 Token 立即解除限制。`;
+  } else {
+    msg.style.display = 'none';
+  }
+  document.getElementById('tokenStatus').textContent = '';
+  setTimeout(() => input.focus(), 50);
+}
+
+function closeTokenDialog() {
+  document.getElementById('tokenModal').style.display = 'none';
+}
+
+function clearTokenDialog() {
+  document.getElementById('tokenInput').value = '';
+  if (app && app.api) app.api.setToken('');
+  document.getElementById('tokenStatus').textContent = '✅ Token 已清除，恢复匿名模式（60次/小时）';
+  document.getElementById('tokenStatus').style.color = '#64748b';
+  setTimeout(closeTokenDialog, 1500);
+}
+
+async function saveTokenDialog() {
+  const token = document.getElementById('tokenInput').value.trim();
+  const status = document.getElementById('tokenStatus');
+  if (!token) { clearTokenDialog(); return; }
+
+  status.textContent = '验证中…';
+  status.style.color = 'var(--text-muted)';
+
+  try {
+    // 验证 token 是否有效
+    const res = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) {
+      const user = await res.json();
+      if (app && app.api) app.api.setToken(token);
+      status.textContent = `✅ 验证成功！已登录为 @${user.login}`;
+      status.style.color = '#16a34a';
+      setTimeout(() => { closeTokenDialog(); location.reload(); }, 1500);
+    } else {
+      status.textContent = '❌ Token 无效，请检查是否填写正确';
+      status.style.color = '#dc2626';
+    }
+  } catch (e) {
+    status.textContent = '❌ 网络错误，请重试';
+    status.style.color = '#dc2626';
+  }
+}
+
+// 点击遮罩关闭
+document.getElementById('tokenModal').addEventListener('click', function(e) {
+  if (e.target === this) closeTokenDialog();
+});
+
+// 页面加载后更新底部 Token 入口的显示状态
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('tokenEntryBtn');
+  if (!btn) return;
+  const saved = localStorage.getItem('zblog_user_token');
+  btn.textContent = saved ? '✅ Token' : '⚙️ Token';
+  btn.title = saved ? '已设置 Token（5000次/小时）' : '未设置 Token（60次/小时）';
+});
+</script>
 
 <!-- ── Scripts ───────────────────────────────────────────── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
