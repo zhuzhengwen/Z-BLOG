@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- 背景渐变 -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <!-- 光晕效果 -->
+    <radialGradient id="glow" cx="40%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <!-- 投影 -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="rgba(0,0,0,0.35)"/>
+    </filter>
+    <!-- Z 字光泽 -->
+    <linearGradient id="zgrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.85)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 圆角矩形背景 -->
+  <rect width="1024" height="1024" rx="220" ry="220" fill="url(#bg)"/>
+  <!-- 光晕层 -->
+  <rect width="1024" height="1024" rx="220" ry="220" fill="url(#glow)"/>
+
+  <!-- 装饰：右下角书页 -->
+  <g opacity="0.12">
+    <rect x="600" y="640" width="300" height="20" rx="10" fill="#ffffff"/>
+    <rect x="600" y="680" width="260" height="16" rx="8" fill="#ffffff"/>
+    <rect x="600" y="716" width="220" height="16" rx="8" fill="#ffffff"/>
+    <rect x="600" y="752" width="280" height="16" rx="8" fill="#ffffff"/>
+    <rect x="600" y="788" width="180" height="16" rx="8" fill="#ffffff"/>
+  </g>
+
+  <!-- 装饰：左上角书页 -->
+  <g opacity="0.08">
+    <rect x="124" y="240" width="240" height="16" rx="8" fill="#ffffff"/>
+    <rect x="124" y="272" width="200" height="14" rx="7" fill="#ffffff"/>
+    <rect x="124" y="300" width="220" height="14" rx="7" fill="#ffffff"/>
+  </g>
+
+  <!-- 主字母 Z（粗体，带笔触感） -->
+  <g filter="url(#shadow)">
+    <!-- Z 顶横 -->
+    <rect x="230" y="268" width="560" height="90" rx="45" fill="url(#zgrad)"/>
+    <!-- Z 斜线（用多边形模拟粗斜线） -->
+    <polygon
+      points="730,358 790,358 294,666 234,666"
+      fill="url(#zgrad)"
+    />
+    <!-- Z 底横 -->
+    <rect x="230" y="666" width="560" height="90" rx="45" fill="url(#zgrad)"/>
+  </g>
+
+  <!-- 笔点装饰：底部横线末端小圆点 -->
+  <circle cx="790" cy="311" r="28" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="234" cy="711" r="28" fill="rgba(255,255,255,0.6)"/>
+
+  <!-- 右下角小徽标：铅笔图标 -->
+  <g transform="translate(730, 760) rotate(-30)" opacity="0.75">
+    <rect x="0" y="0" width="28" height="110" rx="8" fill="#ffffff"/>
+    <polygon points="0,110 28,110 14,145" fill="#fbbf24"/>
+    <rect x="0" y="0" width="28" height="22" rx="8" fill="#94a3b8"/>
+  </g>
+</svg>

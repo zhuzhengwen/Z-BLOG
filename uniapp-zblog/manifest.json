@@ -11,14 +11,39 @@
     "nvueStyleCompiler": "uni-compiler",
     "compilerVersion": 3,
     "splashscreen": {
-      "alwaysShowBeforeRender": true,
+      "alwaysShowBeforeRender": false,
       "waiting": true,
       "autoclose": true,
-      "delay": 0
+      "delay": 0,
+      "androidStyle": "default"
+    },
+    "icons": {
+      "android": {
+        "mdpi":    "static/icons/icon-48.png",
+        "hdpi":    "static/icons/icon-72.png",
+        "xhdpi":   "static/icons/icon-96.png",
+        "xxhdpi":  "static/icons/icon-144.png",
+        "xxxhdpi": "static/icons/icon-192.png"
+      },
+      "ios": {
+        "appstore":    "static/icons/icon-1024.png",
+        "iphone":      {
+          "app_20x2":  "static/icons/icon-40.png",
+          "app_20x3":  "static/icons/icon-60.png",
+          "app_29x2":  "static/icons/icon-58.png",
+          "app_29x3":  "static/icons/icon-87.png",
+          "app_40x2":  "static/icons/icon-80.png",
+          "app_40x3":  "static/icons/icon-120.png",
+          "app_60x2":  "static/icons/icon-120.png",
+          "app_60x3":  "static/icons/icon-180.png"
+        }
+      }
     },
     "modules": {},
     "distribute": {
       "android": {
+        "packagename": "com.zblog.app",
+        "versionCode": 1,
         "permissions": [
           "<uses-permission android:name=\"android.permission.INTERNET\"/>",
           "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>"
