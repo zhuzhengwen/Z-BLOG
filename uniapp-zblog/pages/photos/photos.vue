@@ -23,7 +23,6 @@
           v-for="item in photos" :key="item.id"
           class="grid-cell"
           @click="preview(item)">
-          <!-- 骨架占位（图片加载前显示） -->
           <view v-if="!item.loaded" class="cell-skeleton"></view>
           <image
             class="cell-img"
@@ -33,6 +32,10 @@
             @load="item.loaded = true"
             @error="item.loaded = true">
           </image>
+          <!-- 日期遮罩 -->
+          <view class="cell-date-bar">
+            <text class="cell-date-text">{{ item.date }}</text>
+          </view>
         </view>
       </view>
       <view style="height:160rpx"></view>
@@ -161,5 +164,16 @@ export default {
 .cell-img {
   position: absolute; inset: 3rpx;
   width: calc(100% - 6rpx); height: calc(100% - 6rpx);
+}
+/* 日期遮罩 */
+.cell-date-bar {
+  position: absolute; bottom: 3rpx; left: 3rpx; right: 3rpx;
+  padding: 20rpx 10rpx 8rpx;
+  background: linear-gradient(transparent, rgba(0,0,0,.65));
+  border-radius: 0 0 4rpx 4rpx;
+}
+.cell-date-text {
+  font-size: 17rpx; color: rgba(255,255,255,.9);
+  font-weight: 500; display: block;
 }
 </style>

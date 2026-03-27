@@ -56,21 +56,31 @@
             </view>
             <!-- #endif -->
 
-            <!-- App 端：直链 video，外链用行内点击 -->
+            <!-- App 端：直链 video，外链用预览卡片 -->
             <!-- #ifndef H5 -->
             <view v-if="v.type === 'direct'" class="video-wrap">
               <video :src="v.url" controls class="video-player" :show-fullscreen-btn="true"></video>
             </view>
-            <view v-else class="video-link-row" @click="openVideoInBrowser(v.url)">
-              <view class="video-link-thumb">
-                <image v-if="v.thumb" :src="v.thumb" mode="aspectFill" class="video-link-img"></image>
-                <view v-else class="video-link-placeholder">
-                  <text class="play-icon">▶</text>
+            <view v-else class="video-preview-card" :class="'vpc--'+v.type" @click="openVideoInBrowser(v.url)">
+              <!-- 缩略图区域 -->
+              <view class="vpc-thumb">
+                <image v-if="v.thumb" :src="v.thumb" mode="aspectFill" lazy-load class="vpc-thumb-img"></image>
+                <view v-else class="vpc-thumb-placeholder"></view>
+                <!-- 居中播放按钮 -->
+                <view class="vpc-play-overlay">
+                  <view class="vpc-play-btn">
+                    <text class="vpc-play-icon">▶</text>
+                  </view>
+                </view>
+                <!-- 平台标识 -->
+                <view class="vpc-platform-badge">
+                  <text class="vpc-platform-text">{{ v.type === 'youtube' ? 'YouTube' : 'Bilibili' }}</text>
                 </view>
               </view>
-              <view class="video-link-info">
-                <text class="video-link-type">{{ v.type === 'youtube' ? 'YouTube 视频' : 'Bilibili 视频' }}</text>
-                <text class="video-link-hint">点击在浏览器中播放</text>
+              <!-- 底部提示 -->
+              <view class="vpc-footer">
+                <text class="vpc-hint">点击在浏览器中播放</text>
+                <text class="vpc-arrow">›</text>
               </view>
             </view>
             <!-- #endif -->
@@ -219,21 +229,51 @@ export default {
   /* #endif */
 }
 
-/* App 端外链视频 */
-.video-link-row {
-  display: flex; flex-direction: row; align-items: stretch;
-  background: #1e293b; border-radius: 12rpx; overflow: hidden;
+/* App 端视频预览卡片 */
+.video-preview-card {
+  border-radius: 14rpx; overflow: hidden;
+  background: #1e293b;
 }
-.video-link-thumb { width: 200rpx; flex-shrink: 0; }
-.video-link-img   { width: 100%; height: 100%; }
-.video-link-placeholder {
-  width: 100%; height: 140rpx; background: #334155;
+.vpc--youtube  { background: #0f0f0f; }
+.vpc--bilibili { background: #1a0a12; }
+
+.vpc-thumb {
+  width: 100%; padding-bottom: 56.25%; /* 16:9 */
+  position: relative; overflow: hidden;
+}
+.vpc-thumb-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.vpc-thumb-placeholder {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #fb7299, #ec4899);
+}
+.vpc--youtube .vpc-thumb-placeholder {
+  background: linear-gradient(135deg, #ff4444, #cc0000);
+}
+.vpc-play-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.35);
   display: flex; align-items: center; justify-content: center;
 }
-.play-icon { font-size: 52rpx; color: rgba(255,255,255,.6); }
-.video-link-info  { flex: 1; padding: 24rpx; display: flex; flex-direction: column; justify-content: center; gap: 10rpx; }
-.video-link-type  { font-size: 28rpx; color: #fff; font-weight: 600; }
-.video-link-hint  { font-size: 22rpx; color: rgba(255,255,255,.5); }
+.vpc-play-btn {
+  width: 100rpx; height: 100rpx; border-radius: 50%;
+  background: rgba(255,255,255,.92);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,.4);
+}
+.vpc-play-icon { font-size: 40rpx; color: #1e293b; margin-left: 8rpx; }
+.vpc-platform-badge {
+  position: absolute; top: 16rpx; left: 16rpx;
+  background: rgba(0,0,0,.6); border-radius: 8rpx;
+  padding: 6rpx 16rpx;
+}
+.vpc-platform-text { font-size: 22rpx; color: #fff; font-weight: 700; }
+.vpc-footer {
+  padding: 20rpx 24rpx;
+  display: flex; flex-direction: row; align-items: center;
+}
+.vpc-hint  { flex: 1; font-size: 26rpx; color: rgba(255,255,255,.65); }
+.vpc-arrow { font-size: 40rpx; color: rgba(255,255,255,.4); }
 
 /* 图片画廊 */
 .img-gallery { margin-bottom: 30rpx; }
