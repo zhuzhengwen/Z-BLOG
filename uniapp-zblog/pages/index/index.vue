@@ -1,49 +1,65 @@
 <template>
   <view class="page">
 
-    <!-- 顶部搜索栏 -->
-    <view class="search-bar">
-      <view class="search-wrap">
-        <text class="search-icon">🔍</text>
-        <input
-          class="search-input"
-          v-model="searchKeyword"
-          placeholder="搜索文章…"
-          confirm-type="search"
-          @confirm="doSearch" />
-        <text v-if="searchKeyword" class="search-clear" @click="clearSearch">✕</text>
+    <!-- 顶部 Header -->
+    <view class="header">
+      <view v-if="!searchExpanded" class="header__main">
+        <text class="header__title">{{ siteTitle }}</text>
+        <view class="header__actions">
+          <view class="header__icon-btn" @click="searchExpanded = true">
+            <text class="icon">🔍</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 搜索展开态 -->
+      <view v-else class="header__search">
+        <view class="search-wrap">
+          <text class="search-icon">🔍</text>
+          <input
+            class="search-input"
+            v-model="searchKeyword"
+            placeholder="搜索文章…"
+            confirm-type="search"
+            :focus="searchExpanded"
+            @confirm="doSearch"
+          />
+          <text v-if="searchKeyword" class="search-clear" @click="searchKeyword = ''">✕</text>
+        </view>
+        <text class="search-cancel" @click="cancelSearch">取消</text>
       </view>
     </view>
 
-    <!-- 分类筛选栏（可折叠） -->
-    <view class="chips-section">
-      <scroll-view v-if="chipsVisible" class="chips-bar" scroll-x :show-scrollbar="false">
-        <view class="chips-inner">
-          <view class="chip" :class="{ 'chip--active': !currentCat }" @click="switchCat(null)">
-            🏠 全部
+    <!-- 分类 Tab 栏 -->
+    <view class="tabs-bar">
+      <scroll-view class="tabs-scroll" scroll-x :show-scrollbar="false">
+        <view class="tabs-inner">
+          <view
+            class="tab"
+            :class="{ 'tab--active': !currentCat }"
+            @click="switchCat(null)">
+            <text class="tab__text">全部</text>
+            <view v-if="!currentCat" class="tab__line"></view>
           </view>
           <view
             v-for="c in categories" :key="c.label"
-            class="chip"
-            :class="{ 'chip--active': currentCat === c.label }"
+            class="tab"
+            :class="{ 'tab--active': currentCat === c.label }"
             @click="switchCat(c.label)">
-            {{ c.icon }} {{ c.name }}
+            <text class="tab__text">{{ c.icon }} {{ c.name }}</text>
+            <view v-if="currentCat === c.label" class="tab__line"></view>
           </view>
         </view>
       </scroll-view>
-      <view class="chips-toggle" @click="chipsVisible = !chipsVisible">
-        <text class="chips-toggle__text">{{ chipsVisible ? '收起 ▲' : '展开分类 ▼' }}</text>
-      </view>
     </view>
 
-    <!-- 搜索结果模式 -->
+    <!-- 搜索结果 -->
     <scroll-view v-if="searchMode" scroll-y class="list-scroll">
       <view class="list-inner">
-        <view class="search-header">
-          <text class="search-header__title">🔍 "{{ lastKeyword }}"</text>
-          <text class="search-header__close" @click="clearSearch">✕ 返回</text>
+        <view class="search-result-bar">
+          <text class="search-result-kw">"{{ lastKeyword }}" 的结果</text>
+          <text class="search-result-back" @click="clearSearch">清除</text>
         </view>
-
         <view v-if="loading && !posts.length">
           <view v-for="i in 3" :key="i" class="skeleton-card">
             <view class="skeleton sk-short"></view>
@@ -60,7 +76,7 @@
       </view>
     </scroll-view>
 
-    <!-- 正常列表模式 -->
+    <!-- 正常列表 -->
     <scroll-view
       v-else
       class="list-scroll"
@@ -79,18 +95,14 @@
             <view class="skeleton sk-medium"></view>
           </view>
         </view>
-
         <view v-else-if="error" class="error-box"><text>⚠️ {{ error }}</text></view>
-
         <view v-else-if="!posts.length && !loading" class="empty">
           <text class="empty-icon">📭</text>
           <text class="empty-text">暂无内容</text>
         </view>
-
         <template v-else>
           <post-card v-for="issue in posts" :key="issue.id" :issue="issue" @click="openDetail(issue)" />
         </template>
-
         <view v-if="posts.length" class="load-footer">
           <text v-if="loadingMore" class="load-text">加载中…</text>
           <text v-else-if="!hasMore" class="load-text">— 已经到底了 —</text>
@@ -98,7 +110,6 @@
       </view>
     </scroll-view>
 
-    <!-- 自定义底部导航 -->
     <tab-bar current="index"></tab-bar>
   </view>
 </template>
@@ -113,19 +124,20 @@ export default {
   components: { PostCard, TabBar },
   data() {
     return {
-      posts:         [],
-      hasMore:       true,
-      page:          1,
-      currentCat:    null,
-      loading:       false,
-      loadingMore:   false,
-      refreshing:    false,
-      error:         null,
-      categories:    CONFIG.categories,
-      chipsVisible:  true,
-      searchKeyword: '',
-      lastKeyword:   '',
-      searchMode:    false,
+      posts:          [],
+      hasMore:        true,
+      page:           1,
+      currentCat:     null,
+      loading:        false,
+      loadingMore:    false,
+      refreshing:     false,
+      error:          null,
+      categories:     CONFIG.categories,
+      siteTitle:      CONFIG.siteTitle || 'Z-BLOG',
+      searchKeyword:  '',
+      lastKeyword:    '',
+      searchMode:     false,
+      searchExpanded: false,
     }
   },
   onLoad() { this.loadPosts() },
@@ -154,7 +166,6 @@ export default {
     switchCat(label) {
       if (this.currentCat === label && !this.searchMode) return
       this.searchMode    = false
-      this.searchKeyword = ''
       this.currentCat    = label
       this.page          = 1
       this.posts         = []
@@ -182,10 +193,11 @@ export default {
     async doSearch() {
       const q = this.searchKeyword.trim()
       if (!q) return
-      this.lastKeyword = q
-      this.searchMode  = true
-      this.loading     = true
-      this.posts       = []
+      this.lastKeyword    = q
+      this.searchMode     = true
+      this.searchExpanded = false
+      this.loading        = true
+      this.posts          = []
       try {
         const { items } = await api.searchIssues(q)
         this.posts = items
@@ -196,13 +208,19 @@ export default {
       }
     },
 
+    cancelSearch() {
+      this.searchKeyword  = ''
+      this.searchExpanded = false
+    },
+
     clearSearch() {
-      this.searchKeyword = ''
-      this.lastKeyword   = ''
-      this.searchMode    = false
-      this.page          = 1
-      this.posts         = []
-      this.hasMore       = true
+      this.searchKeyword  = ''
+      this.lastKeyword    = ''
+      this.searchMode     = false
+      this.searchExpanded = false
+      this.page           = 1
+      this.posts          = []
+      this.hasMore        = true
       this.loadPosts()
     },
   }
@@ -212,44 +230,83 @@ export default {
 <style lang="scss" scoped>
 .page { display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
 
-/* 搜索栏 */
-.search-bar {
-  background: #2563eb; padding: 20rpx 24rpx 16rpx; flex-shrink: 0;
+/* ── Header ─────────────────────────────────────────────── */
+.header {
+  background: #fff;
+  border-bottom: 1rpx solid #f1f5f9;
+  padding: 0 28rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,.04);
+}
+.header__main {
+  flex: 1; display: flex; flex-direction: row;
+  align-items: center; justify-content: space-between;
+}
+.header__title {
+  font-size: 36rpx; font-weight: 800; color: #1e293b; letter-spacing: -0.5rpx;
+}
+.header__actions { display: flex; flex-direction: row; gap: 4rpx; }
+.header__icon-btn {
+  width: 72rpx; height: 72rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #f8fafc;
+}
+.icon { font-size: 36rpx; }
+
+/* 搜索展开 */
+.header__search {
+  flex: 1; display: flex; flex-direction: row; align-items: center; gap: 16rpx;
 }
 .search-wrap {
-  display: flex; flex-direction: row; align-items: center;
-  background: rgba(255,255,255,.2); border-radius: 12rpx;
-  padding: 14rpx 20rpx; gap: 12rpx;
+  flex: 1; display: flex; flex-direction: row; align-items: center;
+  background: #f1f5f9; border-radius: 12rpx;
+  padding: 14rpx 20rpx; gap: 10rpx;
 }
-.search-icon { font-size: 28rpx; color: #fff; }
-.search-input { flex: 1; font-size: 28rpx; color: #fff; }
-.search-clear { font-size: 26rpx; color: rgba(255,255,255,.8); padding: 0 4rpx; }
+.search-icon { font-size: 26rpx; color: #94a3b8; }
+.search-input { flex: 1; font-size: 28rpx; color: #1e293b; }
+.search-clear { font-size: 24rpx; color: #94a3b8; padding: 0 2rpx; }
+.search-cancel { font-size: 28rpx; color: #2563eb; white-space: nowrap; padding: 8rpx 0; }
 
-/* 分类筛选区 */
-.chips-section { background: #fff; border-bottom: 1rpx solid #e2e8f0; flex-shrink: 0; }
-.chips-bar { white-space: nowrap; }
-.chips-inner { display: inline-flex; flex-direction: row; gap: 12rpx; padding: 16rpx 24rpx 12rpx; }
-.chip {
-  display: inline-flex; align-items: center;
-  padding: 10rpx 26rpx; border-radius: 99rpx;
-  font-size: 26rpx; color: #64748b;
-  background: #f1f5f9; white-space: nowrap; border: 2rpx solid transparent;
+/* ── 分类 Tab 栏 ─────────────────────────────────────────── */
+.tabs-bar {
+  background: #fff;
+  border-bottom: 1rpx solid #e2e8f0;
+  flex-shrink: 0;
 }
-.chip--active { background: rgba(37,99,235,.1); color: #2563eb; border-color: rgba(37,99,235,.4); }
-.chips-toggle { padding: 6rpx 0 10rpx; text-align: center; }
-.chips-toggle__text { font-size: 22rpx; color: #94a3b8; }
+.tabs-scroll { white-space: nowrap; }
+.tabs-inner {
+  display: inline-flex; flex-direction: row;
+  padding: 0 20rpx;
+}
+.tab {
+  display: inline-flex; flex-direction: column;
+  align-items: center; padding: 24rpx 24rpx 0;
+  position: relative; min-width: 80rpx;
+}
+.tab__text {
+  font-size: 28rpx; color: #94a3b8; white-space: nowrap;
+  padding-bottom: 22rpx; font-weight: 500;
+}
+.tab--active .tab__text { color: #2563eb; font-weight: 700; }
+.tab__line {
+  position: absolute; bottom: 0; left: 16rpx; right: 16rpx;
+  height: 4rpx; background: #2563eb; border-radius: 2rpx;
+}
 
-/* 列表 */
+/* ── 列表 ────────────────────────────────────────────────── */
 .list-scroll { flex: 1; }
 .list-inner  { padding: 16rpx 20rpx 160rpx; }
 
-/* 搜索结果头 */
-.search-header {
+/* 搜索结果条 */
+.search-result-bar {
   display: flex; flex-direction: row; align-items: center;
-  padding: 14rpx 4rpx 18rpx; gap: 12rpx;
+  padding: 16rpx 4rpx 18rpx;
 }
-.search-header__title { flex: 1; font-size: 26rpx; color: #1e293b; font-weight: 600; }
-.search-header__close { font-size: 24rpx; color: #2563eb; padding: 8rpx 4rpx; }
+.search-result-kw   { flex: 1; font-size: 26rpx; color: #1e293b; font-weight: 600; }
+.search-result-back { font-size: 24rpx; color: #94a3b8; padding: 6rpx; }
 
 /* 骨架屏 */
 .skeleton-card {
@@ -268,7 +325,10 @@ export default {
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 /* 空/错误 */
-.empty { text-align: center; padding: 80rpx 40rpx; display: flex; flex-direction: column; align-items: center; gap: 16rpx; }
+.empty {
+  text-align: center; padding: 80rpx 40rpx;
+  display: flex; flex-direction: column; align-items: center; gap: 16rpx;
+}
 .empty-icon { font-size: 80rpx; }
 .empty-text { font-size: 28rpx; color: #94a3b8; }
 .error-box  { background: #fef2f2; border-radius: 10rpx; padding: 28rpx; margin: 20rpx 0; }
