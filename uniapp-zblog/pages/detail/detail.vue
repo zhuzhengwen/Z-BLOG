@@ -134,7 +134,21 @@ export default {
     videos()      { return this.issue ? extractVideos(this.issue.body || '') : [] },
     isImagePost() { return this.cat && this.cat.label === 'image' },
     isVideoPost() { return this.cat && this.cat.label === 'video' },
-    renderedHtml(){ return this.issue ? simpleMarkdown(this.issue.body || '') : '' },
+    renderedHtml() {
+      if (!this.issue) return ''
+      let body = this.issue.body || ''
+      // 视频类文章：从正文中剥离已经在预览卡展示的视频链接，避免重复显示为链接
+      if (this.isVideoPost || this.videos.length) {
+        body = body
+          .replace(/https?:\/\/(?:www\.)?youtube\.com\/watch[^\s\n\])]*/g, '')
+          .replace(/https?:\/\/youtu\.be\/[^\s\n\]))]*/g, '')
+          .replace(/https?:\/\/(?:www\.)?bilibili\.com\/video\/[^\s\n\]))]*/g, '')
+          .replace(/https?:\/\/[^\s\n\])]+\.(?:mp4|webm|mov|ogg)(?:\?[^\s\n\])]*)?/gi, '')
+          .replace(/\n{3,}/g, '\n\n')  // 清理多余空行
+          .trim()
+      }
+      return simpleMarkdown(body)
+    },
   },
   onLoad(options) {
     const { number, title } = options

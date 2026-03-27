@@ -262,9 +262,19 @@ function renderPostDetail(issue, categories) {
   const isLinkPost = cat && cat.label === 'link';
   const isVideoPost = cat && cat.label === 'video';
 
+  // 从正文剥离视频链接，避免嵌入播放器下方再出现裸链接
+  function stripVideoUrls(text) {
+    return (text || '')
+      .replace(/https?:\/\/(?:www\.)?youtube\.com\/watch[^\s\n\])"<]*/g, '')
+      .replace(/https?:\/\/youtu\.be\/[^\s\n\])"<]*/g, '')
+      .replace(/https?:\/\/(?:www\.)?bilibili\.com\/video\/[^\s\n\])"<]*/g, '')
+      .replace(/https?:\/\/[^\s\n\])"<]+\.(?:mp4|webm|mov|ogg)(?:\?[^\s\n\])"<]*)?/gi, '')
+      .replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   let content = '';
   if (isVideoPost) {
-    content = renderVideosFromMarkdown(issue.body) + renderMarkdown(issue.body);
+    content = renderVideosFromMarkdown(issue.body) + renderMarkdown(stripVideoUrls(issue.body));
   } else if (isImagePost) {
     const imgs = extractImages(issue.body || '');
     content = renderImageGallery(imgs) + renderMarkdown(issue.body);
