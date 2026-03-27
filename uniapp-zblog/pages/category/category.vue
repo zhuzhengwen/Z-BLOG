@@ -36,16 +36,18 @@
 
     <!-- 自定义底部导航 -->
     <tab-bar current="category"></tab-bar>
+    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
-import TabBar from '../../components/TabBar.vue'
+import TabBar     from '../../components/TabBar.vue'
+import TokenModal from '../../components/TokenModal.vue'
 import CONFIG from '../../config.js'
 import { getRuntimeStr } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar },
+  components: { TabBar, TokenModal },
   data() {
     return {
       categories: CONFIG.categories.map(c => ({ ...c, desc: this.getDesc(c.label) })),

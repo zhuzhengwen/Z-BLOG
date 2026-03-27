@@ -38,16 +38,18 @@
 
     <!-- 自定义底部导航 -->
     <tab-bar current="photos"></tab-bar>
+    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
-import TabBar from '../../components/TabBar.vue'
+import TabBar     from '../../components/TabBar.vue'
+import TokenModal from '../../components/TokenModal.vue'
 import api    from '../../utils/api.js'
 import { extractImages, formatDate } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar },
+  components: { TabBar, TokenModal },
   data() {
     return { photos: [], loading: true, error: null }
   },

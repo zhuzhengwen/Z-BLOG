@@ -94,17 +94,19 @@
 
     <!-- 自定义底部导航 -->
     <tab-bar current="profile"></tab-bar>
+    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
-import TabBar from '../../components/TabBar.vue'
+import TabBar     from '../../components/TabBar.vue'
+import TokenModal from '../../components/TokenModal.vue'
 import CONFIG from '../../config.js'
 import api    from '../../utils/api.js'
 import { getRuntimeStr } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar },
+  components: { TabBar, TokenModal },
   data() {
     return {
       config:          CONFIG,

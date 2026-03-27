@@ -137,17 +137,19 @@
     </scroll-view>
 
     <tab-bar current="index"></tab-bar>
+    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
-import PostCard from '../../components/PostCard.vue'
-import TabBar   from '../../components/TabBar.vue'
-import CONFIG   from '../../config.js'
-import api      from '../../utils/api.js'
+import PostCard    from '../../components/PostCard.vue'
+import TabBar      from '../../components/TabBar.vue'
+import TokenModal  from '../../components/TokenModal.vue'
+import CONFIG      from '../../config.js'
+import api         from '../../utils/api.js'
 
 export default {
-  components: { PostCard, TabBar },
+  components: { PostCard, TabBar, TokenModal },
   data() {
     return {
       posts:          [],
