@@ -1,0 +1,14 @@
+# ── 本地私有配置（含 token，不提交）──────────────────────
+config.local.js
+uniapp-zblog/config.local.js
+
+# ── Node / UniApp 构建产物 ────────────────────────────────
+node_modules/
+uniapp-zblog/node_modules/
+uniapp-zblog/dist/
+uniapp-zblog/unpackage/
+
+# ── 系统文件 ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,38 @@
+{
+  "name": "Z-BLOG",
+  "short_name": "Z-BLOG",
+  "description": "基于 GitHub Issues 的个人博客",
+  "start_url": "/mobile.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%232563eb'/><text y='160' x='20' font-size='150'>📝</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%232563eb'/><text y='430' x='50' font-size='400'>📝</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "blog", "social"],
+  "shortcuts": [
+    {
+      "name": "文章",
+      "url": "/mobile.html#home-article",
+      "description": "查看所有文章"
+    },
+    {
+      "name": "图片",
+      "url": "/mobile.html#home-image",
+      "description": "查看图片集"
+    }
+  ]
+}

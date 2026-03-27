@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="基于 GitHub Issues 的个人博客 - 手机版">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Z-BLOG">
+  <title>Z-BLOG</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='.9em' font-size='70' x='15'>📝</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+
+  <!-- Desktop redirect hint -->
+  <link rel="alternate" media="only screen and (min-width:769px)" href="index.html">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+
+<!-- ── Top Header ───────────────────────────────────────── -->
+<header class="m-header">
+  <span class="m-header__logo" id="mSiteTitle">📝 Z-BLOG</span>
+  <button class="m-header__btn" onclick="mApp&&mApp._switchTab('search')" title="搜索">🔍</button>
+  <button class="m-header__btn" onclick="mApp&&mApp._switchTab('about')" title="关于">👤</button>
+</header>
+
+<!-- ── Pages ────────────────────────────────────────────── -->
+
+<!-- 首页 -->
+<div class="m-page active" id="page-home">
+  <!-- 分类筛选 Chips -->
+  <div class="m-chips" id="homeChips">
+    <button class="m-chip active" data-cat="">全部</button>
+  </div>
+  <!-- 文章列表 -->
+  <div class="m-scroll">
+    <div class="m-post-list" id="homeList">
+      <div class="skeleton-card">
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--medium"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--medium"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--medium"></div>
+      </div>
+    </div>
+    <button id="loadMoreBtn" class="load-more-btn" style="display:none" onclick="mApp&&mApp.loadMore()">加载更多</button>
+  </div>
+</div>
+
+<!-- 分类页 -->
+<div class="m-page" id="page-categories">
+  <div class="m-cat-grid" id="catGrid">
+    <!-- 由 JS 生成 -->
+  </div>
+</div>
+
+<!-- 搜索页 -->
+<div class="m-page" id="page-search">
+  <div class="m-search-bar">
+    <input type="search" id="mSearchInput" placeholder="搜索文章…" autocomplete="off" enterkeyhint="search">
+    <button id="mSearchBtn">搜索</button>
+  </div>
+  <div class="m-scroll">
+    <div class="m-post-list" id="mSearchResult">
+      <div class="empty-state">
+        <span class="empty-state__icon">🔍</span>
+        <p>输入关键词开始搜索</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 照片墙页（跳转到 photos.html）-->
+<div class="m-page" id="page-photos">
+  <div style="text-align:center;padding:40px 20px">
+    <p style="font-size:3rem;margin-bottom:12px">🖼️</p>
+    <p style="font-weight:700;font-size:1.1rem;margin-bottom:8px">照片墙</p>
+    <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:20px">在浏览器中查看完整照片墙</p>
+    <a href="photos.html" style="display:inline-block;padding:11px 28px;background:var(--primary);color:#fff;border-radius:8px;font-weight:500">打开照片墙 →</a>
+  </div>
+</div>
+
+<!-- 关于页 -->
+<div class="m-page" id="page-about">
+  <div class="m-about" id="aboutContent">
+    <div class="skeleton" style="width:80px;height:80px;border-radius:50%;margin:0 auto 16px"></div>
+    <div class="skeleton skeleton--medium" style="width:40%;margin:0 auto 8px"></div>
+    <div class="skeleton skeleton--line" style="width:70%;margin:0 auto"></div>
+  </div>
+</div>
+
+<!-- ── 文章详情（全屏滑入）──────────────────────────────── -->
+<div class="m-detail" id="mDetail">
+  <div class="m-detail__bar">
+    <button class="m-detail__back" id="mDetailBack" aria-label="返回">←</button>
+    <span class="m-detail__bar-title" id="mDetailBarTitle"></span>
+    <button class="m-detail__gh-btn" id="mDetailGhBtn">GitHub ↗</button>
+  </div>
+  <div id="mDetailContent"></div>
+</div>
+
+<!-- ── 底部导航 ──────────────────────────────────────────── -->
+<nav class="m-nav">
+  <button class="m-nav__item active" data-tab="home">
+    <span class="m-nav__icon">🏠</span>
+    <span>首页</span>
+  </button>
+  <button class="m-nav__item" data-tab="photos">
+    <span class="m-nav__icon">🖼️</span>
+    <span>照片墙</span>
+  </button>
+  <button class="m-nav__item" data-tab="categories">
+    <span class="m-nav__icon">🗂️</span>
+    <span>分类</span>
+  </button>
+  <button class="m-nav__item" data-tab="search">
+    <span class="m-nav__icon">🔍</span>
+    <span>搜索</span>
+  </button>
+  <button class="m-nav__item" data-tab="about">
+    <span class="m-nav__icon">👤</span>
+    <span>关于</span>
+  </button>
+</nav>
+
+<!-- ── 灯箱 ──────────────────────────────────────────────── -->
+<div id="lightbox" class="lightbox">
+  <button class="lightbox__close" onclick="closeLightbox()">✕</button>
+  <img src="" alt="">
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div id="toast" class="toast"></div>
+
+<!-- ── Scripts ───────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/render.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  // 更新站点标题
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('mSiteTitle');
+    if (el) el.textContent = `📝 ${CONFIG.siteTitle}`;
+    document.title = CONFIG.siteTitle;
+  });
+</script>
+<script src="js/mobile.js"></script>
+
+<!-- PWA Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+
+</body>
+</html>

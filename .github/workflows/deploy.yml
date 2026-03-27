@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+# 触发条件：推送代码 或 Issue 有变动时自动重新部署
+on:
+  push:
+    branches: [main, master]
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled, deleted]
+
+# 授权 GitHub Pages 部署
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只允许一个部署运行
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 注入 token（从 Secrets，不进入代码库）
+        run: sed -i "s|token: ''|token: '${{ secrets.BLOG_TOKEN }}'|g" config.js
+
+      - name: 配置 GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: 上传站点文件
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 上传整个仓库根目录，排除不需要的目录
+          path: .
+          # 注意：upload-pages-artifact 会自动排除 .git 目录
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

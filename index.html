@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="基于 GitHub Issues 的个人博客">
+  <title>Z-BLOG</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <!-- Mobile 跳转 -->
+  <link rel="alternate" media="only screen and (max-width:768px)" href="mobile.html">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .hljs-github { display: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────── -->
+<header class="header">
+  <div class="container header__inner">
+    <a class="header__logo" href="#/">
+      📝 <span id="siteTitle">Z-BLOG</span>
+    </a>
+
+    <nav class="header__nav" id="headerNav">
+      <button class="header__nav-item active" data-cat="all">🏠 <span>全部</span></button>
+      <!-- 分类导航由 JS 动态插入 -->
+    </nav>
+
+    <div class="header__search">
+      <span>🔍</span>
+      <input type="search" id="searchInput" placeholder="搜索文章…" autocomplete="off">
+      <button id="searchBtn" title="搜索">→</button>
+    </div>
+
+    <a href="mobile.html" style="font-size:.8rem;color:var(--text-muted);white-space:nowrap" title="手机版">📱</a>
+  </div>
+</header>
+
+<!-- ── Main Layout ─────────────────────────────────────── -->
+<div class="container layout">
+
+  <!-- 主内容区 -->
+  <main class="main" id="main">
+    <!-- 骨架屏（JS 接管前） -->
+    <div class="section-header">
+      <h1 class="section-header__title">📚 全部文章</h1>
+    </div>
+    <div class="post-list" id="postListInit">
+      <div class="skeleton-card">
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--medium"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--medium"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--medium"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+
+    <!-- 博主信息 -->
+    <div class="sidebar-card">
+      <div id="sidebarRepo">
+        <div class="skeleton" style="width:64px;height:64px;border-radius:50%;margin:0 auto 12px"></div>
+        <div class="skeleton skeleton--medium" style="margin:0 auto 8px;width:60%"></div>
+        <div class="skeleton skeleton--line" style="width:80%;margin:0 auto"></div>
+      </div>
+    </div>
+
+    <!-- 文章分类 -->
+    <div class="sidebar-card">
+      <p class="sidebar-card__title">文章分类</p>
+      <ul class="cat-list" id="sidebarCats">
+        <li><button class="cat-list__item active" data-cat="all" onclick="location.hash='#/'">
+          <span class="cat-list__icon">📚</span>
+          <span class="cat-list__name">全部</span>
+        </button></li>
+      </ul>
+    </div>
+
+    <!-- 关于 -->
+    <div class="sidebar-card">
+      <p class="sidebar-card__title">使用说明</p>
+      <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7">
+        本博客由 <strong>GitHub Issues</strong> 驱动。<br>
+        创建 Issue 即可发布文章，<br>
+        添加 Label 即可分类。<br><br>
+        支持的分类标签：<br>
+        📝 article &nbsp; 🖼️ image<br>
+        🎬 video &nbsp; 📌 note &nbsp; 🔗 link
+      </p>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <p>
+      由 <a href="https://github.com" target="_blank">GitHub Issues</a> 驱动 ·
+      <a href="photos.html">🖼️ 照片墙</a> ·
+      <a href="mobile.html">📱 手机版</a> ·
+      <a href="#" onclick="app&&app.api.clearCache();showToast('缓存已清除');return false">刷新缓存</a>
+    </p>
+    <p style="margin-top:6px">
+      <span id="siteRuntime"></span> ·
+      <span id="busuanzi_container_site_uv">访客 <span id="busuanzi_value_site_uv">-</span> 人</span> ·
+      <span id="busuanzi_container_site_pv">浏览 <span id="busuanzi_value_site_pv">-</span> 次</span>
+    </p>
+  </div>
+</footer>
+
+<!-- ── 灯箱 ──────────────────────────────────────────────── -->
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
+  <button class="lightbox__close" onclick="closeLightbox()" aria-label="关闭">✕</button>
+  <img src="" alt="图片预览">
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div id="toast" class="toast"></div>
+
+<!-- ── Scripts ───────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/render.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  // 运行时间
+  (function() {
+    const el = document.getElementById('siteRuntime');
+    if (!el) return;
+    const tick = () => {
+      const start = new Date(CONFIG.siteStartDate || '2026-03-26');
+      const s = Math.floor((Date.now() - start) / 1000);
+      const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600),
+            m = Math.floor((s % 3600) / 60), sec = s % 60;
+      el.textContent = `运行 ${d} 天 ${h} 时 ${m} 分 ${sec} 秒`;
+    };
+    document.addEventListener('DOMContentLoaded', () => { tick(); setInterval(tick, 1000); });
+  })();
+</script>
+<script>
+  // 动态插入分类导航
+  document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('headerNav');
+    if (!nav || !CONFIG.categories) return;
+    CONFIG.categories.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'header__nav-item';
+      btn.dataset.cat = c.label;
+      btn.innerHTML = `${c.icon} <span>${c.name}</span>`;
+      nav.appendChild(btn);
+    });
+
+    // 更新站点标题
+    const titleEl = document.getElementById('siteTitle');
+    if (titleEl) titleEl.textContent = CONFIG.siteTitle;
+    document.title = CONFIG.siteTitle;
+  });
+</script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
