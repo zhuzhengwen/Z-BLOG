@@ -8,9 +8,17 @@ class GitHubAPI {
   constructor() {
     this.owner = CONFIG.owner
     this.repo  = CONFIG.repo
-    this.token = CONFIG.token
     this.base  = `https://api.github.com/repos/${this.owner}/${this.repo}`
     this._cache = {}
+  }
+
+  getToken() {
+    return uni.getStorageSync('zblog_user_token') || CONFIG.token || ''
+  }
+
+  setToken(token) {
+    if (token) uni.setStorageSync('zblog_user_token', token)
+    else        uni.removeStorageSync('zblog_user_token')
   }
 
   // ── 缓存 ────────────────────────────────────────────────
@@ -37,7 +45,8 @@ class GitHubAPI {
     if (cached) return Promise.resolve(cached)
 
     const header = { 'Accept': 'application/vnd.github.v3+json' }
-    if (this.token) header['Authorization'] = `token ${this.token}`
+    const token  = this.getToken()
+    if (token) header['Authorization'] = `token ${token}`
 
     return new Promise((resolve, reject) => {
       uni.request({
@@ -48,7 +57,8 @@ class GitHubAPI {
             this._setCache(full, res.data)
             resolve(res.data)
           } else if (res.statusCode === 403) {
-            reject(new Error('GitHub API 频率限制，请稍后再试'))
+            uni.$emit('showTokenModal')
+            reject(new Error('GitHub API 频率限制，请设置 Token 后重试'))
           } else {
             reject(new Error(`请求失败: ${res.statusCode}`))
           }

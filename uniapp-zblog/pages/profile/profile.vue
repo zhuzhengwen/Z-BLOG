@@ -46,10 +46,6 @@
         <view class="section-title">ℹ️ 关于</view>
         <view class="info-card">
           <view class="info-row">
-            <text class="info-key">📝 博客名称</text>
-            <text class="info-val">{{ config.siteTitle }}</text>
-          </view>
-          <view class="info-row">
             <text class="info-key">🏠 GitHub</text>
             <text class="info-val link" @click="openGitHub">{{ config.owner }}/{{ config.repo }}</text>
           </view>
@@ -64,6 +60,12 @@
       <view class="section">
         <view class="section-title">⚙️ 设置</view>
         <view class="action-list">
+          <view class="action-item" @click="openTokenModal">
+            <text class="action-icon">🔑</text>
+            <text class="action-text">设置 GitHub Token</text>
+            <text class="action-tag">{{ hasToken ? '✅ 已设置' : '未设置' }}</text>
+            <text class="action-arrow">›</text>
+          </view>
           <view class="action-item" @click="clearCache">
             <text class="action-icon">🗑️</text>
             <text class="action-text">清除缓存</text>
@@ -122,6 +124,7 @@ export default {
   },
   computed: {
     displayName() { return this.name || this.login || CONFIG.siteTitle },
+    hasToken() { return !!uni.getStorageSync('zblog_user_token') },
     blogDisplay() {
       return (this.blog || '').replace(/^https?:\/\//, '').replace(/\/$/, '')
     },
@@ -175,6 +178,10 @@ export default {
         }))
         this.catCount = counts
       } catch (e) {}
+    },
+
+    openTokenModal() {
+      uni.$emit('showTokenModal', '')
     },
 
     clearCache() {
@@ -304,6 +311,7 @@ export default {
 .action-item:last-child { border-bottom: none; }
 .action-icon { font-size: 36rpx; }
 .action-text { flex: 1; font-size: 28rpx; color: #1e293b; }
+.action-tag   { font-size: 22rpx; color: #94a3b8; margin-right: 4rpx; }
 .action-arrow { font-size: 36rpx; color: #94a3b8; }
 
 /* 版权 */
