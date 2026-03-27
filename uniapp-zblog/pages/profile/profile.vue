@@ -122,10 +122,11 @@ export default {
   computed: {
     displayName() { return this.name || this.login || CONFIG.siteTitle },
     avatarUrl() {
-      if (!this.avatar) return 'https://github.com/github.png'
-      // 拼时间戳（按天刷新），绕过本地图片缓存，头像改后当天生效
+      // 按天变化的版本号，绕过本地图片缓存
       const day = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-      return `${this.avatar}&v=${day}`
+      if (this.avatar) return `${this.avatar}&v=${day}`
+      // API 未返回时直接用 GitHub 头像 CDN（始终是当前用户头像，无需登录）
+      return `https://github.com/${CONFIG.owner}.png?v=${day}`
     },
     stats() {
       return [
