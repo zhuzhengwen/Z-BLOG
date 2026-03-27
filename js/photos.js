@@ -1,15 +1,22 @@
 /**
  * 照片墙逻辑
  * - 加载所有 image 标签的 Issues
- * - 提取图片并瀑布流展示
+ * - 方形九宫格展示，底部日期遮罩，骨架加载
  * - 增强版灯箱（前后翻页）
  */
 
 const api = new GitHubAPI(CONFIG);
-let allPhotos = [];   // { src, title, date, issueUrl }
+let allPhotos = [];   // { src, title, date, fullDate, issueUrl }
 let filtered  = [];
 let lbIndex   = 0;
-let layout    = 'masonry';
+
+// ── GitHub CDN 缩略图（加速加载）──────────────────────────
+function thumbUrl(src) {
+  if (src && src.includes('user-images.githubusercontent.com')) {
+    return src + (src.includes('?') ? '&' : '?') + 'width=400';
+  }
+  return src;
+}
 
 // ── 启动 ───────────────────────────────────────────────────
 async function init() {
@@ -22,12 +29,10 @@ async function init() {
 // ── 加载所有图片（分页拉取所有 image Issues）───────────────
 async function loadAllPhotos() {
   const wall = document.getElementById('photoWall');
-  wall.innerHTML = `<div class="photos-loading"><div class="photos-loading__spinner"></div><p>正在加载图片…</p></div>`;
 
   try {
     let page = 1;
     let issues = [];
-    // 分页拉取全部 image 类 Issues
     while (true) {
       const batch = await api.getIssues({ page, perPage: 100, label: 'image' });
       issues = issues.concat(batch);
@@ -41,7 +46,6 @@ async function loadAllPhotos() {
       return;
     }
 
-    // 提取所有图片
     issues.forEach(issue => {
       const imgs = extractImages(issue.body || '');
       imgs.forEach(src => {
@@ -64,7 +68,7 @@ async function loadAllPhotos() {
   }
 }
 
-// ── 渲染照片墙 ─────────────────────────────────────────────
+// ── 渲染方形九宫格 ─────────────────────────────────────────
 function renderWall() {
   const wall = document.getElementById('photoWall');
   if (!filtered.length) {
@@ -73,23 +77,22 @@ function renderWall() {
   }
 
   wall.innerHTML = filtered.map((p, i) => `
-    <div class="photo-item" onclick="openLb(${i})" title="${escapeHtml(p.title)}">
-      <img src="${p.src}" alt="${escapeHtml(p.title)}" loading="lazy"
-           onerror="this.parentElement.style.display='none'">
-      <div class="photo-item__overlay">
-        <p class="photo-item__title">${escapeHtml(p.title)}</p>
-        <p class="photo-item__date">${p.date}</p>
+    <div class="pw-cell" onclick="openLb(${i})" title="${escapeHtml(p.title)}">
+      <div class="pw-skeleton"></div>
+      <img
+        class="pw-img"
+        src="${thumbUrl(p.src)}"
+        alt="${escapeHtml(p.title)}"
+        loading="lazy"
+        onload="this.classList.add('loaded')"
+        onerror="this.parentElement.style.display='none'">
+      <div class="pw-title-bar">
+        <span class="pw-title">${escapeHtml(p.title)}</span>
+      </div>
+      <div class="pw-date-bar">
+        <span class="pw-date">${p.date}</span>
       </div>
     </div>`).join('');
-}
-
-// ── 布局切换 ───────────────────────────────────────────────
-function setLayout(type) {
-  layout = type;
-  const wall = document.getElementById('photoWall');
-  document.getElementById('btnMasonry').classList.toggle('active', type === 'masonry');
-  document.getElementById('btnGrid').classList.toggle('active', type === 'grid');
-  wall.className = type === 'grid' ? 'photo-masonry photo-masonry--grid' : 'photo-masonry';
 }
 
 // ── 关键词筛选 ─────────────────────────────────────────────
@@ -148,7 +151,6 @@ function bindKeyboard() {
     if (e.key === 'ArrowRight') { lbNext(); }
     if (e.key === 'Escape')     { closeLb(); }
   });
-  // 点击背景关闭
   document.getElementById('photoLightbox').addEventListener('click', e => {
     if (e.target === e.currentTarget || e.target.classList.contains('photo-lightbox__img-wrap')) closeLb();
   });
