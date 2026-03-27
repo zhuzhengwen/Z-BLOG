@@ -29,9 +29,6 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 注入 token（从 Secrets，不进入代码库）
-        run: sed -i "s|token: ''|token: '${{ secrets.BLOG_TOKEN }}'|g" config.js
-
       - name: 配置 GitHub Pages
         uses: actions/configure-pages@v4
 
