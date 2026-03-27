@@ -109,7 +109,6 @@ class App {
             <img class="sidebar-card__avatar" src="${user.avatar_url}" alt="${user.login}">
           </a>
           <p class="sidebar-card__name">${escapeHtml(user.name || user.login)}</p>
-          <p class="sidebar-card__handle">@${escapeHtml(user.login)}</p>
           <p class="sidebar-card__desc">${escapeHtml(user.bio || repo.description || CONFIG.siteDesc || '')}</p>
           <div class="sidebar-card__metas">
             ${locationHtml}
