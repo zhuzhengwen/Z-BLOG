@@ -6,8 +6,13 @@
 
     <!-- 左侧抽屉 -->
     <view class="drawer" :class="{ 'drawer--open': drawerOpen }">
-      <view class="drawer__header">
-        <text class="drawer__title">{{ siteTitle }}</text>
+      <view class="drawer__header" :style="{ paddingTop: (statusBarHeight + 24) + 'px' }">
+        <view class="drawer__header-main">
+          <view class="drawer__logo">
+            <text class="drawer__logo-icon">📝</text>
+          </view>
+          <text class="drawer__title">{{ siteTitle }}</text>
+        </view>
         <view class="drawer__close" @click="drawerOpen = false">
           <text class="drawer__close-icon">✕</text>
         </view>
@@ -155,11 +160,12 @@ export default {
       error:          null,
       categories:     CONFIG.categories,
       siteTitle:      CONFIG.siteTitle || 'Z-BLOG',
-      drawerOpen:     false,
-      searchKeyword:  '',
-      lastKeyword:    '',
-      searchMode:     false,
-      searchExpanded: false,
+      drawerOpen:      false,
+      searchKeyword:   '',
+      lastKeyword:     '',
+      searchMode:      false,
+      searchExpanded:  false,
+      statusBarHeight: 0,
     }
   },
   computed: {
@@ -169,7 +175,11 @@ export default {
       return cat ? `${cat.icon} ${cat.name}` : this.siteTitle
     }
   },
-  onLoad() { this.loadPosts() },
+  onLoad() {
+    const info = uni.getSystemInfoSync()
+    this.statusBarHeight = info.statusBarHeight || 20
+    this.loadPosts()
+  },
   onShow() {
     uni.$on('switchCategory', (label) => {
       this.switchCat(label)
@@ -276,53 +286,76 @@ export default {
 /* ── 左侧抽屉 ────────────────────────────────────────────── */
 .drawer {
   position: fixed; top: 0; left: 0; bottom: 0; z-index: 101;
-  width: 520rpx;
+  width: 540rpx;
   background: #fff;
   display: flex; flex-direction: column;
   transform: translateX(-100%);
   /* #ifdef H5 */
-  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
   /* #endif */
-  box-shadow: 4rpx 0 24rpx rgba(0,0,0,.12);
+  box-shadow: 8rpx 0 40rpx rgba(0,0,0,.15);
 }
 .drawer--open { transform: translateX(0); }
 
 .drawer__header {
   display: flex; flex-direction: row; align-items: center;
-  padding: 60rpx 32rpx 28rpx;
-  border-bottom: 1rpx solid #f1f5f9;
+  padding-left: 32rpx; padding-right: 28rpx; padding-bottom: 28rpx;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
-.drawer__title {
-  flex: 1; font-size: 36rpx; font-weight: 800; color: #1e293b;
+.drawer__header-main {
+  flex: 1; display: flex; flex-direction: row; align-items: center; gap: 16rpx;
 }
-.drawer__close {
-  width: 64rpx; height: 64rpx; border-radius: 50%;
-  background: #f8fafc;
+.drawer__logo {
+  width: 72rpx; height: 72rpx; border-radius: 18rpx;
+  background: rgba(255,255,255,.2);
   display: flex; align-items: center; justify-content: center;
 }
-.drawer__close-icon { font-size: 28rpx; color: #64748b; }
+.drawer__logo-icon { font-size: 38rpx; }
+.drawer__title {
+  font-size: 34rpx; font-weight: 800; color: #fff;
+  text-shadow: 0 1rpx 4rpx rgba(0,0,0,.15);
+}
+.drawer__close {
+  width: 60rpx; height: 60rpx; border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.drawer__close-icon { font-size: 26rpx; color: rgba(255,255,255,.9); }
 
 .drawer__menu {
-  flex: 1; padding: 16rpx 0;
+  flex: 1; padding: 12rpx 0;
   overflow-y: auto;
 }
 .drawer__item {
   display: flex; flex-direction: row; align-items: center;
-  padding: 28rpx 32rpx; gap: 20rpx;
+  padding: 26rpx 32rpx; gap: 22rpx;
   position: relative;
+  /* #ifdef H5 */
+  transition: background .15s;
+  /* #endif */
 }
-.drawer__item--active { background: rgba(37,99,235,.06); }
-.drawer__item-icon { font-size: 36rpx; width: 48rpx; text-align: center; }
+.drawer__item--active {
+  background: linear-gradient(90deg, rgba(37,99,235,.08) 0%, rgba(37,99,235,.02) 100%);
+}
+.drawer__item-icon {
+  font-size: 36rpx; width: 52rpx; text-align: center;
+  background: #f8fafc; border-radius: 12rpx; padding: 8rpx 0;
+}
+.drawer__item--active .drawer__item-icon {
+  background: rgba(37,99,235,.1);
+}
 .drawer__item-text {
   flex: 1; font-size: 30rpx; color: #475569; font-weight: 500;
 }
 .drawer__item--active .drawer__item-text { color: #2563eb; font-weight: 700; }
 .drawer__item-dot {
-  width: 12rpx; height: 12rpx; border-radius: 50%; background: #2563eb;
+  width: 10rpx; height: 10rpx; border-radius: 50%; background: #2563eb;
+  box-shadow: 0 0 6rpx rgba(37,99,235,.5);
 }
 
 .drawer__footer {
-  padding: 24rpx 32rpx;
+  padding: 20rpx 32rpx 32rpx;
   border-top: 1rpx solid #f1f5f9;
 }
 .drawer__footer-text { font-size: 22rpx; color: #94a3b8; }

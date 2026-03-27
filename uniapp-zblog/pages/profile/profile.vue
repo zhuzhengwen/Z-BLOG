@@ -3,7 +3,7 @@
     <scroll-view scroll-y style="flex:1">
 
       <!-- 头部卡片 -->
-      <view class="profile-hero">
+      <view class="profile-hero" :style="{ paddingTop: (statusBarHeight + 40) + 'px' }">
         <view class="profile-hero__bg"></view>
         <view class="profile-hero__content">
           <image
@@ -16,7 +16,10 @@
           <view class="profile-stats">
             <view class="stat-item" v-for="s in stats" :key="s.label">
               <text class="stat-num">{{ s.value }}</text>
-              <text class="stat-label">{{ s.label }}</text>
+              <view class="stat-label-row">
+                <text class="stat-icon">{{ s.icon }}</text>
+                <text class="stat-label">{{ s.label }}</text>
+              </view>
             </view>
           </view>
         </view>
@@ -103,27 +106,29 @@ export default {
   components: { TabBar },
   data() {
     return {
-      config:     CONFIG,
-      avatar:     '',
-      name:       '',
-      bio:        '',
-      stars:      0,
-      forks:      0,
-      catCount:   {},
-      runtimeStr: getRuntimeStr(),
-      _timer:     null,
+      config:          CONFIG,
+      avatar:          '',
+      name:            '',
+      bio:             '',
+      stars:           0,
+      forks:           0,
+      catCount:        {},
+      runtimeStr:      getRuntimeStr(),
+      _timer:          null,
+      statusBarHeight: 0,
     }
   },
   computed: {
     stats() {
       return [
-        { label: '⭐ Stars', value: this.stars },
-        { label: '🍴 Forks', value: this.forks },
-        { label: '📝 文章', value: Object.values(this.catCount).reduce((a, b) => a + b, 0) },
+        { icon: '⭐', label: 'Stars', value: this.stars },
+        { icon: '🍴', label: 'Forks', value: this.forks },
+        { icon: '📝', label: '文章', value: Object.values(this.catCount).reduce((a, b) => a + b, 0) },
       ]
     }
   },
   onLoad() {
+    this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 20
     this.loadProfile()
     this.loadCatCounts()
   },
@@ -184,7 +189,7 @@ export default {
 /* 头部 */
 .profile-hero {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  padding: 50rpx 30rpx 40rpx;
+  padding-left: 30rpx; padding-right: 30rpx; padding-bottom: 48rpx;
   display: flex; flex-direction: column; align-items: center;
   position: relative;
 }
@@ -208,7 +213,12 @@ export default {
 }
 .stat-item:last-child { border-right: none; }
 .stat-num   { font-size: 34rpx; font-weight: 800; color: #fff; }
-.stat-label { font-size: 20rpx; color: rgba(255,255,255,.7); margin-top: 4rpx; }
+.stat-label-row {
+  display: flex; flex-direction: row; align-items: center;
+  gap: 4rpx; margin-top: 6rpx;
+}
+.stat-icon  { font-size: 20rpx; line-height: 1; }
+.stat-label { font-size: 20rpx; color: rgba(255,255,255,.7); }
 
 /* 通用区块 */
 .section { margin: 24rpx 24rpx 0; }
