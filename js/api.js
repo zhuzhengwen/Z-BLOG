@@ -85,14 +85,13 @@ class GitHubAPI {
   }
 
   // ── 获取仓库信息 ──────────────────────────────────────────
-  async getRepo() {
-    return this._request(`${this.baseUrl.replace('/repos/', '/repos/')}`
-      .replace(`/repos/${this.owner}/${this.repo}`, `/repos/${this.owner}/${this.repo}`));
-  }
-
-  // 简化版：直接用 baseUrl
   async getRepoInfo() {
     return this._request(this.baseUrl);
+  }
+
+  // ── 获取用户信息（头像、昵称、简介、地区等）────────────────
+  async getUser() {
+    return this._request(`https://api.github.com/users/${this.owner}`);
   }
 
   // ── 搜索帖子 ─────────────────────────────────────────────

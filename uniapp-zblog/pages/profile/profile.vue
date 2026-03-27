@@ -4,15 +4,23 @@
 
       <!-- 头部卡片 -->
       <view class="profile-hero" :style="{ paddingTop: (statusBarHeight + 40) + 'px' }">
-        <view class="profile-hero__bg"></view>
         <view class="profile-hero__content">
           <image
             class="profile-avatar"
             :src="avatar || 'https://github.com/github.png'"
             mode="aspectFill">
           </image>
-          <text class="profile-name">{{ name || config.siteTitle }}</text>
-          <text class="profile-bio">{{ bio || config.siteDesc }}</text>
+          <text class="profile-name">{{ displayName }}</text>
+          <text class="profile-handle">@{{ login }}</text>
+          <text v-if="bio" class="profile-bio">{{ bio }}</text>
+          <view class="profile-meta-row" v-if="location">
+            <text class="profile-meta-icon">📍</text>
+            <text class="profile-meta-text">{{ location }}</text>
+          </view>
+          <view class="profile-meta-row" v-if="blog">
+            <text class="profile-meta-icon">🔗</text>
+            <text class="profile-meta-text profile-meta-link" @click="openLink(blog)">{{ blogDisplay }}</text>
+          </view>
           <view class="profile-stats">
             <view class="stat-item" v-for="s in stats" :key="s.label">
               <text class="stat-num">{{ s.value }}</text>
@@ -108,8 +116,11 @@ export default {
     return {
       config:          CONFIG,
       avatar:          '',
+      login:           CONFIG.owner,
       name:            '',
       bio:             '',
+      location:        '',
+      blog:            '',
       stars:           0,
       forks:           0,
       catCount:        {},
@@ -119,6 +130,10 @@ export default {
     }
   },
   computed: {
+    displayName() { return this.name || this.login || CONFIG.siteTitle },
+    blogDisplay() {
+      return (this.blog || '').replace(/^https?:\/\//, '').replace(/\/$/, '')
+    },
     stats() {
       return [
         { icon: '⭐', label: 'Stars', value: this.stars },
@@ -140,12 +155,15 @@ export default {
   methods: {
     async loadProfile() {
       try {
-        const repo = await api.getRepoInfo()
-        this.avatar = repo.owner.avatar_url
-        this.name   = repo.owner.login
-        this.bio    = repo.description || CONFIG.siteDesc
-        this.stars  = repo.stargazers_count
-        this.forks  = repo.forks_count
+        const [user, repo] = await Promise.all([api.getUser(), api.getRepoInfo()])
+        this.avatar   = user.avatar_url
+        this.login    = user.login
+        this.name     = user.name || user.login
+        this.bio      = user.bio || repo.description || CONFIG.siteDesc || ''
+        this.location = user.location || ''
+        this.blog     = user.blog || ''
+        this.stars    = repo.stargazers_count
+        this.forks    = repo.forks_count
       } catch (e) {}
     },
 
@@ -166,14 +184,19 @@ export default {
       uni.showToast({ title: '缓存已清除', icon: 'success' })
     },
 
-    openGitHub() {
-      const url = `https://github.com/${CONFIG.owner}/${CONFIG.repo}`
+    openLink(url) {
+      if (!url) return
+      const full = /^https?:\/\//.test(url) ? url : `https://${url}`
       // #ifdef H5
-      window.open(url, '_blank')
+      window.open(full, '_blank')
       // #endif
       // #ifdef APP-PLUS
-      plus.runtime.openURL(url)
+      plus.runtime.openURL(full)
       // #endif
+    },
+
+    openGitHub() {
+      this.openLink(`https://github.com/${CONFIG.owner}/${CONFIG.repo}`)
     },
 
     goPhotos() {
@@ -198,14 +221,24 @@ export default {
   border: 6rpx solid rgba(255,255,255,.4);
   margin-bottom: 20rpx;
 }
-.profile-name { font-size: 38rpx; font-weight: 800; color: #fff; margin-bottom: 10rpx; }
-.profile-bio  { font-size: 26rpx; color: rgba(255,255,255,.75); text-align: center; line-height: 1.5; margin-bottom: 30rpx; }
 .profile-hero__content { display: flex; flex-direction: column; align-items: center; }
+.profile-name   { font-size: 38rpx; font-weight: 800; color: #fff; margin-bottom: 6rpx; }
+.profile-handle { font-size: 24rpx; color: rgba(255,255,255,.6); margin-bottom: 12rpx; }
+.profile-bio    { font-size: 26rpx; color: rgba(255,255,255,.8); text-align: center; line-height: 1.5; margin-bottom: 14rpx; padding: 0 20rpx; }
+.profile-meta-row {
+  display: flex; flex-direction: row; align-items: center; gap: 8rpx;
+  margin-bottom: 8rpx;
+}
+.profile-meta-icon { font-size: 24rpx; }
+.profile-meta-text { font-size: 24rpx; color: rgba(255,255,255,.7); }
+.profile-meta-link { color: rgba(147,197,253,1); }
+.profile-stats { margin-top: 24rpx; }
 
 /* 统计数字 */
 .profile-stats {
   display: flex; flex-direction: row; gap: 0;
   background: rgba(255,255,255,.15); border-radius: 16rpx; overflow: hidden;
+  margin-bottom: 0;
 }
 .stat-item {
   flex: 1; display: flex; flex-direction: column; align-items: center;

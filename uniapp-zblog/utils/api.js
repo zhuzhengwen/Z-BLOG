@@ -76,6 +76,11 @@ class GitHubAPI {
     return this._request(this.base)
   }
 
+  // ── 用户信息（头像、昵称、简介、地区等）──────────────────
+  getUser() {
+    return this._request(`https://api.github.com/users/${this.owner}`)
+  }
+
   // ── 搜索 ─────────────────────────────────────────────────
   searchIssues(query, page = 1) {
     const q = `${query} repo:${this.owner}/${this.repo} is:issue is:open`

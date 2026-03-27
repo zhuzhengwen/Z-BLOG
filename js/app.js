@@ -90,16 +90,34 @@ class App {
 
   // ── 加载侧边栏 ─────────────────────────────────────────
   async _loadSidebar() {
-    // 仓库信息
+    // 用户 + 仓库信息（并发请求）
     try {
-      const repo = await this.api.getRepoInfo();
+      const [user, repo] = await Promise.all([
+        this.api.getUser(),
+        this.api.getRepoInfo(),
+      ]);
       const el = document.getElementById('sidebarRepo');
       if (el) {
+        const locationHtml = user.location
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">📍</span>${escapeHtml(user.location)}</p>`
+          : '';
+        const blogHtml = user.blog
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">🔗</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
+          : '';
         el.innerHTML = `
-          <img class="sidebar-card__avatar" src="${repo.owner.avatar_url}&s=128" alt="${repo.owner.login}">
-          <p class="sidebar-card__name">${CONFIG.siteTitle}</p>
-          <p class="sidebar-card__desc">${repo.description || CONFIG.siteDesc}</p>
-          <a class="sidebar-card__link" href="${repo.html_url}" target="_blank">⭐ ${repo.stargazers_count} Stars · 🍴 ${repo.forks_count} Forks</a>`;
+          <a href="${user.html_url}" target="_blank" rel="noopener" class="sidebar-card__avatar-link">
+            <img class="sidebar-card__avatar" src="${user.avatar_url}" alt="${user.login}">
+          </a>
+          <p class="sidebar-card__name">${escapeHtml(user.name || user.login)}</p>
+          <p class="sidebar-card__handle">@${escapeHtml(user.login)}</p>
+          <p class="sidebar-card__desc">${escapeHtml(user.bio || repo.description || CONFIG.siteDesc || '')}</p>
+          <div class="sidebar-card__metas">
+            ${locationHtml}
+            ${blogHtml}
+          </div>
+          <a class="sidebar-card__link" href="${repo.html_url}" target="_blank" rel="noopener">
+            ⭐ ${repo.stargazers_count} Stars &nbsp;·&nbsp; 🍴 ${repo.forks_count} Forks
+          </a>`;
       }
     } catch {}
 
