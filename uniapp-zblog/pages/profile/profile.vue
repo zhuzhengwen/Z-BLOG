@@ -7,20 +7,12 @@
         <view class="profile-hero__content">
           <image
             class="profile-avatar"
-            :src="avatar || 'https://github.com/github.png'"
+            :src="avatarUrl"
             mode="aspectFill">
           </image>
           <text class="profile-name">{{ displayName }}</text>
           <text class="profile-handle">@{{ login }}</text>
           <text v-if="bio" class="profile-bio">{{ bio }}</text>
-          <view class="profile-meta-row" v-if="location">
-            <text class="profile-meta-icon">📍</text>
-            <text class="profile-meta-text">{{ location }}</text>
-          </view>
-          <view class="profile-meta-row" v-if="blog">
-            <text class="profile-meta-icon">🔗</text>
-            <text class="profile-meta-text profile-meta-link" @click="openLink(blog)">{{ blogDisplay }}</text>
-          </view>
           <view class="profile-stats">
             <view class="stat-item" v-for="s in stats" :key="s.label">
               <text class="stat-num">{{ s.value }}</text>
@@ -119,8 +111,6 @@ export default {
       login:           CONFIG.owner,
       name:            '',
       bio:             '',
-      location:        '',
-      blog:            '',
       stars:           0,
       forks:           0,
       catCount:        {},
@@ -131,8 +121,11 @@ export default {
   },
   computed: {
     displayName() { return this.name || this.login || CONFIG.siteTitle },
-    blogDisplay() {
-      return (this.blog || '').replace(/^https?:\/\//, '').replace(/\/$/, '')
+    avatarUrl() {
+      if (!this.avatar) return 'https://github.com/github.png'
+      // 拼时间戳（按天刷新），绕过本地图片缓存，头像改后当天生效
+      const day = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      return `${this.avatar}&v=${day}`
     },
     stats() {
       return [
@@ -160,8 +153,6 @@ export default {
         this.login    = user.login
         this.name     = user.name || user.login
         this.bio      = user.bio || repo.description || CONFIG.siteDesc || ''
-        this.location = user.location || ''
-        this.blog     = user.blog || ''
         this.stars    = repo.stargazers_count
         this.forks    = repo.forks_count
       } catch (e) {}
@@ -225,13 +216,6 @@ export default {
 .profile-name   { font-size: 38rpx; font-weight: 800; color: #fff; margin-bottom: 6rpx; }
 .profile-handle { font-size: 24rpx; color: rgba(255,255,255,.6); margin-bottom: 12rpx; }
 .profile-bio    { font-size: 26rpx; color: rgba(255,255,255,.8); text-align: center; line-height: 1.5; margin-bottom: 14rpx; padding: 0 20rpx; }
-.profile-meta-row {
-  display: flex; flex-direction: row; align-items: center; gap: 8rpx;
-  margin-bottom: 8rpx;
-}
-.profile-meta-icon { font-size: 24rpx; }
-.profile-meta-text { font-size: 24rpx; color: rgba(255,255,255,.7); }
-.profile-meta-link { color: rgba(147,197,253,1); }
 .profile-stats { margin-top: 24rpx; }
 
 /* 统计数字 */
