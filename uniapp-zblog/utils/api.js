@@ -98,6 +98,36 @@ class GitHubAPI {
       .then(data => ({ items: (data.items || []).filter(i => !i.pull_request), total: data.total_count }))
   }
 
+  // ── 创建 Issue（发布文章）────────────────────────────────
+  createIssue({ title, body, labels = [] }) {
+    const token = this.getToken()
+    if (!token) return Promise.reject(new Error('请先设置 GitHub Token'))
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: `${this.base}/issues`,
+        method: 'POST',
+        header: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: { title, body, labels },
+        success: (res) => {
+          if (res.statusCode === 201) {
+            this.clearCache()
+            resolve(res.data)
+          } else if (res.statusCode === 401 || res.statusCode === 403) {
+            uni.$emit('showTokenModal')
+            reject(new Error('Token 无效或权限不足，请重新设置'))
+          } else {
+            reject(new Error(`发布失败: ${res.statusCode} ${JSON.stringify(res.data)}`))
+          }
+        },
+        fail: (err) => reject(new Error(err.errMsg || '网络错误'))
+      })
+    })
+  }
+
   // ── 清缓存 ───────────────────────────────────────────────
   clearCache() {
     try {
