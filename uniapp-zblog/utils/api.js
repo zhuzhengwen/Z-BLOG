@@ -109,20 +109,18 @@ class GitHubAPI {
         header: {
           'Accept': 'application/vnd.github.v3+json',
           'Authorization': `token ${token}`,
-          'content-type': 'application/json',
+          'Content-Type': 'application/json',
         },
-        data: JSON.stringify({ title, body, labels }),
+        data: { title, body, labels },
         success: (res) => {
           if (res.statusCode === 201) {
             this.clearCache()
             resolve(res.data)
-          } else if (res.statusCode === 401 || res.statusCode === 403 || res.statusCode === 404) {
+          } else if (res.statusCode === 401 || res.statusCode === 403) {
             uni.$emit('showTokenModal')
-            reject(new Error('Token 无效或权限不足（需要 public_repo 权限），请重新设置'))
-          } else if (res.statusCode === 422) {
-            reject(new Error('数据格式错误: ' + JSON.stringify(res.data)))
+            reject(new Error('Token 无效或权限不足，请重新设置'))
           } else {
-            reject(new Error(`发布失败 ${res.statusCode}: ` + JSON.stringify(res.data)))
+            reject(new Error(`发布失败: ${res.statusCode} ${JSON.stringify(res.data)}`))
           }
         },
         fail: (err) => reject(new Error(err.errMsg || '网络错误'))
@@ -142,20 +140,20 @@ class GitHubAPI {
         header: {
           'Accept': 'application/vnd.github.v3+json',
           'Authorization': `token ${token}`,
-          'content-type': 'application/json',
+          'Content-Type': 'application/json',
         },
-        data: JSON.stringify({
+        data: {
           message: `upload image ${filename}`,
           content: base64Content,
-        }),
+        },
         success: (res) => {
           if (res.statusCode === 201) {
             resolve(res.data.content.download_url)
-          } else if (res.statusCode === 401 || res.statusCode === 403 || res.statusCode === 404) {
+          } else if (res.statusCode === 401 || res.statusCode === 403) {
             uni.$emit('showTokenModal')
-            reject(new Error('Token 无效或无写入权限（需要 public_repo 权限）'))
+            reject(new Error('Token 无效或无权限'))
           } else {
-            reject(new Error(`上传失败 ${res.statusCode}: ` + JSON.stringify(res.data)))
+            reject(new Error(`上传失败: ${res.statusCode}`))
           }
         },
         fail: (err) => reject(new Error(err.errMsg || '网络错误'))

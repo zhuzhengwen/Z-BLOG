@@ -213,36 +213,37 @@ export default {
       })
     },
 
-    // 用 splice 更新数组项，确保 Vue2 响应式触发
-    _setImg(idx, patch) {
-      const item = Object.assign({}, this.uploadedImages[idx], patch)
-      this.uploadedImages.splice(idx, 1, item)
-    },
-
     uploadOne(localPath) {
       const idx = this.uploadedImages.length
       this.uploadedImages.push({ local: localPath, url: '', uploading: true, progress: 0, error: false })
 
+      // 读取 base64
       uni.getFileSystemManager().readFile({
         filePath: localPath,
         encoding: 'base64',
         success: async (r) => {
-          this._setImg(idx, { progress: 30 })
+          // 简单模拟进度
+          this.uploadedImages[idx].progress = 30
           const ext = localPath.split('.').pop().split('?')[0].toLowerCase() || 'jpg'
           const filename = `${Date.now()}_${idx}.${ext}`
           try {
-            this._setImg(idx, { progress: 60 })
+            this.uploadedImages[idx].progress = 60
             const url = await api.uploadImage(r.data, filename)
-            this._setImg(idx, { url, uploading: false, progress: 100 })
+            this.uploadedImages[idx].url = url
+            this.uploadedImages[idx].uploading = false
+            this.uploadedImages[idx].progress = 100
+            // 插入 Markdown 图片语法到正文末尾
             this.body += (this.body && !this.body.endsWith('\n') ? '\n' : '') + `![图片](${url})\n`
-            uni.showToast({ title: '上传成功', icon: 'success', duration: 1500 })
+            uni.showToast({ title: '图片上传成功', icon: 'success', duration: 1500 })
           } catch (e) {
-            this._setImg(idx, { uploading: false, error: true })
-            uni.showToast({ title: e.message || '上传失败', icon: 'none', duration: 3000 })
+            this.uploadedImages[idx].uploading = false
+            this.uploadedImages[idx].error = true
+            uni.showToast({ title: e.message || '上传失败', icon: 'none', duration: 2500 })
           }
         },
         fail: () => {
-          this._setImg(idx, { uploading: false, error: true })
+          this.uploadedImages[idx].uploading = false
+          this.uploadedImages[idx].error = true
           uni.showToast({ title: '读取图片失败', icon: 'none' })
         }
       })
