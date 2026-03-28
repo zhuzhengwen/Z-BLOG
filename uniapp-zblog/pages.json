@@ -48,13 +48,6 @@
         "navigationBarTextStyle": "white"
       }
     },
-    {
-      "path": "pages/compose/compose",
-      "style": {
-        "navigationBarTitleText": "写文章",
-        "navigationStyle": "custom"
-      }
-    }
   ],
   "globalStyle": {
     "navigationBarTextStyle": "black",
