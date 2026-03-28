@@ -175,7 +175,7 @@ function renderVideosFromMarkdown(markdown) {
 function renderCategoryBadge(cat) {
   if (!cat) return '';
   return `<span class="badge" style="background:${cat.color}20;color:${cat.color};border-color:${cat.color}40">
-    ${ICONS[cat.icon] || ''} ${cat.name}
+    ${cat.icon} ${cat.name}
   </span>`;
 }
 
@@ -215,8 +215,8 @@ function renderPostCard(issue, categories) {
           ${tags.slice(0, 3).map(renderTagBadge).join('')}
         </div>
         <div class="post-card__stats">
-          ${isVideoPost ? `<span title="视频">${ICONS.play}</span> ` : ''}
-          <span title="评论数">${ICONS.comment} ${issue.comments}</span>
+          ${isVideoPost ? '<span title="视频">🎬</span> ' : ''}
+          <span title="评论数">💬 ${issue.comments}</span>
         </div>
       </div>
     </div>
@@ -246,7 +246,7 @@ function renderLinkCards(markdown) {
   return `<div class="link-cards">
     ${links.map(l => `
       <a class="link-card" href="${l.url}" target="_blank" rel="noopener noreferrer">
-        <span class="link-card__icon">${ICONS.link}</span>
+        <span class="link-card__icon">🔗</span>
         <span class="link-card__title">${escapeHtml(l.title)}</span>
         <span class="link-card__host">${new URL(l.url).hostname}</span>
       </a>
@@ -298,7 +298,7 @@ function renderPostDetail(issue, categories) {
         <span>·</span>
         <time title="${formatFullDate(issue.created_at)}">${formatDate(issue.created_at)}</time>
         <span>·</span>
-        <span>${ICONS.comment} ${issue.comments} 条评论</span>
+        <span>💬 ${issue.comments} 条评论</span>
         <a class="post-detail__github-link" href="${issue.html_url}" target="_blank" rel="noopener">
           在 GitHub 查看
         </a>
@@ -309,7 +309,7 @@ function renderPostDetail(issue, categories) {
     </div>
     <footer class="post-detail__footer">
       <a class="btn btn--outline" href="${issue.html_url}" target="_blank" rel="noopener">
-        ${ICONS.comment} 在 GitHub 参与讨论 (${issue.comments})
+        💬 在 GitHub 参与讨论 (${issue.comments})
       </a>
     </footer>
   </article>`;
@@ -317,7 +317,7 @@ function renderPostDetail(issue, categories) {
 
 // ── 空状态 ────────────────────────────────────────────────────
 function renderEmpty(msg = '暂无内容') {
-  return `<div class="empty-state"><span class="empty-state__icon">${ICONS.inbox}</span><p>${msg}</p></div>`;
+  return `<div class="empty-state"><span class="empty-state__icon">📭</span><p>${msg}</p></div>`;
 }
 
 // ── 骨架屏 ────────────────────────────────────────────────────

@@ -99,10 +99,10 @@ class App {
       const el = document.getElementById('sidebarRepo');
       if (el) {
         const locationHtml = user.location
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">${ICONS.location}</span>${escapeHtml(user.location)}</p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">📍</span>${escapeHtml(user.location)}</p>`
           : '';
         const blogHtml = user.blog
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">${ICONS.externalLink}</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">🔗</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
           : '';
         el.innerHTML = `
           <a href="${user.html_url}" target="_blank" rel="noopener" class="sidebar-card__avatar-link">
@@ -115,7 +115,7 @@ class App {
             ${blogHtml}
           </div>
           <a class="sidebar-card__link" href="${repo.html_url}" target="_blank" rel="noopener">
-            ${ICONS.star} ${repo.stargazers_count} Stars &nbsp;·&nbsp; ${ICONS.fork} ${repo.forks_count} Forks
+            ⭐ ${repo.stargazers_count} Stars &nbsp;·&nbsp; 🍴 ${repo.forks_count} Forks
           </a>`;
       }
     } catch {}
@@ -125,7 +125,7 @@ class App {
     if (catEl) {
       catEl.innerHTML = this.categories.map(c => `
         <li><button class="cat-list__item" data-cat="${c.label}" onclick="location.hash='#/category/${c.label}'">
-          <span class="cat-list__icon">${ICONS[c.icon] || ''}</span>
+          <span class="cat-list__icon">${c.icon}</span>
           <span class="cat-list__name">${c.name}</span>
         </button></li>`).join('');
     }
@@ -138,7 +138,7 @@ class App {
     main.innerHTML = `
       <div class="section-header">
         <h1 class="section-header__title">
-          ${cat ? `${ICONS[cat.icon] || ''} ${cat.name}` : `${ICONS.all} 全部文章`}
+          ${cat ? `${cat.icon} ${cat.name}` : '📚 全部文章'}
         </h1>
         <span class="section-header__sub" id="postCount"></span>
       </div>
@@ -170,7 +170,7 @@ class App {
       document.getElementById('pagination').innerHTML =
         renderPagination(this.page, issues.length >= CONFIG.postsPerPage);
     } catch (e) {
-      document.getElementById('postList').innerHTML = `<div class="error-msg">${ICONS.warning} ${e.message}</div>`;
+      document.getElementById('postList').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }
   }
 
@@ -191,7 +191,7 @@ class App {
       // 更新页面标题
       document.title = `${issue.title} - ${CONFIG.siteTitle}`;
     } catch (e) {
-      document.getElementById('postContent').innerHTML = `<div class="error-msg">${ICONS.warning} ${e.message}</div>`;
+      document.getElementById('postContent').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }
   }
 
@@ -201,7 +201,7 @@ class App {
     const main = document.getElementById('main');
     main.innerHTML = `
       <div class="section-header">
-        <h1 class="section-header__title">${ICONS.search} 搜索：${escapeHtml(query)}</h1>
+        <h1 class="section-header__title">🔍 搜索：${escapeHtml(query)}</h1>
       </div>
       <div class="post-list" id="postList">${renderSkeletons(4)}</div>`;
 
@@ -217,7 +217,7 @@ class App {
         card.addEventListener('click', () => location.hash = `#/post/${card.dataset.number}`);
       });
     } catch (e) {
-      document.getElementById('postList').innerHTML = `<div class="error-msg">${ICONS.warning} ${e.message}</div>`;
+      document.getElementById('postList').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }
   }
 
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!CONFIG.owner || CONFIG.owner === 'your-username') {
     document.getElementById('main').innerHTML = `
       <div class="error-msg" style="padding:32px 28px;text-align:center;font-size:1rem">
-        <p style="font-size:2rem;margin-bottom:12px;opacity:.3">${ICONS.settings}</p>
+        <p style="font-size:2rem;margin-bottom:12px">⚙️</p>
         <p><strong>请先配置 config.js</strong></p>
         <p style="margin-top:8px;font-size:.875rem">设置 <code>owner</code>（GitHub 用户名）和 <code>repo</code>（仓库名）后刷新页面</p>
       </div>`;
