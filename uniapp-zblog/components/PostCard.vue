@@ -1,16 +1,16 @@
 <template>
   <view class="moment" @click="$emit('click')">
 
-    <!-- 标题行：标题 + 标签同行，标签靠右 -->
-    <view class="moment__title-row">
-      <text class="moment__title">{{ issue.title }}</text>
-      <view v-if="cat || tags.length" class="moment__badges">
-        <view v-if="cat" class="m-badge"
-          :style="{ background: cat.color + '18', color: cat.color, borderColor: cat.color + '50' }">
-          {{ cat.icon }} {{ cat.name }}
-        </view>
-        <text v-for="tag in tags.slice(0, 2)" :key="tag.name" class="m-tag">{{ tag.name }}</text>
+    <!-- 标题 -->
+    <text class="moment__title">{{ issue.title }}</text>
+
+    <!-- 标签（标题下方） -->
+    <view v-if="cat || tags.length" class="moment__badges">
+      <view v-if="cat" class="m-badge"
+        :style="{ background: cat.color + '18', color: cat.color, borderColor: cat.color + '50' }">
+        {{ cat.icon }} {{ cat.name }}
       </view>
+      <text v-for="tag in tags.slice(0, 3)" :key="tag.name" class="m-tag">{{ tag.name }}</text>
     </view>
 
     <!-- 摘要（无图时显示） -->
@@ -25,6 +25,16 @@
         class="moment__grid-img"
         mode="aspectFill"
         lazy-load />
+      <!-- 超出9张时最后一格显示剩余数量 -->
+      <view v-if="isImagePost && totalImages > 9" class="moment__grid-more" @click.stop="goPhotos">
+        <text class="moment__grid-more-text">+{{ totalImages - 9 }}</text>
+        <text class="moment__grid-more-sub">查看更多</text>
+      </view>
+    </view>
+
+    <!-- 图片帖超出9张时的跳转提示 -->
+    <view v-if="isImagePost && totalImages > 9" class="moment__photos-link" @click.stop="goPhotos">
+      <text class="moment__photos-link-text">共 {{ totalImages }} 张 · 前往照片墙查看全部 →</text>
     </view>
 
     <!-- 底部：日期 + 评论数 -->
@@ -49,14 +59,24 @@ export default {
     issue: { type: Object, required: true }
   },
   computed: {
-    cat()     { return getCategoryFromLabels(this.issue.labels) },
-    tags()    { return getTagsFromLabels(this.issue.labels) },
-    date()    { return formatDate(this.issue.created_at) },
-    excerpt() { return extractExcerpt(this.issue.body, 100) },
+    cat()         { return getCategoryFromLabels(this.issue.labels) },
+    tags()        { return getTagsFromLabels(this.issue.labels) },
+    date()        { return formatDate(this.issue.created_at) },
+    excerpt()     { return extractExcerpt(this.issue.body, 100) },
+    isImagePost() { return this.cat && this.cat.label === 'image' },
 
+    // 图片帖：全部图片数量
+    totalImages() {
+      return this.isImagePost ? extractImages(this.issue.body || '').length : 0
+    },
+
+    // 展示的媒体列表（最多9张）
     mediaList() {
+      if (this.isImagePost) {
+        return extractImages(this.issue.body || '').slice(0, 9)
+      }
       const imgs = extractImages(this.issue.body || '')
-      if (imgs.length) return imgs.slice(0, 9)
+      if (imgs.length) return imgs.slice(0, 1)   // 非图片帖只取封面
       const videos = extractVideos(this.issue.body || '')
       if (videos.length && videos[0].thumb) return [videos[0].thumb]
       return []
@@ -73,6 +93,9 @@ export default {
   },
   methods: {
     compressImg(src, w) { return _compress(src, w) },
+    goPhotos() {
+      uni.redirectTo({ url: '/pages/photos/photos' })
+    },
   }
 }
 </script>
@@ -81,15 +104,11 @@ export default {
 .moment {
   padding: 24rpx 28rpx 20rpx;
   background: #fff;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-radius: 12rpx;
   display: flex; flex-direction: column;
 }
 
-/* 标题行 */
-.moment__title-row {
-  display: flex; flex-direction: row; flex-wrap: wrap;
-  align-items: baseline; gap: 8rpx 10rpx;
-}
+/* 标题 */
 .moment__title {
   font-size: 30rpx; font-weight: 700; color: #1e1e1e; line-height: 1.5;
   /* #ifndef APP-NVUE */
@@ -97,9 +116,10 @@ export default {
   /* #endif */
 }
 
-/* 标签（紧跟标题，字体更小） */
+/* 标签行 */
 .moment__badges {
-  display: flex; flex-direction: row; flex-wrap: wrap; gap: 6rpx;
+  display: flex; flex-direction: row; flex-wrap: wrap;
+  gap: 8rpx; margin-top: 10rpx;
 }
 .m-badge {
   font-size: 22rpx; font-weight: 600;
@@ -130,6 +150,24 @@ export default {
 .grid--three .moment__grid-img { width: 186rpx; height: 186rpx; border-radius: 6rpx; }
 .grid--four .moment__grid-img  { width: 186rpx; height: 186rpx; border-radius: 6rpx; }
 .grid--many .moment__grid-img  { width: 186rpx; height: 186rpx; border-radius: 6rpx; }
+
+/* "+N 更多" 格 */
+.moment__grid-more {
+  width: 186rpx; height: 186rpx; border-radius: 6rpx;
+  background: rgba(0,0,0,.45);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.moment__grid-more-text { font-size: 44rpx; font-weight: 700; color: #fff; }
+.moment__grid-more-sub  { font-size: 22rpx; color: rgba(255,255,255,.8); margin-top: 4rpx; }
+
+/* 照片墙跳转提示 */
+.moment__photos-link {
+  margin-top: 10rpx;
+}
+.moment__photos-link-text {
+  font-size: 24rpx; color: #576b95;
+}
 
 /* ── 底部 ────────────────────────────────────────────────── */
 .moment__footer {

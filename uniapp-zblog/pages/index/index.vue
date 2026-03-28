@@ -433,8 +433,8 @@ export default {
 .search-cancel { font-size: 28rpx; color: #2563eb; white-space: nowrap; }
 
 /* ── 列表 ────────────────────────────────────────────────── */
-.list-scroll { flex: 1; height: 0; background: #f7f7f7; }
-.list-inner  { padding: 0 0 160rpx; }
+.list-scroll { flex: 1; height: 0; background: #f0f2f5; }
+.list-inner  { padding: 16rpx 20rpx 160rpx; display: flex; flex-direction: column; gap: 12rpx; }
 
 .search-result-bar {
   display: flex; flex-direction: row; align-items: center; padding: 16rpx 4rpx 18rpx;

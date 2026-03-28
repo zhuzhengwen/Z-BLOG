@@ -182,29 +182,23 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 /* ── Moments-style Feed ──────────────────────────────────── */
-.post-list {
-  display: flex; flex-direction: column; gap: 0;
-  border-radius: var(--radius); overflow: hidden;
-  border: 1px solid var(--border);
-}
+.post-list { display: flex; flex-direction: column; gap: 10px; }
 
 .moment-card {
   background: var(--surface);
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   cursor: pointer;
   transition: background var(--transition);
 }
 .moment-card:hover { background: var(--surface-2); }
 
-.moment-card__title-row {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px;
-}
 .moment-card__title {
   font-size: 1rem; font-weight: 700; color: var(--text);
   line-height: 1.5; word-break: break-word;
 }
-.moment-card__badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.moment-card__badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
 .moment-card__excerpt {
   font-size: .85rem; color: var(--text-muted); line-height: 1.5;
   margin-top: 6px;
@@ -225,6 +219,20 @@ button { cursor: pointer; font-family: inherit; }
   cursor: zoom-in; transition: transform .25s;
 }
 .moment-grid__item:hover img { transform: scale(1.05); }
+
+.moment-grid__more {
+  background: rgba(0,0,0,.45);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; cursor: pointer;
+}
+.moment-grid__more-num { font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1.1; }
+.moment-grid__more-sub { font-size: .7rem; color: rgba(255,255,255,.8); margin-top: 2px; }
+
+.moment-card__photos-link {
+  display: block; margin-top: 8px;
+  font-size: .8rem; color: var(--primary);
+}
+.moment-card__photos-link:hover { text-decoration: underline; }
 
 .moment-card__footer {
   display: flex; justify-content: space-between; align-items: center;

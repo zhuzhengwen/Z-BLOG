@@ -200,8 +200,9 @@ function renderPostCard(issue, categories) {
   const imgs   = extractImages(issue.body || '');
   const videos = extractVideos(issue.body || '');
 
-  // 媒体列表：正文图片优先，否则取视频封面
-  let mediaList = imgs.slice(0, 9);
+  // 媒体列表：图片帖取全部（最多9张），其他只取封面
+  const isImagePost = cat && cat.label === 'image';
+  let mediaList = isImagePost ? imgs.slice(0, 9) : (imgs.length ? imgs.slice(0, 1) : []);
   if (!mediaList.length && videos.length && videos[0].thumb) {
     mediaList = [videos[0].thumb];
   }
@@ -215,25 +216,33 @@ function renderPostCard(issue, categories) {
     ...tags.slice(0, 3).map(renderTagBadge),
   ].filter(Boolean).join('');
 
-  // 图片九宫格
+  // 图片帖：全部图片数量用于显示 "+N"
+  const totalImages = isImagePost ? imgs.length : 0;
+
   let gridHtml = '';
   if (mediaList.length) {
     const n = mediaList.length;
     const cls = n === 1 ? 'one' : n === 2 ? 'two' : n === 3 ? 'three' : n === 4 ? 'four' : 'many';
+    const moreCell = (isImagePost && totalImages > 9)
+      ? `<div class="moment-grid__item moment-grid__more">
+           <span class="moment-grid__more-num">+${totalImages - 9}</span>
+           <span class="moment-grid__more-sub">查看更多</span>
+         </div>`
+      : '';
     gridHtml = `<div class="moment-grid moment-grid--${cls}">
       ${mediaList.map((src, i) => `
         <div class="moment-grid__item" onclick="openLightbox('${src}', ${i})">
           <img src="${compressImg(src, 480)}" alt="" loading="lazy" data-full="${src}">
         </div>`).join('')}
-    </div>`;
+      ${moreCell}
+    </div>
+    ${isImagePost && totalImages > 9 ? `<a class="moment-card__photos-link" href="photos.html">共 ${totalImages} 张 · 前往照片墙查看全部 →</a>` : ''}`;
   }
 
   return `
   <article class="moment-card" data-number="${issue.number}">
-    <div class="moment-card__title-row">
-      <div class="moment-card__title">${escapeHtml(issue.title)}</div>
-      ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
-    </div>
+    <div class="moment-card__title">${escapeHtml(issue.title)}</div>
+    ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
     ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
     ${gridHtml}
     <div class="moment-card__footer">
@@ -296,7 +305,8 @@ function renderPostDetail(issue, categories) {
     content = renderVideosFromMarkdown(issue.body) + renderMarkdown(stripVideoUrls(issue.body));
   } else if (isImagePost) {
     const imgs = extractImages(issue.body || '');
-    content = renderImageGallery(imgs) + renderMarkdown(issue.body);
+    const bodyNoImgs = (issue.body || '').replace(/!\[[^\]]*\]\(https?:\/\/[^)]+\)/g, '').replace(/\n{3,}/g, '\n\n').trim();
+    content = renderImageGallery(imgs) + (bodyNoImgs ? renderMarkdown(bodyNoImgs) : '');
   } else if (isLinkPost) {
     content = renderLinkCards(issue.body || '') + renderMarkdown(issue.body);
   } else {
