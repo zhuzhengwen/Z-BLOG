@@ -1,15 +1,15 @@
 /**
  * 照片墙逻辑
  * - 加载所有 image 标签的 Issues
- * - 相册 Tab 筛选 + 关键词搜索
- * - 方形九宫格展示，底部日期遮罩，骨架加载
- * - 增强版灯箱（前后翻页）
+ * - 年份 + 月份双层筛选 + 关键词搜索
+ * - 方形九宫格展示，骨架加载，增强版灯箱
  */
 
 const api = new GitHubAPI(CONFIG);
-let allPhotos     = [];   // { src, title, date, fullDate, issueUrl, issueNum }
+let allPhotos     = [];   // { src, title, date, fullDate, issueUrl, issueNum, year, month }
 let filtered      = [];
-let selectedAlbum = null; // null = 全部
+let selectedYear  = null;
+let selectedMonth = null;
 let lbIndex       = 0;
 
 // ── 通用图片压缩代理 ────────────────────────────────────────
@@ -20,7 +20,6 @@ function compressImg(url, width = 400, quality = 80) {
   }
   return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=${quality}&output=webp`;
 }
-
 function thumbUrl(src) { return compressImg(src, 400); }
 
 // ── 启动 ───────────────────────────────────────────────────
@@ -34,10 +33,8 @@ async function init() {
 // ── 加载所有图片 ────────────────────────────────────────────
 async function loadAllPhotos() {
   const wall = document.getElementById('photoWall');
-
   try {
-    let page = 1;
-    let issues = [];
+    let page = 1, issues = [];
     while (true) {
       const batch = await api.getIssues({ page, perPage: 100, label: 'image' });
       issues = issues.concat(batch);
@@ -52,8 +49,8 @@ async function loadAllPhotos() {
     }
 
     issues.forEach(issue => {
-      const imgs = extractImages(issue.body || '');
-      imgs.forEach(src => {
+      const d = new Date(issue.created_at);
+      extractImages(issue.body || '').forEach(src => {
         allPhotos.push({
           src,
           title:    issue.title,
@@ -61,61 +58,79 @@ async function loadAllPhotos() {
           fullDate: formatFullDate(issue.created_at),
           issueUrl: issue.html_url,
           issueNum: issue.number,
+          year:     d.getFullYear(),
+          month:    d.getMonth() + 1,
         });
       });
     });
 
     filtered = [...allPhotos];
+    buildFilterBar();
     updateCount();
-    buildAlbumBar();
     renderWall();
   } catch (e) {
     wall.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
   }
 }
 
-// ── 相册 Tab ────────────────────────────────────────────────
-function buildAlbumBar() {
+// ── 构建年份/月份筛选条 ─────────────────────────────────────
+function buildFilterBar() {
   const bar = document.getElementById('albumBar');
   if (!bar) return;
 
-  // 聚合相册
-  const albumMap = {};
-  allPhotos.forEach(p => {
-    if (!albumMap[p.issueNum]) albumMap[p.issueNum] = { num: p.issueNum, title: p.title, count: 0 };
-    albumMap[p.issueNum].count++;
-  });
-  const albums = Object.values(albumMap);
-  if (albums.length <= 1) { bar.style.display = 'none'; return; }
+  // 年份（降序）
+  const years = [...new Set(allPhotos.map(p => p.year))].sort((a, b) => b - a);
 
-  bar.innerHTML = `
-    <button class="album-chip ${selectedAlbum === null ? 'album-chip--active' : ''}"
-      onclick="selectAlbum(null)">
-      全部 <span class="album-chip__count">${allPhotos.length}</span>
+  // 当前年下的月份
+  const months = selectedYear
+    ? [...new Set(allPhotos.filter(p => p.year === selectedYear).map(p => p.month))].sort((a, b) => a - b)
+    : [];
+
+  const yearChips = `
+    <button class="album-chip ${!selectedYear ? 'album-chip--active' : ''}" onclick="selectYear(null)">
+      全部年份
     </button>
-    ${albums.map(a => `
-      <button class="album-chip ${selectedAlbum === a.num ? 'album-chip--active' : ''}"
-        onclick="selectAlbum(${a.num})">
-        ${escapeHtml(a.title)} <span class="album-chip__count">${a.count}</span>
-      </button>
-    `).join('')}
+    ${years.map(y => `
+      <button class="album-chip ${selectedYear === y ? 'album-chip--active' : ''}" onclick="selectYear(${y})">
+        ${y} 年
+      </button>`).join('')}
   `;
+
+  const monthRow = months.length > 1 ? `
+    <div class="month-bar">
+      <button class="album-chip album-chip--sm ${!selectedMonth ? 'album-chip--active' : ''}"
+        onclick="selectMonth(null)">全部月份</button>
+      ${months.map(m => `
+        <button class="album-chip album-chip--sm ${selectedMonth === m ? 'album-chip--active' : ''}"
+          onclick="selectMonth(${m})">${m} 月</button>`).join('')}
+    </div>` : '';
+
+  bar.innerHTML = `<div class="year-bar">${yearChips}</div>${monthRow}`;
 }
 
-function selectAlbum(num) {
-  selectedAlbum = num;
-  buildAlbumBar();
+function selectYear(y) {
+  selectedYear  = y;
+  selectedMonth = null;
+  buildFilterBar();
   applyFilter();
 }
 
-// ── 筛选（相册 + 关键词组合）──────────────────────────────
+function selectMonth(m) {
+  selectedMonth = m;
+  buildFilterBar();
+  applyFilter();
+}
+
+// ── 筛选（年 + 月 + 关键词）──────────────────────────────
 function applyFilter() {
-  const kw = (document.getElementById('filterInput') || document.getElementById('searchInput'));
-  const q  = kw ? kw.value.trim().toLowerCase() : '';
+  const el = document.getElementById('filterInput') || document.getElementById('searchInput');
+  const q  = el ? el.value.trim().toLowerCase() : '';
+
   filtered = allPhotos.filter(p => {
-    const matchAlbum   = selectedAlbum === null || p.issueNum === selectedAlbum;
-    const matchKeyword = !q || p.title.toLowerCase().includes(q);
-    return matchAlbum && matchKeyword;
+    if (selectedYear  && p.year  !== selectedYear)  return false;
+    if (selectedMonth && p.month !== selectedMonth) return false;
+    if (q && !p.title.toLowerCase().includes(q))   return false;
+    return true;
   });
   updateCount();
   renderWall();
@@ -124,43 +139,33 @@ function applyFilter() {
 function updateCount() {
   const el = document.getElementById('photoCount');
   if (!el) return;
-  if (selectedAlbum !== null || filtered.length < allPhotos.length) {
-    el.textContent = `${filtered.length} / ${allPhotos.length} 张图片`;
-  } else {
-    el.textContent = `共 ${allPhotos.length} 张图片 · ${Object.keys(
-      allPhotos.reduce((m, p) => { m[p.issueNum] = 1; return m; }, {})
-    ).length} 个相册`;
-  }
+  const total = allPhotos.length;
+  const cur   = filtered.length;
+  el.textContent = cur < total
+    ? `${cur} / ${total} 张图片`
+    : `共 ${total} 张图片`;
 }
 
-// ── 渲染方形九宫格 ─────────────────────────────────────────
+// ── 渲染九宫格 ─────────────────────────────────────────────
 function renderWall() {
   const wall = document.getElementById('photoWall');
   if (!filtered.length) {
     wall.innerHTML = renderEmpty('没有找到匹配的图片');
     return;
   }
-
   wall.innerHTML = filtered.map((p, i) => `
     <div class="pw-cell" onclick="openLb(${i})" title="${escapeHtml(p.title)}">
       <div class="pw-skeleton"></div>
-      <img
-        class="pw-img"
-        src="${thumbUrl(p.src)}"
-        alt="${escapeHtml(p.title)}"
+      <img class="pw-img" src="${thumbUrl(p.src)}" alt="${escapeHtml(p.title)}"
         loading="lazy"
         onload="this.classList.add('loaded')"
         onerror="this.parentElement.style.display='none'">
-      <div class="pw-title-bar">
-        <span class="pw-title">${escapeHtml(p.title)}</span>
-      </div>
-      <div class="pw-date-bar">
-        <span class="pw-date">${p.date}</span>
-      </div>
+      <div class="pw-title-bar"><span class="pw-title">${escapeHtml(p.title)}</span></div>
+      <div class="pw-date-bar"><span class="pw-date">${p.date}</span></div>
     </div>`).join('');
 }
 
-// ── 关键词筛选绑定 ─────────────────────────────────────────
+// ── 关键词绑定 ─────────────────────────────────────────────
 function bindFilter() {
   [document.getElementById('filterInput'), document.getElementById('searchInput')]
     .forEach(el => { if (el) el.addEventListener('input', applyFilter); });
@@ -168,31 +173,25 @@ function bindFilter() {
 
 // ── 灯箱 ───────────────────────────────────────────────────
 function openLb(index) {
-  lbIndex = index;
-  showLb();
+  lbIndex = index; showLb();
   document.getElementById('photoLightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function showLb() {
-  const p = filtered[lbIndex];
-  if (!p) return;
+  const p = filtered[lbIndex]; if (!p) return;
   document.getElementById('lbImg').src = p.src;
   document.getElementById('lbTitle').textContent = p.title;
   document.getElementById('lbMeta').innerHTML =
     `${p.fullDate} · <a href="${p.issueUrl}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.7)">在 GitHub 查看</a>`;
   document.getElementById('lbCounter').textContent = `${lbIndex + 1} / ${filtered.length}`;
 }
-
 function closeLb() {
   document.getElementById('photoLightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
-
 function lbPrev() { lbIndex = (lbIndex - 1 + filtered.length) % filtered.length; showLb(); }
 function lbNext() { lbIndex = (lbIndex + 1) % filtered.length; showLb(); }
 
-// ── 键盘控制 ───────────────────────────────────────────────
 function bindKeyboard() {
   document.addEventListener('keydown', e => {
     const lb = document.getElementById('photoLightbox');

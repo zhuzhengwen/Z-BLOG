@@ -11,33 +11,37 @@
     <view class="search-bar">
       <view class="search-wrap">
         <text class="search-icon">🔍</text>
-        <input
-          class="search-input"
-          v-model="keyword"
-          placeholder="搜索相册…"
-          @input="onSearch" />
+        <input class="search-input" v-model="keyword" placeholder="搜索图片…" />
         <text v-if="keyword" class="search-clear" @click="keyword = ''">✕</text>
       </view>
     </view>
 
-    <!-- 相册 Tabs（横向滚动） -->
-    <scroll-view v-if="albums.length > 1" scroll-x class="album-scroll">
-      <view class="album-bar">
-        <view
-          class="album-chip"
-          :class="{ 'album-chip--active': selectedAlbum === null }"
-          @click="selectAlbum(null)">
-          <text class="album-chip__label">全部</text>
-          <text class="album-chip__count">{{ allPhotos.length }}</text>
+    <!-- 年份 Tabs -->
+    <scroll-view v-if="years.length" scroll-x class="filter-scroll">
+      <view class="filter-bar">
+        <view class="filter-chip" :class="{ 'filter-chip--active': selectedYear === null }"
+          @click="selectYear(null)">
+          <text class="filter-chip__text">全部</text>
         </view>
-        <view
-          v-for="a in albums"
-          :key="a.issueNum"
-          class="album-chip"
-          :class="{ 'album-chip--active': selectedAlbum === a.issueNum }"
-          @click="selectAlbum(a.issueNum)">
-          <text class="album-chip__label">{{ a.title }}</text>
-          <text class="album-chip__count">{{ a.count }}</text>
+        <view v-for="y in years" :key="y"
+          class="filter-chip" :class="{ 'filter-chip--active': selectedYear === y }"
+          @click="selectYear(y)">
+          <text class="filter-chip__text">{{ y }} 年</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 月份 Tabs（选年后显示） -->
+    <scroll-view v-if="selectedYear && months.length > 1" scroll-x class="filter-scroll filter-scroll--sub">
+      <view class="filter-bar">
+        <view class="filter-chip filter-chip--sm" :class="{ 'filter-chip--active': selectedMonth === null }"
+          @click="selectedMonth = null">
+          <text class="filter-chip__text">全部月份</text>
+        </view>
+        <view v-for="m in months" :key="m"
+          class="filter-chip filter-chip--sm" :class="{ 'filter-chip--active': selectedMonth === m }"
+          @click="selectedMonth = m">
+          <text class="filter-chip__text">{{ m }} 月</text>
         </view>
       </view>
     </scroll-view>
@@ -55,18 +59,10 @@
     <!-- 三列方形网格 -->
     <scroll-view v-else scroll-y class="wall-scroll">
       <view class="grid">
-        <view
-          v-for="item in photos" :key="item.id"
-          class="grid-cell"
-          @click="preview(item)">
+        <view v-for="item in photos" :key="item.id" class="grid-cell" @click="preview(item)">
           <view v-if="!item.loaded" class="cell-skeleton"></view>
-          <image
-            class="cell-img"
-            :src="thumbUrl(item.src)"
-            mode="aspectFill"
-            lazy-load
-            @load="item.loaded = true"
-            @error="item.loaded = true" />
+          <image class="cell-img" :src="thumbUrl(item.src)" mode="aspectFill" lazy-load
+            @load="item.loaded = true" @error="item.loaded = true" />
           <view class="cell-date-bar">
             <text class="cell-date-text">{{ item.date }}</text>
           </view>
@@ -91,39 +87,42 @@ export default {
   data() {
     return {
       allPhotos:     [],
-      selectedAlbum: null,
+      selectedYear:  null,
+      selectedMonth: null,
       keyword:       '',
       loading:       true,
       error:         null,
     }
   },
   computed: {
-    // 唯一相册列表
-    albums() {
-      const map = {}
-      this.allPhotos.forEach(p => {
-        if (!map[p.issueNum]) map[p.issueNum] = { issueNum: p.issueNum, title: p.title, count: 0 }
-        map[p.issueNum].count++
-      })
-      return Object.values(map)
+    // 所有年份（降序）
+    years() {
+      const s = new Set(this.allPhotos.map(p => p.year))
+      return [...s].sort((a, b) => b - a)
     },
 
-    // 过滤后的照片
+    // 当前年下的月份（升序）
+    months() {
+      if (!this.selectedYear) return []
+      const s = new Set(this.allPhotos.filter(p => p.year === this.selectedYear).map(p => p.month))
+      return [...s].sort((a, b) => a - b)
+    },
+
     photos() {
       const kw = this.keyword.trim().toLowerCase()
       return this.allPhotos.filter(p => {
-        const matchAlbum   = this.selectedAlbum === null || p.issueNum === this.selectedAlbum
-        const matchKeyword = !kw || p.title.toLowerCase().includes(kw)
-        return matchAlbum && matchKeyword
+        if (this.selectedYear  && p.year  !== this.selectedYear)  return false
+        if (this.selectedMonth && p.month !== this.selectedMonth) return false
+        if (kw && !p.title.toLowerCase().includes(kw))           return false
+        return true
       })
     },
 
     countLabel() {
       if (this.loading && !this.allPhotos.length) return '加载中…'
-      if (this.selectedAlbum !== null || this.keyword) {
-        return `${this.photos.length} / ${this.allPhotos.length} 张`
-      }
-      return `共 ${this.allPhotos.length} 张`
+      const total = this.allPhotos.length
+      const cur   = this.photos.length
+      return cur < total ? `${cur} / ${total} 张` : `共 ${total} 张`
     },
 
     allUrls() { return this.photos.map(p => p.src) },
@@ -132,8 +131,10 @@ export default {
   methods: {
     thumbUrl(src) { return compressImg(src, 400) },
 
-    selectAlbum(num) { this.selectedAlbum = num },
-    onSearch() {},   // v-model 已实时响应，保留供 confirm 调用
+    selectYear(y) {
+      this.selectedYear  = y
+      this.selectedMonth = null
+    },
 
     async loadAll() {
       try {
@@ -146,14 +147,16 @@ export default {
         }
         let id = 0
         allIssues.forEach(issue => {
+          const d = new Date(issue.created_at)
           extractImages(issue.body || '').forEach(src => {
             this.allPhotos.push({
-              id: id++,
+              id:    id++,
               src,
-              title:    issue.title,
-              date:     formatDate(issue.created_at),
-              issueNum: issue.number,
-              loaded:   false,
+              title: issue.title,
+              date:  formatDate(issue.created_at),
+              year:  d.getFullYear(),
+              month: d.getMonth() + 1,
+              loaded: false,
             })
           })
         })
@@ -175,7 +178,6 @@ export default {
 <style lang="scss" scoped>
 .page { height: 100vh; display: flex; flex-direction: column; background: #0f172a; }
 
-/* 顶部 */
 .hero {
   padding: 24rpx 28rpx 12rpx;
   display: flex; flex-direction: row; align-items: center; flex-shrink: 0;
@@ -184,9 +186,7 @@ export default {
 .hero-count { font-size: 24rpx; color: rgba(255,255,255,.5); }
 
 /* 搜索框 */
-.search-bar {
-  padding: 0 20rpx 14rpx; flex-shrink: 0;
-}
+.search-bar { padding: 0 20rpx 12rpx; flex-shrink: 0; }
 .search-wrap {
   display: flex; flex-direction: row; align-items: center;
   background: rgba(255,255,255,.1); border-radius: 12rpx;
@@ -196,37 +196,26 @@ export default {
 .search-input { flex: 1; font-size: 26rpx; color: #fff; }
 .search-clear { font-size: 24rpx; color: rgba(255,255,255,.4); padding: 4rpx; }
 
-/* 相册横向 Tabs */
-.album-scroll { flex-shrink: 0; }
-.album-bar {
+/* 筛选条 */
+.filter-scroll { flex-shrink: 0; }
+.filter-scroll--sub { opacity: .85; }
+.filter-bar {
   display: flex; flex-direction: row;
-  padding: 0 20rpx 16rpx; gap: 12rpx;
-  white-space: nowrap;
+  padding: 0 20rpx 12rpx; gap: 10rpx; white-space: nowrap;
 }
-.album-chip {
-  display: flex; flex-direction: row; align-items: center; gap: 6rpx;
-  padding: 10rpx 22rpx; border-radius: 99rpx; flex-shrink: 0;
+.filter-chip {
+  display: flex; align-items: center;
+  padding: 10rpx 26rpx; border-radius: 99rpx; flex-shrink: 0;
   background: rgba(255,255,255,.1);
 }
-.album-chip--active {
-  background: #3b82f6;
-}
-.album-chip__label { font-size: 26rpx; color: rgba(255,255,255,.85); font-weight: 500; }
-.album-chip__count {
-  font-size: 22rpx; color: rgba(255,255,255,.55);
-  background: rgba(255,255,255,.12);
-  padding: 2rpx 10rpx; border-radius: 99rpx;
-}
-.album-chip--active .album-chip__count {
-  background: rgba(255,255,255,.25); color: #fff;
-}
+.filter-chip--sm { padding: 8rpx 20rpx; }
+.filter-chip--active { background: #3b82f6; }
+.filter-chip__text { font-size: 26rpx; color: rgba(255,255,255,.85); font-weight: 500; }
+.filter-chip--sm .filter-chip__text { font-size: 24rpx; }
 
 /* 骨架 */
 .skeleton-grid { display: flex; flex-wrap: wrap; padding: 3rpx; }
-.skeleton-cell {
-  width: 33.333%; aspect-ratio: 1;
-  padding: 3rpx; box-sizing: border-box;
-}
+.skeleton-cell { width: 33.333%; aspect-ratio: 1; padding: 3rpx; box-sizing: border-box; }
 .skeleton-cell::after {
   content: ''; display: block; width: 100%; height: 100%;
   background: #1e293b; animation: pulse 1.4s ease-in-out infinite;

@@ -101,29 +101,29 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* ── 相册选择器 ─────────────────────────────────── */
-    .album-bar {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      padding: 4px 0 16px;
+    /* ── 年份/月份筛选器 ────────────────────────────── */
+    .album-bar { padding: 4px 0 4px; }
+    .year-bar {
+      display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 10px;
+    }
+    .month-bar {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 8px 0 14px;
+      border-top: 1px solid var(--border);
     }
     .album-chip {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border-radius: 99px; font-size: .82rem;
+      padding: 6px 16px; border-radius: 99px; font-size: .83rem;
       border: 1px solid var(--border); background: var(--surface);
       color: var(--text-muted); cursor: pointer; white-space: nowrap;
       transition: background .15s, color .15s, border-color .15s;
     }
     .album-chip:hover { border-color: var(--primary); color: var(--primary); }
     .album-chip--active {
-      background: var(--primary); border-color: var(--primary);
-      color: #fff;
+      background: var(--primary); border-color: var(--primary); color: #fff;
     }
     .album-chip--active:hover { background: var(--primary-hover); }
-    .album-chip__count {
-      font-size: .72rem; background: rgba(0,0,0,.08);
-      padding: 1px 7px; border-radius: 99px;
-    }
-    .album-chip--active .album-chip__count { background: rgba(255,255,255,.25); }
+    .album-chip--sm { padding: 4px 12px; font-size: .78rem; }
 
     /* ── 加强版灯箱 ─────────────────────────────────── */
     .photo-lightbox {
