@@ -193,12 +193,12 @@ function renderTagBadge(tag) {
   return `<span class="tag" style="border-color:${color}40;color:${color}">${tag.name}</span>`;
 }
 
-// ── 文章卡片（朋友圈风格）────────────────────────────────────
-function renderPostCard(issue) {
-  const imgs    = extractImages(issue.body || '');
-  const videos  = extractVideos(issue.body || '');
-  const login   = issue.user.login;
-  const avatar  = issue.user.avatar_url + '&s=80';
+// ── 文章卡片（列表用）────────────────────────────────────────
+function renderPostCard(issue, categories) {
+  const cat    = getCategoryFromLabels(issue.labels, categories);
+  const tags   = getTagsFromLabels(issue.labels, categories);
+  const imgs   = extractImages(issue.body || '');
+  const videos = extractVideos(issue.body || '');
 
   // 媒体列表：正文图片优先，否则取视频封面
   let mediaList = imgs.slice(0, 9);
@@ -208,6 +208,12 @@ function renderPostCard(issue) {
 
   // 摘要（无图时显示）
   const excerpt = !mediaList.length ? extractExcerpt(issue.body) : '';
+
+  // 标签行：分类 badge + tag 小标签
+  const badgesHtml = [
+    cat ? renderCategoryBadge(cat) : '',
+    ...tags.slice(0, 3).map(renderTagBadge),
+  ].filter(Boolean).join('');
 
   // 图片九宫格
   let gridHtml = '';
@@ -222,25 +228,15 @@ function renderPostCard(issue) {
     </div>`;
   }
 
-  // GitHub 标签行（使用 label.color 原色）
-  const labelsHtml = (issue.labels || []).map(label => {
-    const c = '#' + label.color;
-    return `<span class="gh-label" style="background:${c}22;color:${c};border-color:${c}55">${escapeHtml(label.name)}</span>`;
-  }).join('');
-
   return `
   <article class="moment-card" data-number="${issue.number}">
-    <img class="moment-card__avatar" src="${avatar}" alt="${escapeHtml(login)}" loading="lazy">
-    <div class="moment-card__main">
-      <div class="moment-card__name">${escapeHtml(login)}</div>
-      <div class="moment-card__title">${escapeHtml(issue.title)}</div>
-      ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
-      ${gridHtml}
-      ${labelsHtml ? `<div class="moment-card__badges">${labelsHtml}</div>` : ''}
-      <div class="moment-card__footer">
-        <time class="moment-card__date">${formatDate(issue.created_at)}</time>
-        <span class="moment-card__comments">💬 ${issue.comments}</span>
-      </div>
+    <div class="moment-card__title">${escapeHtml(issue.title)}</div>
+    ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
+    ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
+    ${gridHtml}
+    <div class="moment-card__footer">
+      <time class="moment-card__date">${formatDate(issue.created_at)}</time>
+      <span class="moment-card__comments">💬 ${issue.comments}</span>
     </div>
   </article>`;
 }

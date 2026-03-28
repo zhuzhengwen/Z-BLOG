@@ -190,7 +190,6 @@ button { cursor: pointer; font-family: inherit; }
 
 .moment-card {
   background: var(--surface);
-  display: flex; gap: 14px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
@@ -198,23 +197,13 @@ button { cursor: pointer; font-family: inherit; }
 }
 .moment-card:hover { background: var(--surface-2); }
 
-.moment-card__avatar {
-  width: 44px; height: 44px; border-radius: 6px;
-  flex-shrink: 0; object-fit: cover;
-  background: var(--surface-2);
-}
-.moment-card__main { flex: 1; min-width: 0; }
-.moment-card__name {
-  font-size: .88rem; font-weight: 700; color: var(--primary);
-  margin-bottom: 4px;
-}
 .moment-card__title {
-  font-size: .95rem; font-weight: 500; color: var(--text);
-  line-height: 1.55; margin-bottom: 2px; word-break: break-word;
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  line-height: 1.5; word-break: break-word;
 }
 .moment-card__excerpt {
   font-size: .85rem; color: var(--text-muted); line-height: 1.5;
-  margin-top: 4px; margin-bottom: 4px;
+  margin-top: 6px;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 
@@ -233,7 +222,7 @@ button { cursor: pointer; font-family: inherit; }
 }
 .moment-grid__item:hover img { transform: scale(1.05); }
 
-.moment-card__badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; }
+.moment-card__badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .moment-card__footer {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: 8px;
