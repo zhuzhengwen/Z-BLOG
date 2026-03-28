@@ -7,7 +7,7 @@
   <title>Z-BLOG</title>
 
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231e293b'/><text y='.88em' font-size='72' font-weight='900' font-family='system-ui,sans-serif' fill='white' text-anchor='middle' x='50'>Z</text></svg>">
   <!-- Mobile 跳转 -->
   <link rel="alternate" media="only screen and (max-width:768px)" href="mobile.html">
 
@@ -28,21 +28,22 @@
 <header class="header">
   <div class="container header__inner">
     <a class="header__logo" href="#/">
-      📝 <span id="siteTitle">Z-BLOG</span>
+      <svg class="ci" style="width:1.2em;height:1.2em;vertical-align:-.2em" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1h7l3 3v11H3V1z"/><path d="M9 1v3h3"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="11" y2="11"/></svg>
+      <span id="siteTitle">Z-BLOG</span>
     </a>
 
     <nav class="header__nav" id="headerNav">
-      <button class="header__nav-item active" data-cat="all">🏠 <span>全部</span></button>
+      <button class="header__nav-item active" data-cat="all"><span>全部</span></button>
       <!-- 分类导航由 JS 动态插入 -->
     </nav>
 
     <div class="header__search">
-      <span>🔍</span>
+      <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
       <input type="search" id="searchInput" placeholder="搜索文章…" autocomplete="off">
       <button id="searchBtn" title="搜索">→</button>
     </div>
 
-    <a href="mobile.html" style="font-size:.8rem;color:var(--text-muted);white-space:nowrap" title="手机版">📱</a>
+    <a href="mobile.html" style="font-size:.8rem;color:var(--text-muted);white-space:nowrap" title="手机版">手机版</a>
   </div>
 </header>
 
@@ -53,7 +54,7 @@
   <main class="main" id="main">
     <!-- 骨架屏（JS 接管前） -->
     <div class="section-header">
-      <h1 class="section-header__title">📚 全部文章</h1>
+      <h1 class="section-header__title">全部文章</h1>
     </div>
     <div class="post-list" id="postListInit">
       <div class="skeleton-card">
@@ -91,7 +92,7 @@
       <p class="sidebar-card__title">文章分类</p>
       <ul class="cat-list" id="sidebarCats">
         <li><button class="cat-list__item active" data-cat="all" onclick="location.hash='#/'">
-          <span class="cat-list__icon">📚</span>
+          <span class="cat-list__icon"><svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="5" x2="14" y2="5"/><line x1="2" y1="9" x2="14" y2="9"/><line x1="2" y1="13" x2="10" y2="13"/></svg></span>
           <span class="cat-list__name">全部</span>
         </button></li>
       </ul>
@@ -105,8 +106,8 @@
         创建 Issue 即可发布文章，<br>
         添加 Label 即可分类。<br><br>
         支持的分类标签：<br>
-        📝 article &nbsp; 🖼️ image<br>
-        🎬 video &nbsp; 📌 note &nbsp; 🔗 link
+        article &nbsp; image &nbsp; video<br>
+        note &nbsp; link
       </p>
     </div>
 
@@ -118,10 +119,10 @@
   <div class="container">
     <p>
       由 <a href="https://github.com" target="_blank">GitHub Issues</a> 驱动 ·
-      <a href="photos.html">🖼️ 照片墙</a> ·
-      <a href="mobile.html">📱 手机版</a> ·
+      <a href="photos.html">照片墙</a> ·
+      <a href="mobile.html">手机版</a> ·
       <a href="#" onclick="app&&app.api.clearCache();showToast('缓存已清除');return false">刷新缓存</a> ·
-      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">⚙️ Token</a>
+      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">Token</a>
     </p>
     <p style="margin-top:6px">
       <span id="siteRuntime"></span> ·
@@ -254,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('tokenEntryBtn');
   if (!btn) return;
   const saved = localStorage.getItem('zblog_user_token');
-  btn.textContent = saved ? '✅ Token' : '⚙️ Token';
+  btn.textContent = saved ? '✓ Token' : 'Token';
   btn.title = saved ? '已设置 Token（5000次/小时）' : '未设置 Token（60次/小时）';
 });
 </script>

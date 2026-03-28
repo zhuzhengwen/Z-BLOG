@@ -155,7 +155,14 @@ button { cursor: pointer; font-family: inherit; }
 }
 .sidebar-card__meta a { color: var(--text-muted); }
 .sidebar-card__meta a:hover { color: var(--primary); }
-.sidebar-meta-icon { font-size: .85rem; flex-shrink: 0; }
+/* Inline SVG icon helper */
+.ci {
+  display: inline-block;
+  width: 1em; height: 1em;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+.sidebar-meta-icon { font-size: .85rem; flex-shrink: 0; line-height: 1; }
 .sidebar-card__link {
   display: block; margin-top: 12px; text-align: center;
   font-size: .8rem; color: var(--primary);

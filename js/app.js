@@ -99,10 +99,10 @@ class App {
       const el = document.getElementById('sidebarRepo');
       if (el) {
         const locationHtml = user.location
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">📍</span>${escapeHtml(user.location)}</p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon"><svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1a5 5 0 015 5c0 4-5 9-5 9S3 10 3 6a5 5 0 015-5z"/><circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg></span>${escapeHtml(user.location)}</p>`
           : '';
         const blogHtml = user.blog
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">🔗</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon"><svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3H2v11h11V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg></span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
           : '';
         el.innerHTML = `
           <a href="${user.html_url}" target="_blank" rel="noopener" class="sidebar-card__avatar-link">
@@ -115,7 +115,7 @@ class App {
             ${blogHtml}
           </div>
           <a class="sidebar-card__link" href="${repo.html_url}" target="_blank" rel="noopener">
-            ⭐ ${repo.stargazers_count} Stars &nbsp;·&nbsp; 🍴 ${repo.forks_count} Forks
+            <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="8 1 10 6 15.5 6.5 11.5 10 13 15 8 12 3 15 4.5 10 0.5 6.5 6 6"/></svg> ${repo.stargazers_count} &nbsp;·&nbsp; <svg class="ci" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="3.5" r="1.5"/><circle cx="11" cy="3.5" r="1.5"/><circle cx="8" cy="12.5" r="1.5"/><path d="M5 5v3a3 3 0 003 3"/><path d="M11 5v1a3 3 0 01-3 3"/></svg> ${repo.forks_count}
           </a>`;
       }
     } catch {}
@@ -138,7 +138,7 @@ class App {
     main.innerHTML = `
       <div class="section-header">
         <h1 class="section-header__title">
-          ${cat ? `${cat.icon} ${cat.name}` : '📚 全部文章'}
+          ${cat ? `${cat.icon} ${cat.name}` : '全部文章'}
         </h1>
         <span class="section-header__sub" id="postCount"></span>
       </div>
