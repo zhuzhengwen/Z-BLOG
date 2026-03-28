@@ -128,6 +128,39 @@ class GitHubAPI {
     })
   }
 
+  // ── 上传图片到仓库 images/blog/ 目录 ────────────────────────
+  uploadImage(base64Content, filename) {
+    const token = this.getToken()
+    if (!token) return Promise.reject(new Error('请先设置 GitHub Token'))
+    const path = `images/blog/${filename}`
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: `${this.base}/contents/${path}`,
+        method: 'PUT',
+        header: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          message: `upload image ${filename}`,
+          content: base64Content,
+        },
+        success: (res) => {
+          if (res.statusCode === 201) {
+            resolve(res.data.content.download_url)
+          } else if (res.statusCode === 401 || res.statusCode === 403) {
+            uni.$emit('showTokenModal')
+            reject(new Error('Token 无效或无权限'))
+          } else {
+            reject(new Error(`上传失败: ${res.statusCode}`))
+          }
+        },
+        fail: (err) => reject(new Error(err.errMsg || '网络错误'))
+      })
+    })
+  }
+
   // ── 清缓存 ───────────────────────────────────────────────
   clearCache() {
     try {

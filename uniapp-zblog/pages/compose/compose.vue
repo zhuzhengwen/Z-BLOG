@@ -57,7 +57,7 @@
         <textarea
           class="body-input"
           v-model="body"
-          placeholder="支持 Markdown 格式…&#10;&#10;**加粗** *斜体* `代码`&#10;## 标题&#10;- 列表项&#10;&#10;图片：将图片链接粘贴到此处"
+          placeholder="支持 Markdown 格式…&#10;&#10;**加粗** *斜体* `代码`&#10;## 标题&#10;- 列表项"
           placeholder-class="placeholder"
           :disabled="submitting"
           :auto-height="false"
@@ -65,6 +65,22 @@
           @input="onBodyInput" />
         <view class="word-count">
           <text>{{ body.length }} 字</text>
+        </view>
+      </view>
+
+      <!-- 已上传图片预览条 -->
+      <view v-if="tab === 'edit' && uploadedImages.length" class="img-strip">
+        <view v-for="(img, i) in uploadedImages" :key="i" class="img-strip__item">
+          <image :src="img.local" mode="aspectFill" class="img-strip__thumb"></image>
+          <view v-if="img.uploading" class="img-strip__mask">
+            <text class="img-strip__progress">{{ img.progress }}%</text>
+          </view>
+          <view v-else-if="img.error" class="img-strip__mask img-strip__mask--error">
+            <text class="img-strip__err">✕</text>
+          </view>
+          <view v-else class="img-strip__done">
+            <text>✓</text>
+          </view>
         </view>
       </view>
 
@@ -85,7 +101,7 @@
         <view class="toolbar__item" @click="insertLine('- ')"><text>•</text></view>
         <view class="toolbar__item" @click="insertLine('> ')"><text>"</text></view>
         <view class="toolbar__item" @click="insert('[', '](url)', '链接文字')"><text>🔗</text></view>
-        <view class="toolbar__item" @click="insert('![', '](url)', '图片描述')"><text>图</text></view>
+        <view class="toolbar__item toolbar__item--img" @click="pickImage"><text>📷</text></view>
         <view class="toolbar__item toolbar__item--divider"></view>
         <view class="toolbar__item" @click="insertLine('---')"><text>—</text></view>
       </view>
@@ -140,6 +156,7 @@ export default {
       catIndex: 0,
       categories: CONFIG.categories,
       submitting: false,
+      uploadedImages: [],  // { local, url, uploading, progress, error }
     }
   },
   computed: {
@@ -183,6 +200,55 @@ export default {
     onBodyInput(e) {
       this.body = e.detail.value
     },
+    // 选择并上传图片
+    pickImage() {
+      uni.chooseImage({
+        count: 9,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera'],
+        success: (res) => {
+          res.tempFilePaths.forEach(path => this.uploadOne(path))
+        },
+        fail: () => {}
+      })
+    },
+
+    uploadOne(localPath) {
+      const idx = this.uploadedImages.length
+      this.uploadedImages.push({ local: localPath, url: '', uploading: true, progress: 0, error: false })
+
+      // 读取 base64
+      uni.getFileSystemManager().readFile({
+        filePath: localPath,
+        encoding: 'base64',
+        success: async (r) => {
+          // 简单模拟进度
+          this.uploadedImages[idx].progress = 30
+          const ext = localPath.split('.').pop().split('?')[0].toLowerCase() || 'jpg'
+          const filename = `${Date.now()}_${idx}.${ext}`
+          try {
+            this.uploadedImages[idx].progress = 60
+            const url = await api.uploadImage(r.data, filename)
+            this.uploadedImages[idx].url = url
+            this.uploadedImages[idx].uploading = false
+            this.uploadedImages[idx].progress = 100
+            // 插入 Markdown 图片语法到正文末尾
+            this.body += (this.body && !this.body.endsWith('\n') ? '\n' : '') + `![图片](${url})\n`
+            uni.showToast({ title: '图片上传成功', icon: 'success', duration: 1500 })
+          } catch (e) {
+            this.uploadedImages[idx].uploading = false
+            this.uploadedImages[idx].error = true
+            uni.showToast({ title: e.message || '上传失败', icon: 'none', duration: 2500 })
+          }
+        },
+        fail: () => {
+          this.uploadedImages[idx].uploading = false
+          this.uploadedImages[idx].error = true
+          uni.showToast({ title: '读取图片失败', icon: 'none' })
+        }
+      })
+    },
+
     // 插入包裹符号
     insert(before, after, placeholder) {
       const pos = this.body.length
@@ -399,6 +465,42 @@ export default {
   background: #e2e8f0;
   height: 40rpx;
   margin: 0 8rpx;
+}
+
+/* ── 已上传图片预览条 ── */
+.img-strip {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  padding: 0 28rpx 20rpx;
+}
+.img-strip__item {
+  width: 160rpx; height: 160rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  position: relative;
+  background: #f1f5f9;
+}
+.img-strip__thumb {
+  width: 100%; height: 100%;
+}
+.img-strip__mask {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+}
+.img-strip__mask--error { background: rgba(220,38,38,.55); }
+.img-strip__progress {
+  font-size: 26rpx; color: #fff; font-weight: 700;
+}
+.img-strip__err { font-size: 36rpx; color: #fff; }
+.img-strip__done {
+  position: absolute; bottom: 8rpx; right: 8rpx;
+  background: #22c55e; border-radius: 50%;
+  width: 36rpx; height: 36rpx;
+  display: flex; align-items: center; justify-content: center;
+  text { font-size: 22rpx; color: #fff; }
 }
 
 /* ── placeholder ── */
