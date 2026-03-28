@@ -50,7 +50,7 @@
 import TabBar     from '../../components/TabBar.vue'
 import TokenModal from '../../components/TokenModal.vue'
 import api        from '../../utils/api.js'
-import { extractImages, formatDate } from '../../utils/helper.js'
+import { extractImages, formatDate, compressImg } from '../../utils/helper.js'
 
 export default {
   components: { TabBar, TokenModal },
@@ -63,12 +63,8 @@ export default {
   },
   onLoad() { this.loadAll() },
   methods: {
-    // GitHub user-images CDN 支持 width 参数，加速缩略图加载
     thumbUrl(src) {
-      if (src && src.includes('user-images.githubusercontent.com')) {
-        return src + (src.includes('?') ? '&' : '?') + 'width=400'
-      }
-      return src
+      return compressImg(src, 400)
     },
 
     async loadAll() {

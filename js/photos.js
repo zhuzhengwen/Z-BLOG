@@ -10,13 +10,17 @@ let allPhotos = [];   // { src, title, date, fullDate, issueUrl }
 let filtered  = [];
 let lbIndex   = 0;
 
-// ── GitHub CDN 缩略图（加速加载）──────────────────────────
-function thumbUrl(src) {
-  if (src && src.includes('user-images.githubusercontent.com')) {
-    return src + (src.includes('?') ? '&' : '?') + 'width=400';
+// ── 通用图片压缩代理 ────────────────────────────────────────
+// GitHub user-images CDN 用原生 width 参数；其他来源走 wsrv.nl 代理
+function compressImg(url, width = 400, quality = 80) {
+  if (!url || url.startsWith('data:')) return url;
+  if (url.includes('user-images.githubusercontent.com')) {
+    return url + (url.includes('?') ? '&' : '?') + `width=${width}`;
   }
-  return src;
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=${quality}&output=webp`;
 }
+
+function thumbUrl(src) { return compressImg(src, 400); }
 
 // ── 启动 ───────────────────────────────────────────────────
 async function init() {

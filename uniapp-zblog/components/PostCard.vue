@@ -66,7 +66,7 @@
 <script>
 import {
   getCategoryFromLabels, getTagsFromLabels, formatDate,
-  extractThumb, extractExcerpt, extractVideos,
+  extractThumb, extractExcerpt, extractVideos, compressImg,
 } from '../utils/helper.js'
 
 export default {
@@ -78,7 +78,7 @@ export default {
     cat()    { return getCategoryFromLabels(this.issue.labels) },
     tags()   { return getTagsFromLabels(this.issue.labels) },
     date()   { return formatDate(this.issue.created_at) },
-    thumb()  { return extractThumb(this.issue.body || '', this.cat) },
+    thumb()  { return compressImg(extractThumb(this.issue.body || '', this.cat), 600) },
     excerpt(){ return extractExcerpt(this.issue.body, 80) },
     isVideoPost() { return this.cat && this.cat.label === 'video' },
 

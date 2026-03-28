@@ -5,6 +5,15 @@
  * - 文章卡片、详情、图片画廊、视频嵌入
  */
 
+// ── 通用图片压缩代理 ────────────────────────────────────────
+function compressImg(url, width = 400, quality = 80) {
+  if (!url || url.startsWith('data:')) return url;
+  if (url.includes('user-images.githubusercontent.com')) {
+    return url + (url.includes('?') ? '&' : '?') + `width=${width}`;
+  }
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=${quality}&output=webp`;
+}
+
 // 配置 marked.js
 function initMarked() {
   if (typeof marked === 'undefined') return;
@@ -195,7 +204,7 @@ function renderPostCard(issue, categories) {
   let thumbHtml = '';
   if (thumb) {
     if (thumb.type === 'image') {
-      thumbHtml = `<div class="post-card__thumb"><img src="${thumb.src}" alt="" loading="lazy"></div>`;
+      thumbHtml = `<div class="post-card__thumb"><img src="${compressImg(thumb.src, 480)}" alt="" loading="lazy"></div>`;
     } else {
       thumbHtml = `<div class="post-card__thumb post-card__thumb--video"><span class="thumb-play">▶</span></div>`;
     }
@@ -230,7 +239,7 @@ function renderImageGallery(images) {
   return `<div class="image-gallery">
     ${images.map((src, i) => `
       <div class="image-gallery__item" onclick="openLightbox('${src}', ${i})">
-        <img src="${src}" loading="lazy" alt="图片 ${i + 1}">
+        <img src="${compressImg(src, 600)}" loading="lazy" alt="图片 ${i + 1}" data-full="${src}">
       </div>
     `).join('')}
   </div>`;

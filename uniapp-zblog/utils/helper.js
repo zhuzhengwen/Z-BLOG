@@ -130,6 +130,17 @@ export function simpleMarkdown(text = '') {
   return `<p style="margin:0 0 1em;line-height:1.8">${html}</p>`
 }
 
+// ── 图片压缩代理 ──────────────────────────────────────────
+// GitHub user-images CDN 支持原生 width 参数
+// 其他来源通过 wsrv.nl 代理压缩（支持任意图片 URL、质量压缩、WebP 转换）
+export function compressImg(url, width = 400, quality = 80) {
+  if (!url || url === '__video__' || url.startsWith('data:')) return url
+  if (url.includes('user-images.githubusercontent.com')) {
+    return url + (url.includes('?') ? '&' : '?') + `width=${width}`
+  }
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=${quality}&output=webp`
+}
+
 // ── 运行时间 ──────────────────────────────────────────────
 export function getRuntimeStr() {
   const start = new Date(CONFIG.siteStartDate || '2026-03-26')
