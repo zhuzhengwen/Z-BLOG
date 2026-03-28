@@ -6,7 +6,7 @@
 
     <!-- 左侧抽屉 -->
     <view class="drawer" :class="{ 'drawer--open': drawerOpen }">
-      <view class="drawer__header" :style="{ paddingTop: (statusBarHeight + 24) + 'px' }">
+      <view class="drawer__header" :style="{ paddingTop: (statusBarHeight + 24) + 'px', background: headerGradient }">
         <view class="drawer__header-main">
           <view class="drawer__logo">
             <text class="drawer__logo-icon">📝</text>
@@ -24,8 +24,8 @@
           :class="{ 'drawer__item--active': !currentCat }"
           @click="selectCat(null)">
           <text class="drawer__item-icon">🏠</text>
-          <text class="drawer__item-text">全部</text>
-          <view v-if="!currentCat" class="drawer__item-dot"></view>
+          <text class="drawer__item-text" :style="!currentCat ? { color: themeColor, fontWeight: '700' } : {}">全部</text>
+          <view v-if="!currentCat" class="drawer__item-dot" :style="{ background: themeColor }"></view>
         </view>
 
         <view
@@ -34,8 +34,8 @@
           :class="{ 'drawer__item--active': currentCat === c.label }"
           @click="selectCat(c.label)">
           <text class="drawer__item-icon">{{ c.icon }}</text>
-          <text class="drawer__item-text">{{ c.name }}</text>
-          <view v-if="currentCat === c.label" class="drawer__item-dot"></view>
+          <text class="drawer__item-text" :style="currentCat === c.label ? { color: themeColor, fontWeight: '700' } : {}">{{ c.name }}</text>
+          <view v-if="currentCat === c.label" class="drawer__item-dot" :style="{ background: themeColor }"></view>
         </view>
       </view>
 
@@ -45,7 +45,7 @@
     </view>
 
     <!-- 顶部 Header -->
-    <view class="header">
+    <view class="header" :style="{ background: headerGradient }">
       <view v-if="!searchExpanded" class="header__main">
         <!-- 左：汉堡菜单 + 当前分类名 -->
         <view class="header__left" @click="drawerOpen = true">
@@ -75,7 +75,7 @@
             @confirm="doSearch" />
           <text v-if="searchKeyword" class="search-clear" @click="searchKeyword = ''">✕</text>
         </view>
-        <text class="search-cancel" @click="cancelSearch">取消</text>
+        <text class="search-cancel" :style="{ color: themeColor }" @click="cancelSearch">取消</text>
       </view>
     </view>
 
@@ -147,6 +147,7 @@ import TabBar      from '../../components/TabBar.vue'
 import TokenModal  from '../../components/TokenModal.vue'
 import CONFIG      from '../../config.js'
 import api         from '../../utils/api.js'
+import { getThemeColor, darkenColor } from '../../utils/theme.js'
 
 export default {
   components: { PostCard, TabBar, TokenModal },
@@ -168,6 +169,7 @@ export default {
       searchMode:      false,
       searchExpanded:  false,
       statusBarHeight: 0,
+      themeColor:      getThemeColor(),
     }
   },
   computed: {
@@ -175,7 +177,16 @@ export default {
       if (!this.currentCat) return this.siteTitle
       const cat = this.categories.find(c => c.label === this.currentCat)
       return cat ? `${cat.icon} ${cat.name}` : this.siteTitle
-    }
+    },
+    headerGradient() {
+      return `linear-gradient(135deg, ${this.themeColor} 0%, ${darkenColor(this.themeColor)} 100%)`
+    },
+  },
+  mounted() {
+    uni.$on('themeChanged', color => { this.themeColor = color })
+  },
+  beforeDestroy() {
+    uni.$off('themeChanged')
   },
   onLoad() {
     const info = uni.getSystemInfoSync()

@@ -10,13 +10,23 @@
         :src="current === item.key ? item.iconActive : item.iconNormal"
         mode="aspectFit">
       </image>
-      <text class="tabbar__label" :class="{ 'tabbar__label--active': current === item.key }">{{ item.label }}</text>
-      <view v-if="current === item.key" class="tabbar__dot"></view>
+      <text
+        class="tabbar__label"
+        :style="current === item.key ? { color: themeColor, fontWeight: '700' } : {}">
+        {{ item.label }}
+      </text>
+      <view
+        v-if="current === item.key"
+        class="tabbar__dot"
+        :style="{ background: themeColor }">
+      </view>
     </view>
   </view>
 </template>
 
 <script>
+import { getThemeColor } from '../utils/theme.js'
+
 export default {
   name: 'TabBar',
   props: {
@@ -24,37 +34,20 @@ export default {
   },
   data() {
     return {
+      themeColor: getThemeColor(),
       tabs: [
-        {
-          key: 'index',
-          label: '首页',
-          iconNormal: '/static/icons/tab-home-normal.png',
-          iconActive: '/static/icons/tab-home-active.png',
-          page: '/pages/index/index',
-        },
-        {
-          key: 'photos',
-          label: '照片墙',
-          iconNormal: '/static/icons/tab-photos-normal.png',
-          iconActive: '/static/icons/tab-photos-active.png',
-          page: '/pages/photos/photos',
-        },
-        {
-          key: 'category',
-          label: '分类',
-          iconNormal: '/static/icons/tab-category-normal.png',
-          iconActive: '/static/icons/tab-category-active.png',
-          page: '/pages/category/category',
-        },
-        {
-          key: 'profile',
-          label: '我的',
-          iconNormal: '/static/icons/tab-profile-normal.png',
-          iconActive: '/static/icons/tab-profile-active.png',
-          page: '/pages/profile/profile',
-        },
+        { key: 'index',    label: '首页',  iconNormal: '/static/icons/tab-home-normal.png',     iconActive: '/static/icons/tab-home-active.png',     page: '/pages/index/index' },
+        { key: 'photos',   label: '照片墙', iconNormal: '/static/icons/tab-photos-normal.png',   iconActive: '/static/icons/tab-photos-active.png',   page: '/pages/photos/photos' },
+        { key: 'category', label: '分类',  iconNormal: '/static/icons/tab-category-normal.png', iconActive: '/static/icons/tab-category-active.png', page: '/pages/category/category' },
+        { key: 'profile',  label: '我的',  iconNormal: '/static/icons/tab-profile-normal.png',  iconActive: '/static/icons/tab-profile-active.png',  page: '/pages/profile/profile' },
       ]
     }
+  },
+  mounted() {
+    uni.$on('themeChanged', color => { this.themeColor = color })
+  },
+  beforeDestroy() {
+    uni.$off('themeChanged')
   },
   methods: {
     go(item) {
@@ -82,19 +75,11 @@ export default {
   align-items: center; justify-content: center;
   gap: 6rpx; position: relative;
 }
-.tabbar__icon-img {
-  width: 48rpx; height: 48rpx;
-}
-.tabbar__label {
-  font-size: 20rpx; color: #94a3b8; font-weight: 500;
-}
-.tabbar__label--active {
-  color: #2563eb; font-weight: 700;
-}
+.tabbar__icon-img { width: 48rpx; height: 48rpx; }
+.tabbar__label { font-size: 20rpx; color: #94a3b8; font-weight: 500; }
 .tabbar__dot {
   position: absolute; bottom: 8rpx; left: 50%;
   transform: translateX(-50%);
   width: 8rpx; height: 8rpx; border-radius: 50%;
-  background: #2563eb;
 }
 </style>

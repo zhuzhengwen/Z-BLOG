@@ -3,7 +3,7 @@
     <scroll-view scroll-y style="flex:1">
 
       <!-- 头部卡片 -->
-      <view class="profile-hero" :style="{ paddingTop: (statusBarHeight + 40) + 'px' }">
+      <view class="profile-hero" :style="{ paddingTop: (statusBarHeight + 40) + 'px', background: heroGradient }">
         <view class="profile-hero__content">
           <image
             class="profile-avatar"
@@ -46,22 +46,22 @@
         <view class="section-title">⏱️ 博客运行</view>
         <view class="runtime-card">
           <view class="runtime-item">
-            <text class="runtime-num">{{ runtimeDays }}</text>
+            <text class="runtime-num" :style="{ color: themeColor }">{{ runtimeDays }}</text>
             <text class="runtime-label">天</text>
           </view>
           <view class="runtime-divider"></view>
           <view class="runtime-item">
-            <text class="runtime-num">{{ runtimeHours }}</text>
+            <text class="runtime-num" :style="{ color: themeColor }">{{ runtimeHours }}</text>
             <text class="runtime-label">时</text>
           </view>
           <view class="runtime-divider"></view>
           <view class="runtime-item">
-            <text class="runtime-num">{{ runtimeMins }}</text>
+            <text class="runtime-num" :style="{ color: themeColor }">{{ runtimeMins }}</text>
             <text class="runtime-label">分</text>
           </view>
           <view class="runtime-divider"></view>
           <view class="runtime-item">
-            <text class="runtime-num">{{ runtimeSecs }}</text>
+            <text class="runtime-num" :style="{ color: themeColor }">{{ runtimeSecs }}</text>
             <text class="runtime-label">秒</text>
           </view>
         </view>
@@ -83,6 +83,20 @@
           <view class="info-row">
             <text class="info-key">🖼️ 图片总数</text>
             <text class="info-val">{{ catCount['image'] || 0 }} 张</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 主题颜色 -->
+      <view class="section">
+        <view class="section-title">🎨 主题颜色</view>
+        <view class="theme-picker">
+          <view
+            v-for="t in themePresets" :key="t.color"
+            class="theme-dot"
+            :style="{ background: t.color, boxShadow: themeColor === t.color ? '0 0 0 4rpx rgba(255,255,255,.9), 0 0 0 7rpx ' + t.color : 'none' }"
+            @click="applyTheme(t.color)">
+            <text v-if="themeColor === t.color" class="theme-dot__check">✓</text>
           </view>
         </view>
       </view>
@@ -134,6 +148,7 @@ import TabBar     from '../../components/TabBar.vue'
 import TokenModal from '../../components/TokenModal.vue'
 import CONFIG from '../../config.js'
 import api    from '../../utils/api.js'
+import { THEME_PRESETS, getThemeColor, saveThemeColor, darkenColor } from '../../utils/theme.js'
 
 export default {
   components: { TabBar, TokenModal },
@@ -155,9 +170,14 @@ export default {
       runtimeSecs:     0,
       _timer:          null,
       statusBarHeight: 0,
+      themeColor:      getThemeColor(),
+      themePresets:    THEME_PRESETS,
     }
   },
   computed: {
+    heroGradient() {
+      return `linear-gradient(135deg, ${this.themeColor} 0%, ${darkenColor(this.themeColor)} 100%)`
+    },
     displayName()   { return this.name || this.login || CONFIG.siteTitle },
     hasToken()      { return !!uni.getStorageSync('zblog_user_token') },
     totalArticles() { return Object.values(this.catCount).reduce((a, b) => a + b, 0) },
@@ -251,6 +271,11 @@ export default {
 
     goPhotos() {
       uni.redirectTo({ url: '/pages/photos/photos' })
+    },
+
+    applyTheme(color) {
+      this.themeColor = color
+      saveThemeColor(color)
     },
   }
 }
@@ -384,6 +409,19 @@ export default {
   font-size: 22rpx; color: #94a3b8; text-align: center;
   display: block; margin-top: 14rpx;
 }
+
+/* 主题色选择器 */
+.theme-picker {
+  display: flex; flex-direction: row; flex-wrap: wrap; gap: 20rpx;
+  padding: 8rpx 0;
+}
+.theme-dot {
+  width: 60rpx; height: 60rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 5rpx solid transparent;
+  box-sizing: border-box;
+}
+.theme-dot__check { font-size: 28rpx; color: #fff; font-weight: 700; }
 
 /* 版权 */
 .footer-credit { text-align: center; padding: 30rpx; }
