@@ -1,17 +1,18 @@
 /**
  * 照片墙逻辑
  * - 加载所有 image 标签的 Issues
+ * - 相册 Tab 筛选 + 关键词搜索
  * - 方形九宫格展示，底部日期遮罩，骨架加载
  * - 增强版灯箱（前后翻页）
  */
 
 const api = new GitHubAPI(CONFIG);
-let allPhotos = [];   // { src, title, date, fullDate, issueUrl }
-let filtered  = [];
-let lbIndex   = 0;
+let allPhotos     = [];   // { src, title, date, fullDate, issueUrl, issueNum }
+let filtered      = [];
+let selectedAlbum = null; // null = 全部
+let lbIndex       = 0;
 
 // ── 通用图片压缩代理 ────────────────────────────────────────
-// GitHub user-images CDN 用原生 width 参数；其他来源走 wsrv.nl 代理
 function compressImg(url, width = 400, quality = 80) {
   if (!url || url.startsWith('data:')) return url;
   if (url.includes('user-images.githubusercontent.com')) {
@@ -30,7 +31,7 @@ async function init() {
   bindKeyboard();
 }
 
-// ── 加载所有图片（分页拉取所有 image Issues）───────────────
+// ── 加载所有图片 ────────────────────────────────────────────
 async function loadAllPhotos() {
   const wall = document.getElementById('photoWall');
 
@@ -55,8 +56,8 @@ async function loadAllPhotos() {
       imgs.forEach(src => {
         allPhotos.push({
           src,
-          title: issue.title,
-          date: formatDate(issue.created_at),
+          title:    issue.title,
+          date:     formatDate(issue.created_at),
           fullDate: formatFullDate(issue.created_at),
           issueUrl: issue.html_url,
           issueNum: issue.number,
@@ -65,10 +66,70 @@ async function loadAllPhotos() {
     });
 
     filtered = [...allPhotos];
-    document.getElementById('photoCount').textContent = `共 ${allPhotos.length} 张图片 · ${issues.length} 个相册`;
+    updateCount();
+    buildAlbumBar();
     renderWall();
   } catch (e) {
     wall.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+  }
+}
+
+// ── 相册 Tab ────────────────────────────────────────────────
+function buildAlbumBar() {
+  const bar = document.getElementById('albumBar');
+  if (!bar) return;
+
+  // 聚合相册
+  const albumMap = {};
+  allPhotos.forEach(p => {
+    if (!albumMap[p.issueNum]) albumMap[p.issueNum] = { num: p.issueNum, title: p.title, count: 0 };
+    albumMap[p.issueNum].count++;
+  });
+  const albums = Object.values(albumMap);
+  if (albums.length <= 1) { bar.style.display = 'none'; return; }
+
+  bar.innerHTML = `
+    <button class="album-chip ${selectedAlbum === null ? 'album-chip--active' : ''}"
+      onclick="selectAlbum(null)">
+      全部 <span class="album-chip__count">${allPhotos.length}</span>
+    </button>
+    ${albums.map(a => `
+      <button class="album-chip ${selectedAlbum === a.num ? 'album-chip--active' : ''}"
+        onclick="selectAlbum(${a.num})">
+        ${escapeHtml(a.title)} <span class="album-chip__count">${a.count}</span>
+      </button>
+    `).join('')}
+  `;
+}
+
+function selectAlbum(num) {
+  selectedAlbum = num;
+  buildAlbumBar();
+  applyFilter();
+}
+
+// ── 筛选（相册 + 关键词组合）──────────────────────────────
+function applyFilter() {
+  const kw = (document.getElementById('filterInput') || document.getElementById('searchInput'));
+  const q  = kw ? kw.value.trim().toLowerCase() : '';
+  filtered = allPhotos.filter(p => {
+    const matchAlbum   = selectedAlbum === null || p.issueNum === selectedAlbum;
+    const matchKeyword = !q || p.title.toLowerCase().includes(q);
+    return matchAlbum && matchKeyword;
+  });
+  updateCount();
+  renderWall();
+}
+
+function updateCount() {
+  const el = document.getElementById('photoCount');
+  if (!el) return;
+  if (selectedAlbum !== null || filtered.length < allPhotos.length) {
+    el.textContent = `${filtered.length} / ${allPhotos.length} 张图片`;
+  } else {
+    el.textContent = `共 ${allPhotos.length} 张图片 · ${Object.keys(
+      allPhotos.reduce((m, p) => { m[p.issueNum] = 1; return m; }, {})
+    ).length} 个相册`;
   }
 }
 
@@ -99,18 +160,10 @@ function renderWall() {
     </div>`).join('');
 }
 
-// ── 关键词筛选 ─────────────────────────────────────────────
+// ── 关键词筛选绑定 ─────────────────────────────────────────
 function bindFilter() {
-  const input = document.getElementById('filterInput');
-  const search = document.getElementById('searchInput');
-  const doFilter = (val) => {
-    const q = val.trim().toLowerCase();
-    filtered = q ? allPhotos.filter(p => p.title.toLowerCase().includes(q)) : [...allPhotos];
-    renderWall();
-  };
-  [input, search].forEach(el => {
-    if (el) el.addEventListener('input', e => doFilter(e.target.value));
-  });
+  [document.getElementById('filterInput'), document.getElementById('searchInput')]
+    .forEach(el => { if (el) el.addEventListener('input', applyFilter); });
 }
 
 // ── 灯箱 ───────────────────────────────────────────────────
@@ -136,24 +189,17 @@ function closeLb() {
   document.body.style.overflow = '';
 }
 
-function lbPrev() {
-  lbIndex = (lbIndex - 1 + filtered.length) % filtered.length;
-  showLb();
-}
-
-function lbNext() {
-  lbIndex = (lbIndex + 1) % filtered.length;
-  showLb();
-}
+function lbPrev() { lbIndex = (lbIndex - 1 + filtered.length) % filtered.length; showLb(); }
+function lbNext() { lbIndex = (lbIndex + 1) % filtered.length; showLb(); }
 
 // ── 键盘控制 ───────────────────────────────────────────────
 function bindKeyboard() {
   document.addEventListener('keydown', e => {
     const lb = document.getElementById('photoLightbox');
     if (!lb.classList.contains('open')) return;
-    if (e.key === 'ArrowLeft')  { lbPrev(); }
-    if (e.key === 'ArrowRight') { lbNext(); }
-    if (e.key === 'Escape')     { closeLb(); }
+    if (e.key === 'ArrowLeft')  lbPrev();
+    if (e.key === 'ArrowRight') lbNext();
+    if (e.key === 'Escape')     closeLb();
   });
   document.getElementById('photoLightbox').addEventListener('click', e => {
     if (e.target === e.currentTarget || e.target.classList.contains('photo-lightbox__img-wrap')) closeLb();
@@ -168,7 +214,7 @@ function setSiteRuntime() {
   const tick = () => {
     const s = Math.floor((Date.now() - start) / 1000);
     const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600),
-          m = Math.floor((s % 3600) / 60),  sec = s % 60;
+          m = Math.floor((s % 3600) / 60), sec = s % 60;
     el.textContent = `运行 ${d} 天 ${h} 时 ${m} 分 ${sec} 秒`;
   };
   tick(); setInterval(tick, 1000);

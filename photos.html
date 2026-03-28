@@ -101,6 +101,30 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
+    /* ── 相册选择器 ─────────────────────────────────── */
+    .album-bar {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 4px 0 16px;
+    }
+    .album-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 99px; font-size: .82rem;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-muted); cursor: pointer; white-space: nowrap;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .album-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .album-chip--active {
+      background: var(--primary); border-color: var(--primary);
+      color: #fff;
+    }
+    .album-chip--active:hover { background: var(--primary-hover); }
+    .album-chip__count {
+      font-size: .72rem; background: rgba(0,0,0,.08);
+      padding: 1px 7px; border-radius: 99px;
+    }
+    .album-chip--active .album-chip__count { background: rgba(255,255,255,.25); }
+
     /* ── 加强版灯箱 ─────────────────────────────────── */
     .photo-lightbox {
       display: none; position: fixed; inset: 0; z-index: 2000;
@@ -173,9 +197,12 @@
   <div class="photos-toolbar">
     <div class="photos-search">
       <span>🔍</span>
-      <input type="search" id="filterInput" placeholder="筛选图片标题…">
+      <input type="search" id="filterInput" placeholder="搜索相册…">
     </div>
   </div>
+
+  <!-- 相册选择器 -->
+  <div class="album-bar" id="albumBar"></div>
 
   <div class="pw-grid" id="photoWall">
     <!-- 骨架占位 -->
