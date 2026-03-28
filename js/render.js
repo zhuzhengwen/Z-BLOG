@@ -193,43 +193,57 @@ function renderTagBadge(tag) {
   return `<span class="tag" style="border-color:${color}40;color:${color}">${tag.name}</span>`;
 }
 
-// ── 文章卡片（列表用）─ 横向布局，右侧方形缩略图 ─────────────
+// ── 文章卡片（朋友圈风格）────────────────────────────────────
 function renderPostCard(issue, categories) {
-  const cat = getCategoryFromLabels(issue.labels, categories);
-  const tags = getTagsFromLabels(issue.labels, categories);
-  const thumb = extractThumb(issue.body, cat);
-  const excerpt = extractExcerpt(issue.body);
-  const isVideoPost = cat && cat.label === 'video';
+  const cat     = getCategoryFromLabels(issue.labels, categories);
+  const tags    = getTagsFromLabels(issue.labels, categories);
+  const imgs    = extractImages(issue.body || '');
+  const videos  = extractVideos(issue.body || '');
+  const login   = issue.user.login;
+  const avatar  = issue.user.avatar_url + '&s=80';
 
-  let thumbHtml = '';
-  if (thumb) {
-    if (thumb.type === 'image') {
-      thumbHtml = `<div class="post-card__thumb"><img src="${compressImg(thumb.src, 480)}" alt="" loading="lazy"></div>`;
-    } else {
-      thumbHtml = `<div class="post-card__thumb post-card__thumb--video"><span class="thumb-play">▶</span></div>`;
-    }
+  // 媒体列表：正文图片优先，否则取视频封面
+  let mediaList = imgs.slice(0, 9);
+  if (!mediaList.length && videos.length && videos[0].thumb) {
+    mediaList = [videos[0].thumb];
   }
 
+  // 摘要（无图时显示）
+  const excerpt = !mediaList.length ? extractExcerpt(issue.body) : '';
+
+  // 图片九宫格
+  let gridHtml = '';
+  if (mediaList.length) {
+    const n = mediaList.length;
+    const cls = n === 1 ? 'one' : n === 2 ? 'two' : n === 3 ? 'three' : n === 4 ? 'four' : 'many';
+    gridHtml = `<div class="moment-grid moment-grid--${cls}">
+      ${mediaList.map((src, i) => `
+        <div class="moment-grid__item" onclick="openLightbox('${src}', ${i})">
+          <img src="${compressImg(src, 480)}" alt="" loading="lazy" data-full="${src}">
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // 徽章行
+  const badgesHtml = [
+    cat ? renderCategoryBadge(cat) : '',
+    ...tags.slice(0, 2).map(renderTagBadge),
+  ].filter(Boolean).join('');
+
   return `
-  <article class="post-card${thumb ? ' post-card--has-thumb' : ''}" data-number="${issue.number}">
-    <div class="post-card__body">
-      <div class="post-card__meta-top">
-        ${renderCategoryBadge(cat)}
-        <span class="post-card__date">${formatDate(issue.created_at)}</span>
-      </div>
-      <h2 class="post-card__title">${escapeHtml(issue.title)}</h2>
-      <p class="post-card__excerpt">${escapeHtml(excerpt)}</p>
-      <div class="post-card__footer">
-        <div class="post-card__tags">
-          ${tags.slice(0, 3).map(renderTagBadge).join('')}
-        </div>
-        <div class="post-card__stats">
-          ${isVideoPost ? '<span title="视频">🎬</span> ' : ''}
-          <span title="评论数">💬 ${issue.comments}</span>
-        </div>
+  <article class="moment-card" data-number="${issue.number}">
+    <img class="moment-card__avatar" src="${avatar}" alt="${escapeHtml(login)}" loading="lazy">
+    <div class="moment-card__main">
+      <div class="moment-card__name">${escapeHtml(login)}</div>
+      <div class="moment-card__title">${escapeHtml(issue.title)}</div>
+      ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
+      ${gridHtml}
+      ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
+      <div class="moment-card__footer">
+        <time class="moment-card__date">${formatDate(issue.created_at)}</time>
+        <span class="moment-card__comments">💬 ${issue.comments}</span>
       </div>
     </div>
-    ${thumbHtml}
   </article>`;
 }
 

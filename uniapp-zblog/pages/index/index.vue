@@ -88,8 +88,10 @@
         </view>
         <view v-if="loading && !posts.length">
           <view v-for="i in 3" :key="i" class="skeleton-card">
-            <view class="skeleton sk-short"></view>
-            <view class="skeleton sk-full"></view>
+            <view style="flex:1;display:flex;flex-direction:column;gap:14rpx;">
+              <view class="skeleton sk-short"></view>
+              <view class="skeleton sk-full"></view>
+            </view>
           </view>
         </view>
         <view v-else-if="!posts.length && !loading" class="empty">
@@ -116,9 +118,11 @@
       <view class="list-inner">
         <view v-if="loading && !posts.length">
           <view v-for="i in 5" :key="i" class="skeleton-card">
-            <view class="skeleton sk-short"></view>
-            <view class="skeleton sk-full"></view>
-            <view class="skeleton sk-medium"></view>
+            <view style="flex:1;display:flex;flex-direction:column;gap:14rpx;">
+              <view class="skeleton sk-short"></view>
+              <view class="skeleton sk-full"></view>
+              <view class="skeleton sk-medium"></view>
+            </view>
           </view>
         </view>
         <view v-else-if="error" class="error-box"><text>⚠️ {{ error }}</text></view>
@@ -429,8 +433,8 @@ export default {
 .search-cancel { font-size: 28rpx; color: #2563eb; white-space: nowrap; }
 
 /* ── 列表 ────────────────────────────────────────────────── */
-.list-scroll { flex: 1; height: 0; }
-.list-inner  { padding: 16rpx 20rpx 160rpx; }
+.list-scroll { flex: 1; height: 0; background: #f7f7f7; }
+.list-inner  { padding: 0 0 160rpx; }
 
 .search-result-bar {
   display: flex; flex-direction: row; align-items: center; padding: 16rpx 4rpx 18rpx;
@@ -440,9 +444,14 @@ export default {
 
 /* 骨架屏 */
 .skeleton-card {
-  background: #fff; border-radius: 10rpx;
-  padding: 28rpx; margin-bottom: 12rpx;
-  display: flex; flex-direction: column; gap: 18rpx;
+  background: #fff; border-bottom: 1rpx solid #f0f0f0;
+  padding: 24rpx 28rpx;
+  display: flex; flex-direction: row; gap: 20rpx;
+}
+.skeleton-card::before {
+  content: ''; display: block; width: 80rpx; height: 80rpx;
+  border-radius: 10rpx; flex-shrink: 0;
+  background: #f1f5f9;
 }
 .skeleton {
   border-radius: 8rpx; height: 26rpx;
