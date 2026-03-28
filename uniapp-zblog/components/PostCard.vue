@@ -87,22 +87,19 @@ export default {
 
 /* 标题行 */
 .moment__title-row {
-  display: flex; flex-direction: row;
-  align-items: flex-start; gap: 12rpx;
+  display: flex; flex-direction: row; flex-wrap: wrap;
+  align-items: baseline; gap: 8rpx 10rpx;
 }
 .moment__title {
-  flex: 1;
   font-size: 30rpx; font-weight: 700; color: #1e1e1e; line-height: 1.5;
   /* #ifndef APP-NVUE */
   word-break: break-word;
   /* #endif */
 }
 
-/* 标签（靠右） */
+/* 标签（紧跟标题，字体更小） */
 .moment__badges {
-  display: flex; flex-direction: row; flex-wrap: wrap;
-  justify-content: flex-end; gap: 8rpx;
-  flex-shrink: 0; padding-top: 4rpx;
+  display: flex; flex-direction: row; flex-wrap: wrap; gap: 6rpx;
 }
 .m-badge {
   font-size: 22rpx; font-weight: 600;
