@@ -6,11 +6,9 @@
           <view
             v-for="c in row" :key="c.label"
             class="cat-card"
-            :style="{ borderColor: c.color + '30' }"
+            :style="{ borderColor: c.color + '40' }"
             @click="openCategory(c)">
-            <view class="cat-icon-badge" :style="{ background: c.color + '15', color: c.color }">
-              <text class="cat-icon-text">{{ c.icon }}</text>
-            </view>
+            <text class="cat-icon">{{ c.icon }}</text>
             <text class="cat-name">{{ c.name }}</text>
             <text class="cat-desc">{{ c.desc || '' }}</text>
             <view class="cat-arrow" :style="{ background: c.color + '15' }">
@@ -22,7 +20,7 @@
 
       <view class="about-section">
         <view class="about-card">
-          <text class="about-title">使用说明</text>
+          <text class="about-title">📋 使用说明</text>
           <text class="about-item">1. 在 GitHub 创建 Issue 作为文章</text>
           <text class="about-item">2. 给 Issue 添加 Label 进行分类</text>
           <text class="about-item">3. 图片类型支持照片墙展示</text>
@@ -99,12 +97,7 @@ export default {
 }
 .cat-card:first-child { margin-right: 8rpx; }
 .cat-card:last-child  { margin-left: 8rpx; }
-.cat-icon-badge {
-  width: 76rpx; height: 76rpx; border-radius: 20rpx;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 4rpx;
-}
-.cat-icon-text { font-size: 32rpx; font-weight: 700; }
+.cat-icon { font-size: 56rpx; }
 .cat-name { font-size: 30rpx; font-weight: 700; color: #1e293b; }
 .cat-desc { font-size: 22rpx; color: #94a3b8; text-align: center; }
 .cat-arrow {
