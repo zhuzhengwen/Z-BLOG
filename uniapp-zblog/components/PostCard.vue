@@ -2,13 +2,13 @@
   <view class="moment" @click="$emit('click')">
 
     <!-- 左侧头像 -->
-    <image class="moment__avatar" :src="avatarUrl" mode="aspectFill" lazy-load />
+    <image class="moment__avatar" :src="issue.user.avatar_url" mode="aspectFill" lazy-load />
 
     <!-- 右侧主体 -->
     <view class="moment__main">
 
       <!-- 名称 -->
-      <text class="moment__name">{{ ownerName }}</text>
+      <text class="moment__name">{{ issue.user.login }}</text>
 
       <!-- 标题（主内容文字） -->
       <text class="moment__title">{{ issue.title }}</text>
@@ -27,12 +27,15 @@
           lazy-load />
       </view>
 
-      <!-- 分类 + 标签 -->
-      <view v-if="cat || tags.length" class="moment__badges">
-        <view v-if="cat" class="m-badge" :style="{ background: cat.color + '18', color: cat.color }">
-          {{ cat.icon }} {{ cat.name }}
+      <!-- GitHub 标签 -->
+      <view v-if="issue.labels && issue.labels.length" class="moment__badges">
+        <view
+          v-for="label in issue.labels"
+          :key="label.id"
+          class="gh-label"
+          :style="ghLabelStyle(label)">
+          {{ label.name }}
         </view>
-        <text v-for="tag in tags.slice(0, 2)" :key="tag.name" class="m-tag">{{ tag.name }}</text>
       </view>
 
       <!-- 底部：日期 + 评论数 -->
@@ -46,10 +49,8 @@
 </template>
 
 <script>
-import CONFIG from '../config.js'
 import {
-  getCategoryFromLabels, getTagsFromLabels, formatDate,
-  extractImages, extractExcerpt, extractVideos, compressImg as _compress,
+  formatDate, extractImages, extractExcerpt, extractVideos, compressImg as _compress,
 } from '../utils/helper.js'
 
 export default {
@@ -58,15 +59,8 @@ export default {
     issue: { type: Object, required: true }
   },
   computed: {
-    cat()       { return getCategoryFromLabels(this.issue.labels) },
-    tags()      { return getTagsFromLabels(this.issue.labels) },
-    date()      { return formatDate(this.issue.created_at) },
-    excerpt()   { return extractExcerpt(this.issue.body, 100) },
-    ownerName() { return CONFIG.siteTitle || CONFIG.owner },
-    avatarUrl() {
-      const day = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-      return `https://github.com/${CONFIG.owner}.png?size=80&v=${day}`
-    },
+    date()    { return formatDate(this.issue.created_at) },
+    excerpt() { return extractExcerpt(this.issue.body, 100) },
 
     // 图片列表：优先取正文图片；视频帖取缩略图
     mediaList() {
@@ -88,7 +82,11 @@ export default {
     },
   },
   methods: {
-    compressImg(src, w) { return _compress(src, w) }
+    compressImg(src, w) { return _compress(src, w) },
+    ghLabelStyle(label) {
+      const c = '#' + label.color
+      return { background: c + '22', color: c, borderColor: c + '55' }
+    },
   }
 }
 </script>
@@ -165,18 +163,15 @@ export default {
   width: 186rpx; height: 186rpx; border-radius: 6rpx;
 }
 
-/* ── 徽章 / 标签 ─────────────────────────────────────────── */
+/* ── GitHub 标签 ─────────────────────────────────────────── */
 .moment__badges {
   display: flex; flex-direction: row; flex-wrap: wrap;
   gap: 8rpx; margin-top: 14rpx;
 }
-.m-badge {
+.gh-label {
   font-size: 22rpx; font-weight: 600;
   padding: 4rpx 14rpx; border-radius: 99rpx;
-}
-.m-tag {
-  font-size: 22rpx; color: #64748b;
-  background: #f1f5f9; padding: 4rpx 14rpx; border-radius: 99rpx;
+  border-width: 1rpx; border-style: solid;
 }
 
 /* ── 底部 ────────────────────────────────────────────────── */

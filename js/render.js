@@ -194,9 +194,7 @@ function renderTagBadge(tag) {
 }
 
 // ── 文章卡片（朋友圈风格）────────────────────────────────────
-function renderPostCard(issue, categories) {
-  const cat     = getCategoryFromLabels(issue.labels, categories);
-  const tags    = getTagsFromLabels(issue.labels, categories);
+function renderPostCard(issue) {
   const imgs    = extractImages(issue.body || '');
   const videos  = extractVideos(issue.body || '');
   const login   = issue.user.login;
@@ -224,11 +222,11 @@ function renderPostCard(issue, categories) {
     </div>`;
   }
 
-  // 徽章行
-  const badgesHtml = [
-    cat ? renderCategoryBadge(cat) : '',
-    ...tags.slice(0, 2).map(renderTagBadge),
-  ].filter(Boolean).join('');
+  // GitHub 标签行（使用 label.color 原色）
+  const labelsHtml = (issue.labels || []).map(label => {
+    const c = '#' + label.color;
+    return `<span class="gh-label" style="background:${c}22;color:${c};border-color:${c}55">${escapeHtml(label.name)}</span>`;
+  }).join('');
 
   return `
   <article class="moment-card" data-number="${issue.number}">
@@ -238,7 +236,7 @@ function renderPostCard(issue, categories) {
       <div class="moment-card__title">${escapeHtml(issue.title)}</div>
       ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
       ${gridHtml}
-      ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
+      ${labelsHtml ? `<div class="moment-card__badges">${labelsHtml}</div>` : ''}
       <div class="moment-card__footer">
         <time class="moment-card__date">${formatDate(issue.created_at)}</time>
         <span class="moment-card__comments">💬 ${issue.comments}</span>

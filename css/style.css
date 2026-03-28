@@ -259,7 +259,14 @@ button { cursor: pointer; font-family: inherit; }
   background: #000;
 }
 
-/* ── Badges & Tags ────────────────────────────────────────── */
+/* ── GitHub Labels ────────────────────────────────────────── */
+.gh-label {
+  display: inline-flex; align-items: center;
+  padding: 2px 9px; border-radius: 99px; font-size: .75rem;
+  font-weight: 600; border: 1px solid; white-space: nowrap;
+}
+
+/* ── Badges & Tags (detail page) ─────────────────────────── */
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 9px; border-radius: 99px; font-size: .75rem;
