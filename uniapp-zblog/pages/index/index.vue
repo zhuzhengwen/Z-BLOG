@@ -56,14 +56,9 @@
           </view>
           <text class="header__cat-name">{{ currentCatName }}</text>
         </view>
-        <!-- 右：写文章 + 搜索 -->
-        <view class="header__right">
-          <view class="header__icon-btn" @click="goCompose">
-            <text class="icon icon--compose">＋</text>
-          </view>
-          <view class="header__icon-btn" @click="searchExpanded = true">
-            <text class="icon">🔍</text>
-          </view>
+        <!-- 右：搜索 -->
+        <view class="header__icon-btn" @click="searchExpanded = true">
+          <text class="icon">🔍</text>
         </view>
       </view>
 
@@ -192,16 +187,8 @@ export default {
       this.switchCat(label)
       uni.$off('switchCategory')
     })
-    uni.$on('refreshPosts', () => {
-      this.page = 1
-      this.loadPosts()
-      uni.$off('refreshPosts')
-    })
   },
-  onHide() {
-    uni.$off('switchCategory')
-    uni.$off('refreshPosts')
-  },
+  onHide() { uni.$off('switchCategory') },
   methods: {
     async loadPosts(append = false) {
       if (!append) { this.loading = true; this.error = null }
@@ -270,10 +257,6 @@ export default {
     cancelSearch() {
       this.searchKeyword  = ''
       this.searchExpanded = false
-    },
-
-    goCompose() {
-      uni.navigateTo({ url: '/pages/compose/compose' })
     },
 
     clearSearch() {
@@ -414,16 +397,12 @@ export default {
 .header__cat-name {
   font-size: 32rpx; font-weight: 700; color: #1e293b;
 }
-.header__right {
-  display: flex; flex-direction: row; align-items: center; gap: 8rpx;
-}
 .header__icon-btn {
   width: 72rpx; height: 72rpx; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   background: #f8fafc; flex-shrink: 0;
 }
 .icon { font-size: 34rpx; }
-.icon--compose { font-size: 40rpx; font-weight: 300; color: #2563eb; }
 
 /* 搜索展开 */
 .header__search {
