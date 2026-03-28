@@ -197,10 +197,15 @@ button { cursor: pointer; font-family: inherit; }
 }
 .moment-card:hover { background: var(--surface-2); }
 
+.moment-card__title-row {
+  display: flex; align-items: flex-start; gap: 12px;
+}
 .moment-card__title {
+  flex: 1;
   font-size: 1rem; font-weight: 700; color: var(--text);
   line-height: 1.5; word-break: break-word;
 }
+.moment-card__badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; padding-top: 2px; }
 .moment-card__excerpt {
   font-size: .85rem; color: var(--text-muted); line-height: 1.5;
   margin-top: 6px;
@@ -222,7 +227,6 @@ button { cursor: pointer; font-family: inherit; }
 }
 .moment-grid__item:hover img { transform: scale(1.05); }
 
-.moment-card__badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .moment-card__footer {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: 8px;

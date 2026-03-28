@@ -230,8 +230,10 @@ function renderPostCard(issue, categories) {
 
   return `
   <article class="moment-card" data-number="${issue.number}">
-    <div class="moment-card__title">${escapeHtml(issue.title)}</div>
-    ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
+    <div class="moment-card__title-row">
+      <div class="moment-card__title">${escapeHtml(issue.title)}</div>
+      ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
+    </div>
     ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
     ${gridHtml}
     <div class="moment-card__footer">

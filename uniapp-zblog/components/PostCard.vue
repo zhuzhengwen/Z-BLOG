@@ -1,16 +1,16 @@
 <template>
   <view class="moment" @click="$emit('click')">
 
-    <!-- 标题 -->
-    <text class="moment__title">{{ issue.title }}</text>
-
-    <!-- 标签（分类 + tags，紧跟标题） -->
-    <view v-if="cat || tags.length" class="moment__badges">
-      <view v-if="cat" class="m-badge"
-        :style="{ background: cat.color + '18', color: cat.color, borderColor: cat.color + '50' }">
-        {{ cat.icon }} {{ cat.name }}
+    <!-- 标题行：标题 + 标签同行，标签靠右 -->
+    <view class="moment__title-row">
+      <text class="moment__title">{{ issue.title }}</text>
+      <view v-if="cat || tags.length" class="moment__badges">
+        <view v-if="cat" class="m-badge"
+          :style="{ background: cat.color + '18', color: cat.color, borderColor: cat.color + '50' }">
+          {{ cat.icon }} {{ cat.name }}
+        </view>
+        <text v-for="tag in tags.slice(0, 2)" :key="tag.name" class="m-tag">{{ tag.name }}</text>
       </view>
-      <text v-for="tag in tags.slice(0, 3)" :key="tag.name" class="m-tag">{{ tag.name }}</text>
     </view>
 
     <!-- 摘要（无图时显示） -->
@@ -85,18 +85,24 @@ export default {
   display: flex; flex-direction: column;
 }
 
-/* 标题 */
+/* 标题行 */
+.moment__title-row {
+  display: flex; flex-direction: row;
+  align-items: flex-start; gap: 12rpx;
+}
 .moment__title {
+  flex: 1;
   font-size: 30rpx; font-weight: 700; color: #1e1e1e; line-height: 1.5;
   /* #ifndef APP-NVUE */
   word-break: break-word;
   /* #endif */
 }
 
-/* 标签行 */
+/* 标签（靠右） */
 .moment__badges {
   display: flex; flex-direction: row; flex-wrap: wrap;
-  gap: 8rpx; margin-top: 12rpx;
+  justify-content: flex-end; gap: 8rpx;
+  flex-shrink: 0; padding-top: 4rpx;
 }
 .m-badge {
   font-size: 22rpx; font-weight: 600;
