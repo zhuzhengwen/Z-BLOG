@@ -20,11 +20,11 @@ const CONFIG = {
   // ========== 分类定义 ==========
   // 对应 GitHub Issue 的 Label，请在 GitHub 仓库中创建同名 Label
   categories: [
-    { label: 'article', name: '文章', icon: '📝', color: '#28a745', desc: '长篇文章与教程' },
-    { label: 'image',   name: '图片', icon: '🖼️', color: '#0969da', desc: '图片与摄影作品' },
-    { label: 'video',   name: '视频', icon: '🎬', color: '#d73a49', desc: '视频内容' },
-    { label: 'note',    name: '笔记', icon: '📌', color: '#6f42c1', desc: '随记与短笔记' },
-    { label: 'link',    name: '链接', icon: '🔗', color: '#e36209', desc: '收藏的链接' },
+    { label: 'article', name: '文章', icon: 'article', color: '#28a745', desc: '长篇文章与教程' },
+    { label: 'image',   name: '图片', icon: 'image',   color: '#0969da', desc: '图片与摄影作品' },
+    { label: 'video',   name: '视频', icon: 'video',   color: '#d73a49', desc: '视频内容' },
+    { label: 'note',    name: '笔记', icon: 'note',    color: '#6f42c1', desc: '随记与短笔记' },
+    { label: 'link',    name: '链接', icon: 'link',    color: '#e36209', desc: '收藏的链接' },
   ],
 
   // ========== 缓存时长（毫秒）==========

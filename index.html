@@ -7,7 +7,7 @@
   <title>Z-BLOG</title>
 
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231e293b'/><text x='16' y='23' text-anchor='middle' font-size='22' font-weight='800' font-family='Arial,sans-serif' fill='white'>Z</text></svg>">
   <!-- Mobile 跳转 -->
   <link rel="alternate" media="only screen and (max-width:768px)" href="mobile.html">
 
@@ -28,21 +28,22 @@
 <header class="header">
   <div class="container header__inner">
     <a class="header__logo" href="#/">
-      📝 <span id="siteTitle">Z-BLOG</span>
+      <svg class="logo-icon" width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="7" fill="currentColor"/><text x="16" y="23" text-anchor="middle" font-size="22" font-weight="800" font-family="Arial,sans-serif" fill="white">Z</text></svg>
+      <span id="siteTitle">Z-BLOG</span>
     </a>
 
     <nav class="header__nav" id="headerNav">
-      <button class="header__nav-item active" data-cat="all">🏠 <span>全部</span></button>
+      <button class="header__nav-item active" data-cat="all"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7.5L8 1.5l7 6"/><path d="M3 6.5v7a.5.5 0 0 0 .5.5H6v-3.5h4V14h2.5a.5.5 0 0 0 .5-.5v-7"/></svg> <span>全部</span></button>
       <!-- 分类导航由 JS 动态插入 -->
     </nav>
 
     <div class="header__search">
-      <span>🔍</span>
+      <span><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14.5" y2="14.5"/></svg></span>
       <input type="search" id="searchInput" placeholder="搜索文章…" autocomplete="off">
       <button id="searchBtn" title="搜索">→</button>
     </div>
 
-    <a href="mobile.html" style="font-size:.8rem;color:var(--text-muted);white-space:nowrap" title="手机版">📱</a>
+    <a href="mobile.html" style="color:var(--text-muted);white-space:nowrap;line-height:1" title="手机版"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="8" height="14" rx="1.5"/><circle cx="8" cy="12.5" r=".6" fill="currentColor" stroke="none"/></svg></a>
   </div>
 </header>
 
@@ -53,7 +54,7 @@
   <main class="main" id="main">
     <!-- 骨架屏（JS 接管前） -->
     <div class="section-header">
-      <h1 class="section-header__title">📚 全部文章</h1>
+      <h1 class="section-header__title"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-.2em"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="10" y2="12"/></svg> 全部文章</h1>
     </div>
     <div class="post-list" id="postListInit">
       <div class="skeleton-card">
@@ -91,7 +92,7 @@
       <p class="sidebar-card__title">文章分类</p>
       <ul class="cat-list" id="sidebarCats">
         <li><button class="cat-list__item active" data-cat="all" onclick="location.hash='#/'">
-          <span class="cat-list__icon">📚</span>
+          <span class="cat-list__icon"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="12" x2="10" y2="12"/></svg></span>
           <span class="cat-list__name">全部</span>
         </button></li>
       </ul>
@@ -105,8 +106,8 @@
         创建 Issue 即可发布文章，<br>
         添加 Label 即可分类。<br><br>
         支持的分类标签：<br>
-        📝 article &nbsp; 🖼️ image<br>
-        🎬 video &nbsp; 📌 note &nbsp; 🔗 link
+        article &nbsp; image &nbsp; video<br>
+        note &nbsp; link
       </p>
     </div>
 
@@ -118,10 +119,10 @@
   <div class="container">
     <p>
       由 <a href="https://github.com" target="_blank">GitHub Issues</a> 驱动 ·
-      <a href="photos.html">🖼️ 照片墙</a> ·
-      <a href="mobile.html">📱 手机版</a> ·
+      <a href="photos.html">照片墙</a> ·
+      <a href="mobile.html">手机版</a> ·
       <a href="#" onclick="app&&app.api.clearCache();showToast('缓存已清除');return false">刷新缓存</a> ·
-      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">⚙️ Token</a>
+      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">Token</a>
     </p>
     <p style="margin-top:6px">
       <span id="siteRuntime"></span> ·
@@ -147,14 +148,14 @@
   <div style="
     background:var(--surface);border-radius:12px;padding:28px;
     width:min(460px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.3);">
-    <h3 style="margin:0 0 6px;font-size:1.1rem">⚙️ 设置 GitHub Token</h3>
+    <h3 style="margin:0 0 6px;font-size:1.1rem">设置 GitHub Token</h3>
     <p style="margin:0 0 16px;font-size:.82rem;color:var(--text-muted);line-height:1.6">
       Token 仅保存在<strong>你的浏览器</strong>中，不会上传到任何地方。<br>
       设置后 API 限额从 60次/小时 提升至 5000次/小时。
     </p>
     <p id="tokenRateMsg" style="display:none;margin:0 0 14px;padding:10px 14px;
       background:#fef9c3;border-radius:7px;font-size:.82rem;color:#854d0e">
-      ⚠️ 当前 IP 已触发频率限制，设置 Token 后即可继续使用。
+      当前 IP 已触发频率限制，设置 Token 后即可继续使用。
     </p>
     <input id="tokenInput" type="password"
       placeholder="ghp_xxxxxxxxxxxxxxxx"
@@ -263,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="config.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/api.js"></script>
 <script src="js/render.js"></script>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
