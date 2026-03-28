@@ -13,7 +13,7 @@
         :password="true"
         placeholder-style="color:#94a3b8" />
       <text class="token-modal__tip">
-        GitHub → Settings → Developer settings → Personal access tokens → 勾选 public_repo 生成
+        GitHub → Settings → Developer settings → Personal access tokens → 勾选 <text style="color:#dc2626;font-weight:700">public_repo</text> 权限后生成
       </text>
       <view class="token-modal__btns">
         <view class="token-btn token-btn--cancel" @click="close">
@@ -89,10 +89,18 @@ export default {
           })
         })
         if (res.statusCode === 200) {
+          // 检查 token 是否有 public_repo 权限
+          const scopes = (res.header['x-oauth-scopes'] || res.header['X-OAuth-Scopes'] || '').split(',').map(s => s.trim())
+          const hasWrite = scopes.includes('public_repo') || scopes.includes('repo')
           api.setToken(token)
-          this.statusMsg  = `✅ 验证成功！已登录为 @${res.data.login}`
-          this.statusColor = '#16a34a'
-          setTimeout(() => this.close(), 1500)
+          if (hasWrite) {
+            this.statusMsg   = `✅ 验证成功！@${res.data.login}（含写入权限）`
+            this.statusColor = '#16a34a'
+            setTimeout(() => this.close(), 1500)
+          } else {
+            this.statusMsg   = `⚠️ Token 已保存，但缺少 public_repo 权限，无法发布文章或上传图片。\n请重新生成并勾选 public_repo。`
+            this.statusColor = '#d97706'
+          }
         } else {
           this.statusMsg  = '❌ Token 无效，请检查是否填写正确'
           this.statusColor = '#dc2626'
