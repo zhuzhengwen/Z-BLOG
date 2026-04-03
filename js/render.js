@@ -193,71 +193,49 @@ function renderTagBadge(tag) {
   return `<span class="tag" style="background:${color}18;border-color:${color}55;color:${color}">${tag.name}</span>`;
 }
 
-// ── 文章卡片（列表用）────────────────────────────────────────
+// ── 文章卡片（Yilia 风格：标题+摘要+右侧缩略图）──────────────
 function renderPostCard(issue, categories) {
   const cat    = getCategoryFromLabels(issue.labels, categories);
   const tags   = getTagsFromLabels(issue.labels, categories);
-  const imgs   = extractImages(issue.body || '');
+  const cover  = extractCover(issue.body || '');
   const videos = extractVideos(issue.body || '');
+  const excerpt = extractExcerpt(issue.body, 100);
 
-  // 媒体列表：图片帖取全部（最多9张），其他只取封面
-  const isImagePost = cat && cat.label === 'image';
-  let mediaList = isImagePost ? imgs.slice(0, 9) : (imgs.length ? imgs.slice(0, 1) : []);
-  if (!mediaList.length && videos.length && videos[0].thumb) {
-    mediaList = [videos[0].thumb];
-  }
+  // 缩略图：优先图片封面，其次视频封面
+  let thumbSrc = cover;
+  if (!thumbSrc && videos.length && videos[0].thumb) thumbSrc = videos[0].thumb;
 
-  // 摘要（无图时显示）
-  const excerpt = !mediaList.length ? extractExcerpt(issue.body) : '';
-
-  // 标签行：分类 badge + tag 小标签
+  // 标签行
   const badgesHtml = [
     cat ? renderCategoryBadge(cat) : '',
     ...tags.slice(0, 3).map(renderTagBadge),
   ].filter(Boolean).join('');
 
-  // 图片帖：全部图片数量用于显示 "+N"
-  const totalImages = isImagePost ? imgs.length : 0;
-
-  let gridHtml = '';
-  if (mediaList.length) {
-    const n = mediaList.length;
-    const cls = n === 1 ? 'one' : n === 2 ? 'two' : n === 3 ? 'three' : n === 4 ? 'four' : 'many';
-    const moreCell = (isImagePost && totalImages > 9)
-      ? `<div class="moment-grid__item moment-grid__more">
-           <span class="moment-grid__more-num">+${totalImages - 9}</span>
-           <span class="moment-grid__more-sub">查看更多</span>
-         </div>`
-      : '';
-    gridHtml = `<div class="moment-grid moment-grid--${cls}">
-      ${mediaList.map((src, i) => `
-        <div class="moment-grid__item" onclick="openLightbox('${src}', ${i})">
-          <img src="${compressImg(src, 480)}" alt="" loading="lazy" data-full="${src}">
-        </div>`).join('')}
-      ${moreCell}
-    </div>
-    ${isImagePost && totalImages > 9 ? `<a class="moment-card__photos-link" href="photos.html">共 ${totalImages} 张 · 前往照片墙查看全部 →</a>` : ''}`;
-  }
-
   const author = issue.user || {};
   const avatarUrl = author.avatar_url
-    ? `https://wsrv.nl/?url=${encodeURIComponent(author.avatar_url)}&w=80&h=80&fit=cover&output=webp`
+    ? `https://wsrv.nl/?url=${encodeURIComponent(author.avatar_url)}&w=60&h=60&fit=cover&output=webp`
     : `https://github.com/${author.login || 'ghost'}.png`;
+
+  const thumbHtml = thumbSrc
+    ? `<div class="moment-card__thumb"><img src="${compressImg(thumbSrc, 300)}" alt="" loading="lazy"></div>`
+    : '';
 
   return `
   <article class="moment-card" data-number="${issue.number}">
-    <div class="moment-card__author">
-      <img class="moment-card__avatar" src="${avatarUrl}" alt="${escapeHtml(author.login || '')}" loading="lazy">
-      <span class="moment-card__username">${escapeHtml(author.login || '')}</span>
-      <time class="moment-card__date">${formatDate(issue.created_at)}</time>
+    <div class="moment-card__body">
+      <div class="moment-card__title">${escapeHtml(issue.title)}</div>
+      ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
+      <div class="moment-card__meta">
+        <div class="moment-card__author">
+          <img class="moment-card__avatar" src="${avatarUrl}" alt="${escapeHtml(author.login || '')}" loading="lazy">
+          <span class="moment-card__username">${escapeHtml(author.login || '')}</span>
+        </div>
+        <time class="moment-card__date">${formatDate(issue.created_at)}</time>
+        <span class="moment-card__comments">💬 ${issue.comments}</span>
+      </div>
+      ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
     </div>
-    <div class="moment-card__title">${escapeHtml(issue.title)}</div>
-    ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
-    ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
-    ${gridHtml}
-    <div class="moment-card__footer">
-      <span class="moment-card__comments">💬 ${issue.comments}</span>
-    </div>
+    ${thumbHtml}
   </article>`;
 }
 
