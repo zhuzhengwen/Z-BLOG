@@ -1,6 +1,6 @@
 /**
- * Z-BLOG Desktop App — Yilia Style
- * Hash 路由 SPA：#/  #/post/123  #/category/article  #/tag/xxx  #/search?q=xxx
+ * Z-BLOG Desktop App
+ * Hash 路由 SPA：#/  #/post/123  #/category/article  #/search?q=xxx
  */
 
 class App {
@@ -10,85 +10,28 @@ class App {
     this.page = 1;
     this.currentCategory = null;
     this.lastIssuesCount = 0;
-    this.repoTags = [];
-    this.activeTag = null;
+    this.repoTags = [];        // 仓库中的主题标签（非分类标签）
+    this.activeTag = null;     // 当前激活的标签筛选
     this._init();
   }
 
   // ── 初始化 ─────────────────────────────────────────────
   async _init() {
     initMarked();
-    this._initSidebar();
+    this._bindNav();
     this._bindSearch();
     this._bindLightbox();
     window.addEventListener('hashchange', () => this._route());
-    await Promise.all([this._loadProfile(), this._loadTags()]);
+    await Promise.all([this._loadSidebar(), this._loadTags()]);
     this._route();
   }
 
-  // ── 初始化侧栏导航 ───────────────────────────────────
-  _initSidebar() {
-    const nav = document.getElementById('sidebarNav');
-    if (!nav) return;
-
-    // 更新站点标题
-    const titleEl = document.getElementById('siteTitle');
-    if (titleEl) { titleEl.textContent = CONFIG.siteTitle; document.title = CONFIG.siteTitle; }
-    const descEl = document.getElementById('siteDesc');
-    if (descEl) descEl.textContent = CONFIG.siteDesc || '';
-
-    // 插入分类导航
-    this.categories.forEach(c => {
-      const a = document.createElement('a');
-      a.className = 'yilia-nav__item';
-      a.dataset.cat = c.label;
-      a.href = `#/category/${c.label}`;
-      a.innerHTML = `<span class="yilia-nav__icon">${c.icon}</span>${c.name}`;
-      nav.appendChild(a);
-    });
-
-    // 绑定导航点击
-    nav.addEventListener('click', (e) => {
-      const item = e.target.closest('.yilia-nav__item');
-      if (!item) return;
-      e.preventDefault();
-      const cat = item.dataset.cat;
-      if (cat === 'music') {
-        // 音乐分类：和其他分类一样展示 issue 列表
-        location.hash = `#/category/music`;
-      } else {
-        location.hash = cat === 'all' ? '#/' : `#/category/${cat}`;
-      }
-    });
-  }
-
-  // ── 加载用户头像等信息 ───────────────────────────────
-  async _loadProfile() {
-    try {
-      const [user, repo] = await Promise.all([
-        this.api.getUser(),
-        this.api.getRepoInfo(),
-      ]);
-
-      const avatar = document.getElementById('sidebarAvatar');
-      const avatarLink = document.getElementById('sidebarAvatarLink');
-      if (avatar) avatar.src = user.avatar_url;
-      if (avatarLink) avatarLink.href = user.html_url;
-
-      const titleEl = document.getElementById('siteTitle');
-      if (titleEl) titleEl.textContent = CONFIG.siteTitle || user.name || user.login;
-
-      const descEl = document.getElementById('siteDesc');
-      if (descEl) descEl.textContent = user.bio || CONFIG.siteDesc || '';
-    } catch {}
-  }
-
-  // ── 加载主题标签 ─────────────────────────────────────
   async _loadTags() {
     try {
       const catLabels = new Set(this.categories.map(c => c.label));
-      const tagMap = {};
+      const tagMap = {}; // { name -> { name, color, count } }
 
+      // 拉取所有文章，从每篇文章的 labels 提取子标签
       let page = 1;
       while (page <= 3) {
         const issues = await this.api.getIssues({ page, perPage: 100 });
@@ -106,44 +49,18 @@ class App {
         page++;
       }
 
+      // 只保留有文章的标签，按数量降序
       this.repoTags = Object.values(tagMap)
         .filter(t => t.count > 0)
         .sort((a, b) => b.count - a.count);
 
-      // 在侧栏分类导航后插入标签
       this._renderSidebarTags();
     } catch {}
   }
 
   _renderSidebarTags() {
-    if (!this.repoTags.length) return;
-    const nav = document.getElementById('sidebarNav');
-    if (!nav) return;
-
-    // 分隔线
-    const sep = document.createElement('div');
-    sep.style.cssText = 'height:1px;background:rgba(255,255,255,.08);margin:8px 0;';
-    nav.appendChild(sep);
-
-    // 标签导航项
-    this.repoTags.forEach(t => {
-      const a = document.createElement('a');
-      a.className = 'yilia-nav__item';
-      a.dataset.tag = t.name;
-      a.href = `#/tag/${encodeURIComponent(t.name)}`;
-      const color = '#' + t.color;
-      a.innerHTML = `
-        <span class="yilia-nav__dot" style="background:${color}"></span>
-        ${escapeHtml(t.name)}
-        <span class="yilia-nav__count">${t.count}</span>`;
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        this._selectTag(t.name);
-      });
-      nav.appendChild(a);
-    });
-
-    // 如果当前在链接页，也填充标签
+    // 标签不放侧边栏，而是放在链接页主内容区
+    // 如果链接页当前开着，顺手填充标签区块
     this._renderTagsSection();
   }
 
@@ -166,7 +83,7 @@ class App {
       this.currentCategory = null;
       this.activeTag = decodeURIComponent(parts[1]);
       this._showList(null);
-      this._setActiveNav(null);
+      this._setActiveNav('all');
     } else if (parts[0] === 'search') {
       const params = new URLSearchParams(query);
       this._showSearch(params.get('q') || '');
@@ -181,41 +98,94 @@ class App {
 
   // ── 导航高亮 ───────────────────────────────────────────
   _setActiveNav(key) {
-    document.querySelectorAll('.yilia-nav__item').forEach(el => {
-      const isCat = el.dataset.cat !== undefined;
-      const isTag = el.dataset.tag !== undefined;
-      if (isCat) {
-        el.classList.toggle('active', el.dataset.cat === key);
-      } else if (isTag) {
-        el.classList.toggle('active', el.dataset.tag === this.activeTag);
-      }
+    document.querySelectorAll('.header__nav-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.cat === key);
+    });
+    document.querySelectorAll('.cat-list__item:not([data-tag])').forEach(el => {
+      el.classList.toggle('active', el.dataset.cat === key);
+    });
+    document.querySelectorAll('.cat-list__item[data-tag]').forEach(el => {
+      el.classList.toggle('active', el.dataset.tag === this.activeTag);
+    });
+  }
+
+  // ── 绑定导航点击 ───────────────────────────────────────
+  _bindNav() {
+    document.querySelectorAll('.header__nav-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const cat = el.dataset.cat;
+        location.hash = cat === 'all' ? '#/' : `#/category/${cat}`;
+      });
     });
   }
 
   // ── 绑定搜索 ───────────────────────────────────────────
   _bindSearch() {
     const input = document.getElementById('searchInput');
-    if (!input) return;
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const q = input.value.trim();
-        if (q) location.hash = `#/search?q=${encodeURIComponent(q)}`;
-      }
-    });
+    const btn = document.getElementById('searchBtn');
+    if (!input || !btn) return;
+    const go = () => {
+      const q = input.value.trim();
+      if (q) location.hash = `#/search?q=${encodeURIComponent(q)}`;
+    };
+    btn.addEventListener('click', go);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   }
 
   // ── 绑定灯箱 ───────────────────────────────────────────
   _bindLightbox() {
     const lb = document.getElementById('lightbox');
     if (!lb) return;
-    lb.addEventListener('click', e => {
-      if (e.target === lb || e.target.classList.contains('lightbox__close')) closeLightbox();
-    });
+    lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('lightbox__close')) closeLightbox(); });
+  }
+
+  // ── 加载侧边栏 ─────────────────────────────────────────
+  async _loadSidebar() {
+    // 用户 + 仓库信息（并发请求）
+    try {
+      const [user, repo] = await Promise.all([
+        this.api.getUser(),
+        this.api.getRepoInfo(),
+      ]);
+      const el = document.getElementById('sidebarRepo');
+      if (el) {
+        const locationHtml = user.location
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">📍</span>${escapeHtml(user.location)}</p>`
+          : '';
+        const blogHtml = user.blog
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">🔗</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
+          : '';
+        el.innerHTML = `
+          <a href="${user.html_url}" target="_blank" rel="noopener" class="sidebar-card__avatar-link">
+            <img class="sidebar-card__avatar" src="${user.avatar_url}" alt="${user.login}">
+          </a>
+          <p class="sidebar-card__name">${escapeHtml(user.name || user.login)}</p>
+          <p class="sidebar-card__desc">${escapeHtml(user.bio || repo.description || CONFIG.siteDesc || '')}</p>
+          <div class="sidebar-card__metas">
+            ${locationHtml}
+            ${blogHtml}
+          </div>
+          <a class="sidebar-card__link" href="${repo.html_url}" target="_blank" rel="noopener">
+            ⭐ ${repo.stargazers_count} Stars &nbsp;·&nbsp; 🍴 ${repo.forks_count} Forks
+          </a>`;
+      }
+    } catch {}
+
+    // 分类列表
+    const catEl = document.getElementById('sidebarCats');
+    if (catEl) {
+      catEl.innerHTML = this.categories.map(c => `
+        <li><button class="cat-list__item" data-cat="${c.label}"
+          onclick="location.hash='#/category/${c.label}'">
+          <span class="cat-list__icon">${c.icon}</span>
+          <span class="cat-list__name">${c.name}</span>
+        </button></li>`).join('');
+    }
   }
 
   // ── 显示列表页 ─────────────────────────────────────────
   async _showList(category) {
-    if (category === 'link') { await this._showLinks(); return; }
+    if (category === 'link')  { await this._showLinks(); return; }
 
     const main = document.getElementById('main');
     const cat = category ? this.categories.find(c => c.label === category) : null;
@@ -237,6 +207,7 @@ class App {
       <div id="pagination"></div>`;
 
     try {
+      // 组合标签：分类 + 主题标签
       let label = category || null;
       if (this.activeTag) label = label ? `${label},${this.activeTag}` : this.activeTag;
 
@@ -277,7 +248,7 @@ class App {
     window.scrollTo(0, 0);
   }
 
-  // ── 显示收藏链接页（含主题标签）──────────────────────
+  // ── 显示收藏链接页（含主题标签） ──────────────────────
   async _showLinks() {
     const COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1','#14b8a6','#f97316'];
     const main = document.getElementById('main');
@@ -287,8 +258,9 @@ class App {
         <span class="section-header__sub" id="linkCount"></span>
       </div>
       <div id="linksList" class="links-grid-pc">${renderSkeletons(3)}</div>
-      <div id="tagsSection" style="margin-top:32px"></div>`;
+      <div id="tagsSection" style="margin-top:28px"></div>`;
 
+    // ── 收藏链接 ──
     try {
       let allIssues = [], page = 1;
       while (true) {
@@ -322,16 +294,23 @@ class App {
       if (el) el.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }
 
+    // ── 主题标签（从已有 repoTags 取，不重复请求）──
     this._renderTagsSection();
   }
 
+  // 在链接页主内容区渲染主题标签区块
   _renderTagsSection() {
     const sec = document.getElementById('tagsSection');
     if (!sec) return;
-    if (!this.repoTags || !this.repoTags.length) { sec.innerHTML = ''; return; }
+
+    // repoTags 还未加载完时稍后重试
+    if (!this.repoTags || !this.repoTags.length) {
+      sec.innerHTML = '';
+      return;
+    }
 
     sec.innerHTML = `
-      <div class="section-header" style="margin-bottom:14px">
+      <div class="section-header" style="margin-bottom:12px">
         <h2 class="section-header__title" style="font-size:1.1rem">🏷️ 主题标签</h2>
         <span class="section-header__sub">${this.repoTags.length} 个</span>
       </div>
@@ -359,9 +338,11 @@ class App {
     try {
       const issue = await this.api.getIssue(number);
       document.getElementById('postContent').innerHTML = renderPostDetail(issue, this.categories);
+      // 代码高亮
       if (typeof hljs !== 'undefined') {
         document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
       }
+      // 更新页面标题
       document.title = `${issue.title} - ${CONFIG.siteTitle}`;
     } catch (e) {
       document.getElementById('postContent').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
@@ -386,7 +367,7 @@ class App {
         return;
       }
       listEl.innerHTML = items.map(i => renderPostCard(i, this.categories)).join('');
-      listEl.querySelectorAll('.moment-card').forEach(card => {
+      listEl.querySelectorAll('.post-card').forEach(card => {
         card.addEventListener('click', () => location.hash = `#/post/${card.dataset.number}`);
       });
     } catch (e) {
