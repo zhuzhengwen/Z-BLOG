@@ -239,14 +239,23 @@ function renderPostCard(issue, categories) {
     ${isImagePost && totalImages > 9 ? `<a class="moment-card__photos-link" href="photos.html">共 ${totalImages} 张 · 前往照片墙查看全部 →</a>` : ''}`;
   }
 
+  const author = issue.user || {};
+  const avatarUrl = author.avatar_url
+    ? `https://wsrv.nl/?url=${encodeURIComponent(author.avatar_url)}&w=80&h=80&fit=cover&output=webp`
+    : `https://github.com/${author.login || 'ghost'}.png`;
+
   return `
   <article class="moment-card" data-number="${issue.number}">
+    <div class="moment-card__author">
+      <img class="moment-card__avatar" src="${avatarUrl}" alt="${escapeHtml(author.login || '')}" loading="lazy">
+      <span class="moment-card__username">${escapeHtml(author.login || '')}</span>
+      <time class="moment-card__date">${formatDate(issue.created_at)}</time>
+    </div>
     <div class="moment-card__title">${escapeHtml(issue.title)}</div>
     ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
     ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
     ${gridHtml}
     <div class="moment-card__footer">
-      <time class="moment-card__date">${formatDate(issue.created_at)}</time>
       <span class="moment-card__comments">💬 ${issue.comments}</span>
     </div>
   </article>`;

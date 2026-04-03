@@ -25,6 +25,7 @@ const CONFIG = {
     { label: 'video',   name: '视频', icon: '🎬', color: '#d73a49', desc: '视频内容' },
     { label: 'note',    name: '笔记', icon: '📌', color: '#6f42c1', desc: '随记与短笔记' },
     { label: 'link',    name: '链接', icon: '🔗', color: '#e36209', desc: '收藏的链接' },
+    { label: 'music',   name: '音乐', icon: '🎵', color: '#ec4899', desc: '背景音乐歌单' },
   ],
 
   // ========== 缓存时长（毫秒）==========

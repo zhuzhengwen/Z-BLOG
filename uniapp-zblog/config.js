@@ -15,6 +15,7 @@ const CONFIG = {
     { label: 'video',   name: '视频', icon: '🎬', color: '#d73a49' },
     { label: 'note',    name: '笔记', icon: '📌', color: '#6f42c1' },
     { label: 'link',    name: '链接', icon: '🔗', color: '#e36209' },
+    { label: 'music',   name: '音乐', icon: '🎵', color: '#ec4899' },
   ],
 
   cacheDuration: 5 * 60 * 1000,

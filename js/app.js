@@ -10,6 +10,8 @@ class App {
     this.page = 1;
     this.currentCategory = null;
     this.lastIssuesCount = 0;
+    this.repoTags = [];        // 仓库中的主题标签（非分类标签）
+    this.activeTag = null;     // 当前激活的标签筛选
     this._init();
   }
 
@@ -20,8 +22,46 @@ class App {
     this._bindSearch();
     this._bindLightbox();
     window.addEventListener('hashchange', () => this._route());
-    await this._loadSidebar();
+    await Promise.all([this._loadSidebar(), this._loadTags()]);
     this._route();
+  }
+
+  async _loadTags() {
+    try {
+      const catLabels = new Set(this.categories.map(c => c.label));
+      const tagMap = {}; // { name -> { name, color, count } }
+
+      // 拉取所有文章，从每篇文章的 labels 提取子标签
+      let page = 1;
+      while (page <= 3) {
+        const issues = await this.api.getIssues({ page, perPage: 100 });
+        for (const issue of issues) {
+          for (const label of (issue.labels || [])) {
+            if (!catLabels.has(label.name)) {
+              if (!tagMap[label.name]) {
+                tagMap[label.name] = { name: label.name, color: label.color || '64748b', count: 0 };
+              }
+              tagMap[label.name].count++;
+            }
+          }
+        }
+        if (issues.length < 100) break;
+        page++;
+      }
+
+      // 只保留有文章的标签，按数量降序
+      this.repoTags = Object.values(tagMap)
+        .filter(t => t.count > 0)
+        .sort((a, b) => b.count - a.count);
+
+      this._renderSidebarTags();
+    } catch {}
+  }
+
+  _renderSidebarTags() {
+    // 标签不放侧边栏，而是放在链接页主内容区
+    // 如果链接页当前开着，顺手填充标签区块
+    this._renderTagsSection();
   }
 
   // ── 路由 ───────────────────────────────────────────────
@@ -34,14 +74,22 @@ class App {
       this._showPost(parseInt(parts[1]));
     } else if (parts[0] === 'category' && parts[1]) {
       this.page = 1;
+      this.activeTag = null;
       this.currentCategory = parts[1];
       this._showList(parts[1]);
       this._setActiveNav(parts[1]);
+    } else if (parts[0] === 'tag' && parts[1]) {
+      this.page = 1;
+      this.currentCategory = null;
+      this.activeTag = decodeURIComponent(parts[1]);
+      this._showList(null);
+      this._setActiveNav('all');
     } else if (parts[0] === 'search') {
       const params = new URLSearchParams(query);
       this._showSearch(params.get('q') || '');
     } else {
       this.page = 1;
+      this.activeTag = null;
       this.currentCategory = null;
       this._showList(null);
       this._setActiveNav('all');
@@ -53,8 +101,11 @@ class App {
     document.querySelectorAll('.header__nav-item').forEach(el => {
       el.classList.toggle('active', el.dataset.cat === key);
     });
-    document.querySelectorAll('.cat-list__item').forEach(el => {
+    document.querySelectorAll('.cat-list__item:not([data-tag])').forEach(el => {
       el.classList.toggle('active', el.dataset.cat === key);
+    });
+    document.querySelectorAll('.cat-list__item[data-tag]').forEach(el => {
+      el.classList.toggle('active', el.dataset.tag === this.activeTag);
     });
   }
 
@@ -124,7 +175,8 @@ class App {
     const catEl = document.getElementById('sidebarCats');
     if (catEl) {
       catEl.innerHTML = this.categories.map(c => `
-        <li><button class="cat-list__item" data-cat="${c.label}" onclick="location.hash='#/category/${c.label}'">
+        <li><button class="cat-list__item" data-cat="${c.label}"
+          onclick="location.hash='#/category/${c.label}'">
           <span class="cat-list__icon">${c.icon}</span>
           <span class="cat-list__name">${c.name}</span>
         </button></li>`).join('');
@@ -133,23 +185,36 @@ class App {
 
   // ── 显示列表页 ─────────────────────────────────────────
   async _showList(category) {
+    if (category === 'link')  { await this._showLinks(); return; }
+
     const main = document.getElementById('main');
     const cat = category ? this.categories.find(c => c.label === category) : null;
+    const tagIndicatorHtml = this.activeTag ? `
+      <div class="tag-active-bar">
+        <span class="tag-active-bar__label">🏷️ ${escapeHtml(this.activeTag)}</span>
+        <button class="tag-active-bar__clear" onclick="app._selectTag(null)">✕ 清除筛选</button>
+      </div>` : '';
+
     main.innerHTML = `
       <div class="section-header">
         <h1 class="section-header__title">
-          ${cat ? `${cat.icon} ${cat.name}` : '📚 全部文章'}
+          ${this.activeTag ? `🏷️ ${escapeHtml(this.activeTag)}` : (cat ? `${cat.icon} ${cat.name}` : '📚 全部文章')}
         </h1>
         <span class="section-header__sub" id="postCount"></span>
       </div>
+      ${tagIndicatorHtml}
       <div class="post-list" id="postList">${renderSkeletons(5)}</div>
       <div id="pagination"></div>`;
 
     try {
+      // 组合标签：分类 + 主题标签
+      let label = category || null;
+      if (this.activeTag) label = label ? `${label},${this.activeTag}` : this.activeTag;
+
       const issues = await this.api.getIssues({
         page: this.page,
         perPage: CONFIG.postsPerPage,
-        label: category || null,
+        label,
       });
       this.lastIssuesCount = issues.length;
 
@@ -160,7 +225,7 @@ class App {
       }
 
       listEl.innerHTML = issues.map(i => renderPostCard(i, this.categories)).join('');
-      listEl.querySelectorAll('.post-card').forEach(card => {
+      listEl.querySelectorAll('.moment-card').forEach(card => {
         card.addEventListener('click', () => {
           location.hash = `#/post/${card.dataset.number}`;
         });
@@ -172,6 +237,95 @@ class App {
     } catch (e) {
       document.getElementById('postList').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }
+  }
+
+  _selectTag(tag) {
+    if (this.activeTag === tag) return;
+    this.activeTag = tag;
+    this.currentCategory = null;
+    this.page = 1;
+    location.hash = tag ? `#/tag/${encodeURIComponent(tag)}` : '#/';
+    window.scrollTo(0, 0);
+  }
+
+  // ── 显示收藏链接页（含主题标签） ──────────────────────
+  async _showLinks() {
+    const COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1','#14b8a6','#f97316'];
+    const main = document.getElementById('main');
+    main.innerHTML = `
+      <div class="section-header">
+        <h1 class="section-header__title">🔗 收藏链接</h1>
+        <span class="section-header__sub" id="linkCount"></span>
+      </div>
+      <div id="linksList" class="links-grid-pc">${renderSkeletons(3)}</div>
+      <div id="tagsSection" style="margin-top:28px"></div>`;
+
+    // ── 收藏链接 ──
+    try {
+      let allIssues = [], page = 1;
+      while (true) {
+        const batch = await this.api.getIssues({ page, perPage: 100, label: 'link' });
+        allIssues = allIssues.concat(batch);
+        if (batch.length < 100) break;
+        page++;
+      }
+
+      const el = document.getElementById('linksList');
+      if (!allIssues.length) {
+        el.innerHTML = renderEmpty('暂无收藏链接');
+      } else {
+        document.getElementById('linkCount').textContent = `共 ${allIssues.length} 个`;
+        el.innerHTML = allIssues.map((issue, idx) => {
+          const body = (issue.body || '').trim();
+          const urlM = body.match(/(https?:\/\/|www\.)[^\s<>"'\]]+/);
+          let url = urlM ? urlM[0] : '';
+          if (url.startsWith('www.')) url = 'https://' + url;
+          if (!url) url = issue.html_url;
+          const color = COLORS[idx % COLORS.length];
+          const letter = escapeHtml(issue.title.charAt(0).toUpperCase());
+          return `<a class="lk" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+            <span class="lk__ico" style="background:${color}">${letter}</span>
+            <span class="lk__name">${escapeHtml(issue.title)}</span>
+          </a>`;
+        }).join('');
+      }
+    } catch (e) {
+      const el = document.getElementById('linksList');
+      if (el) el.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+    }
+
+    // ── 主题标签（从已有 repoTags 取，不重复请求）──
+    this._renderTagsSection();
+  }
+
+  // 在链接页主内容区渲染主题标签区块
+  _renderTagsSection() {
+    const sec = document.getElementById('tagsSection');
+    if (!sec) return;
+
+    // repoTags 还未加载完时稍后重试
+    if (!this.repoTags || !this.repoTags.length) {
+      sec.innerHTML = '';
+      return;
+    }
+
+    sec.innerHTML = `
+      <div class="section-header" style="margin-bottom:12px">
+        <h2 class="section-header__title" style="font-size:1.1rem">🏷️ 主题标签</h2>
+        <span class="section-header__sub">${this.repoTags.length} 个</span>
+      </div>
+      <div class="tags-grid-pc">
+        ${this.repoTags.map(t => {
+          const color = '#' + t.color;
+          const count = t.count >= 100 ? '99+' : t.count;
+          return `<button class="tag-pc" onclick="app._selectTag('${escapeHtml(t.name)}')"
+            style="--tc:${color}">
+            <span class="tag-pc__dot" style="background:${color}"></span>
+            <span class="tag-pc__name">${escapeHtml(t.name)}</span>
+            <span class="tag-pc__count">${count}</span>
+          </button>`;
+        }).join('')}
+      </div>`;
   }
 
   // ── 显示文章详情 ───────────────────────────────────────

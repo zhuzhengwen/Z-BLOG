@@ -1,6 +1,13 @@
 <template>
   <view class="moment" @click="$emit('click')">
 
+    <!-- 作者行 -->
+    <view class="moment__author">
+      <image class="moment__avatar" :src="avatarUrl" mode="aspectFill" />
+      <text class="moment__username">{{ username }}</text>
+      <text class="moment__date">{{ date }}</text>
+    </view>
+
     <!-- 标题 -->
     <text class="moment__title">{{ issue.title }}</text>
 
@@ -37,9 +44,8 @@
       <text class="moment__photos-link-text">共 {{ totalImages }} 张 · 前往照片墙查看全部 →</text>
     </view>
 
-    <!-- 底部：日期 + 评论数 -->
+    <!-- 底部：评论数 -->
     <view class="moment__footer">
-      <text class="moment__date">{{ date }}</text>
       <text class="moment__comments">💬 {{ issue.comments }}</text>
     </view>
 
@@ -63,6 +69,11 @@ export default {
     tags()        { return getTagsFromLabels(this.issue.labels) },
     date()        { return formatDate(this.issue.created_at) },
     excerpt()     { return extractExcerpt(this.issue.body, 100) },
+    username()    { return this.issue.user?.login || CONFIG.owner },
+    avatarUrl()   {
+      const url = this.issue.user?.avatar_url
+      return url ? `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=80&h=80&fit=cover&output=webp` : `https://github.com/${CONFIG.owner}.png`
+    },
     isImagePost() { return this.cat && this.cat.label === 'image' },
 
     // 图片帖：全部图片数量
@@ -103,10 +114,28 @@ export default {
 <style lang="scss" scoped>
 .moment {
   padding: 24rpx 28rpx 20rpx;
-  background: #fff;
-  border-radius: 12rpx;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 18rpx;
+  border: 1rpx solid rgba(255,255,255,0.85);
+  box-shadow: 0 2rpx 20rpx rgba(0,0,0,0.06), 0 1rpx 4rpx rgba(0,0,0,0.04);
   display: flex; flex-direction: column;
 }
+
+/* 作者行 */
+.moment__author {
+  display: flex; flex-direction: row; align-items: center;
+  margin-bottom: 12rpx; gap: 10rpx;
+}
+.moment__avatar {
+  width: 44rpx; height: 44rpx; border-radius: 50%;
+  flex-shrink: 0; background: #e2e8f0;
+}
+.moment__username {
+  font-size: 24rpx; font-weight: 600; color: #374151; flex: 1;
+}
+.moment__date { font-size: 22rpx; color: #aaa; flex-shrink: 0; }
 
 /* 标题 */
 .moment__title {
@@ -172,9 +201,8 @@ export default {
 /* ── 底部 ────────────────────────────────────────────────── */
 .moment__footer {
   display: flex; flex-direction: row;
-  align-items: center; justify-content: space-between;
+  align-items: center; justify-content: flex-end;
   margin-top: 14rpx;
 }
-.moment__date     { font-size: 24rpx; color: #aaa; }
 .moment__comments { font-size: 24rpx; color: #aaa; }
 </style>

@@ -104,9 +104,15 @@
       </view>
     </scroll-view>
 
+    <!-- 激活标签提示条 -->
+    <view v-if="!searchMode && activeTag" class="active-tag-bar">
+      <text class="active-tag-bar__label">🏷️ {{ activeTag }}</text>
+      <text class="active-tag-bar__clear" @click="selectTag(null)">✕ 清除</text>
+    </view>
+
     <!-- 正常列表 -->
     <scroll-view
-      v-else
+      v-if="!searchMode"
       class="list-scroll"
       scroll-y
       :lower-threshold="80"
@@ -140,6 +146,7 @@
       </view>
     </scroll-view>
 
+    <music-player></music-player>
     <tab-bar current="index"></tab-bar>
     <token-modal></token-modal>
   </view>
@@ -149,12 +156,14 @@
 import PostCard    from '../../components/PostCard.vue'
 import TabBar      from '../../components/TabBar.vue'
 import TokenModal  from '../../components/TokenModal.vue'
+import MusicPlayer from '../../components/MusicPlayer.vue'
 import CONFIG      from '../../config.js'
 import api         from '../../utils/api.js'
 import { getThemeColor, darkenColor } from '../../utils/theme.js'
+import { musicState } from '../../utils/music.js'
 
 export default {
-  components: { PostCard, TabBar, TokenModal },
+  components: { PostCard, TabBar, TokenModal, MusicPlayer },
   data() {
     return {
       posts:          [],
@@ -174,6 +183,7 @@ export default {
       searchExpanded:  false,
       statusBarHeight: 0,
       themeColor:      getThemeColor(),
+      activeTag:       null,
     }
   },
   computed: {
@@ -192,9 +202,12 @@ export default {
   beforeDestroy() {
     uni.$off('themeChanged')
   },
-  onLoad() {
+  onLoad(options) {
     const info = uni.getSystemInfoSync()
     this.statusBarHeight = info.statusBarHeight || 20
+    if (options && options.tag) {
+      this.activeTag = decodeURIComponent(options.tag)
+    }
     this.loadPosts()
   },
   onShow() {
@@ -202,14 +215,30 @@ export default {
       this.switchCat(label)
       uni.$off('switchCategory')
     })
+    uni.$on('switchToTag', (tag) => {
+      this.activeTag = tag
+      this.currentCat = null
+      this.page = 1
+      this.posts = []
+      this.hasMore = true
+      this.loadPosts()
+      uni.$off('switchToTag')
+    })
   },
-  onHide() { uni.$off('switchCategory') },
+  onHide() {
+    uni.$off('switchCategory')
+    uni.$off('switchToTag')
+  },
   methods: {
+
     async loadPosts(append = false) {
       if (!append) { this.loading = true; this.error = null }
       else           this.loadingMore = true
       try {
-        const issues = await api.getIssues({ page: this.page, label: this.currentCat })
+        // 组合分类 + 主题标签
+        let label = this.currentCat || null
+        if (this.activeTag) label = label ? `${label},${this.activeTag}` : this.activeTag
+        const issues = await api.getIssues({ page: this.page, label })
         this.posts   = append ? [...this.posts, ...issues] : issues
         this.hasMore = issues.length >= CONFIG.postsPerPage
       } catch (e) {
@@ -219,9 +248,19 @@ export default {
       }
     },
 
+    selectTag(tag) {
+      if (this.activeTag === tag) return
+      this.activeTag = tag
+      this.page      = 1
+      this.posts     = []
+      this.hasMore   = true
+      this.loadPosts()
+    },
+
     switchCat(label) {
-      if (this.currentCat === label && !this.searchMode) return
+      if (this.currentCat === label && !this.searchMode && !this.activeTag) return
       this.searchMode = false
+      this.activeTag  = null
       this.currentCat = label
       this.page       = 1
       this.posts      = []
@@ -279,6 +318,7 @@ export default {
       this.lastKeyword    = ''
       this.searchMode     = false
       this.searchExpanded = false
+      this.activeTag      = null
       this.page           = 1
       this.posts          = []
       this.hasMore        = true
@@ -289,7 +329,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.page { display: flex; flex-direction: column; height: 100vh; background: #f8fafc; }
+.page {
+  display: flex; flex-direction: column; height: 100vh;
+  background: linear-gradient(160deg, #dbeafe 0%, #ede9fe 45%, #fce7f3 100%);
+}
 
 /* ── 遮罩 ────────────────────────────────────────────────── */
 .drawer-mask {
@@ -304,13 +347,16 @@ export default {
 .drawer {
   position: fixed; top: 0; left: 0; bottom: 0; z-index: 101;
   width: 540rpx;
-  background: #fff;
+  background: rgba(248,250,252,0.88);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1rpx solid rgba(255,255,255,0.6);
   display: flex; flex-direction: column;
   transform: translateX(-100%);
   /* #ifdef H5 */
   transition: transform .3s cubic-bezier(.4,0,.2,1);
   /* #endif */
-  box-shadow: 8rpx 0 40rpx rgba(0,0,0,.15);
+  box-shadow: 8rpx 0 40rpx rgba(0,0,0,.12);
 }
 .drawer--open { transform: translateX(0); }
 
@@ -432,8 +478,37 @@ export default {
 .search-clear { font-size: 24rpx; color: #94a3b8; }
 .search-cancel { font-size: 28rpx; color: #2563eb; white-space: nowrap; }
 
+/* ── 激活标签提示条 ─────────────────────────────────────── */
+.active-tag-bar {
+  display: flex; flex-direction: row; align-items: center;
+  margin: 0 20rpx 16rpx; padding: 14rpx 20rpx;
+  background: #eff6ff; border-radius: 10rpx;
+  border: 1.5rpx solid #bfdbfe;
+}
+.active-tag-bar__label { flex: 1; font-size: 26rpx; color: #1d4ed8; font-weight: 600; }
+.active-tag-bar__clear { font-size: 24rpx; color: #94a3b8; padding: 4rpx 12rpx; }
+
+/* ── 旧标签筛选条（保留占位防报错）──────────────────────── */
+.tag-bar {
+  flex-shrink: 0; height: 0; background: transparent;
+  /* #ifndef APP-NVUE */
+  white-space: nowrap;
+  /* #endif */
+}
+.tag-bar__inner {
+  display: flex; flex-direction: row; align-items: center;
+  padding: 0 20rpx; gap: 12rpx; height: 76rpx;
+}
+.tag-chip {
+  display: flex; align-items: center; justify-content: center;
+  padding: 10rpx 24rpx; border-radius: 99rpx; flex-shrink: 0;
+  border-width: 1.5rpx; border-style: solid; border-color: #e2e8f0;
+  background: rgba(255,255,255,0.7);
+}
+.tag-chip__text { font-size: 24rpx; color: #64748b; font-weight: 500; white-space: nowrap; }
+
 /* ── 列表 ────────────────────────────────────────────────── */
-.list-scroll { flex: 1; height: 0; background: #f0f2f5; }
+.list-scroll { flex: 1; height: 0; background: transparent; }
 .list-inner  { padding: 16rpx 20rpx 160rpx; display: flex; flex-direction: column; gap: 12rpx; }
 
 .search-result-bar {
@@ -475,4 +550,5 @@ export default {
 
 .load-footer { padding: 30rpx 0 20rpx; text-align: center; }
 .load-text   { font-size: 26rpx; color: #94a3b8; }
+
 </style>

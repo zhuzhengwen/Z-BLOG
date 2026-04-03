@@ -91,6 +91,11 @@ class GitHubAPI {
     return this._request(`https://api.github.com/users/${this.owner}`)
   }
 
+  // ── 仓库所有 Labels ──────────────────────────────────────
+  getLabels() {
+    return this._request(`${this.base}/labels`, { per_page: 100 })
+  }
+
   // ── 搜索 ─────────────────────────────────────────────────
   searchIssues(query, page = 1) {
     const q = `${query} repo:${this.owner}/${this.repo} is:issue is:open`

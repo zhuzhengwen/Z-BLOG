@@ -1,8 +1,13 @@
 <script>
+import { initMusic, loadPlaylistFromAPI } from './utils/music.js'
+import api from './utils/api.js'
 export default {
-  onLaunch() {},
-  onShow()   {},
-  onHide()   {},
+  onLaunch() {
+    loadPlaylistFromAPI(api)
+      .finally(() => { setTimeout(initMusic, 600) })
+  },
+  onShow()  {},
+  onHide()  {},
 }
 </script>
 

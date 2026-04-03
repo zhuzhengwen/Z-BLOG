@@ -71,19 +71,21 @@
       <view style="height:160rpx"></view>
     </scroll-view>
 
+    <music-player></music-player>
     <tab-bar current="photos"></tab-bar>
     <token-modal></token-modal>
   </view>
 </template>
 
 <script>
-import TabBar     from '../../components/TabBar.vue'
-import TokenModal from '../../components/TokenModal.vue'
-import api        from '../../utils/api.js'
+import TabBar      from '../../components/TabBar.vue'
+import TokenModal  from '../../components/TokenModal.vue'
+import MusicPlayer from '../../components/MusicPlayer.vue'
+import api         from '../../utils/api.js'
 import { extractImages, formatDate, compressImg } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar, TokenModal },
+  components: { TabBar, TokenModal, MusicPlayer },
   data() {
     return {
       allPhotos:     [],

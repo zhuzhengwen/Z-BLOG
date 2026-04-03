@@ -82,7 +82,7 @@
           </view>
           <view class="info-row">
             <text class="info-key">🖼️ 图片总数</text>
-            <text class="info-val">{{ catCount['image'] || 0 }} 张</text>
+            <text class="info-val">{{ totalImages }} 张</text>
           </view>
         </view>
       </view>
@@ -138,20 +138,23 @@
     </scroll-view>
 
     <!-- 自定义底部导航 -->
+    <music-player></music-player>
     <tab-bar current="profile"></tab-bar>
     <token-modal></token-modal>
   </view>
 </template>
 
 <script>
-import TabBar     from '../../components/TabBar.vue'
-import TokenModal from '../../components/TokenModal.vue'
+import TabBar      from '../../components/TabBar.vue'
+import TokenModal  from '../../components/TokenModal.vue'
+import MusicPlayer from '../../components/MusicPlayer.vue'
 import CONFIG from '../../config.js'
 import api    from '../../utils/api.js'
 import { THEME_PRESETS, getThemeColor, saveThemeColor, darkenColor } from '../../utils/theme.js'
+import { extractImages } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar, TokenModal },
+  components: { TabBar, TokenModal, MusicPlayer },
   data() {
     return {
       config:          CONFIG,
@@ -164,6 +167,7 @@ export default {
       stars:           0,
       forks:           0,
       catCount:        {},
+      totalImages:     0,
       runtimeDays:     0,
       runtimeHours:    0,
       runtimeMins:     0,
@@ -227,12 +231,18 @@ export default {
     async loadCatCounts() {
       try {
         const counts = {}
+        let imgTotal = 0
         await Promise.all(CONFIG.categories.map(async cat => {
-          // 获取第一页来估算数量
           const issues = await api.getIssues({ page: 1, perPage: 100, label: cat.label })
           counts[cat.label] = issues.length
+          if (cat.label === 'image') {
+            issues.forEach(issue => {
+              imgTotal += extractImages(issue.body || '').length
+            })
+          }
         }))
         this.catCount = counts
+        this.totalImages = imgTotal
       } catch (e) {}
     },
 

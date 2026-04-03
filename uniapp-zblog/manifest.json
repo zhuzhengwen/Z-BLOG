@@ -1,70 +1,81 @@
 {
-  "name": "Z-BLOG",
-  "appid": "__UNI__ZBLOG",
-  "description": "基于 GitHub Issues 的个人博客",
-  "versionName": "1.0.0",
-  "versionCode": "100",
-  "transformPx": false,
-
-  "app-plus": {
-    "usingComponents": true,
-    "nvueStyleCompiler": "uni-compiler",
-    "compilerVersion": 3,
-    "splashscreen": {
-      "alwaysShowBeforeRender": false,
-      "waiting": true,
-      "autoclose": true,
-      "delay": 0,
-      "androidStyle": "default"
-    },
-    "icons": {
-      "android": {
-        "mdpi":    "static/icons/icon-48.png",
-        "hdpi":    "static/icons/icon-72.png",
-        "xhdpi":   "static/icons/icon-96.png",
-        "xxhdpi":  "static/icons/icon-144.png",
-        "xxxhdpi": "static/icons/icon-192.png"
-      },
-      "ios": {
-        "appstore":    "static/icons/icon-1024.png",
-        "iphone":      {
-          "app_20x2":  "static/icons/icon-40.png",
-          "app_20x3":  "static/icons/icon-60.png",
-          "app_29x2":  "static/icons/icon-58.png",
-          "app_29x3":  "static/icons/icon-87.png",
-          "app_40x2":  "static/icons/icon-80.png",
-          "app_40x3":  "static/icons/icon-120.png",
-          "app_60x2":  "static/icons/icon-120.png",
-          "app_60x3":  "static/icons/icon-180.png"
+    "name" : "Z-BLOG",
+    "appid" : "__UNI__19E72FD",
+    "description" : "基于 GitHub Issues 的个人博客",
+    "versionName" : "1.0.0",
+    "versionCode" : "100",
+    "transformPx" : false,
+    "app-plus" : {
+        "usingComponents" : true,
+        "nvueStyleCompiler" : "uni-compiler",
+        "compilerVersion" : 3,
+        "splashscreen" : {
+            "alwaysShowBeforeRender" : true,
+            "waiting" : true,
+            "autoclose" : true,
+            "delay" : 0
+        },
+        "modules" : {},
+        "distribute" : {
+            "android" : {
+                "permissions" : [
+                    "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>"
+                ]
+            },
+            "ios" : {
+                "dSYMs" : false
+            },
+            "sdkConfigs" : {},
+            "icons" : {
+                "android" : {
+                    "hdpi" : "unpackage/res/icons/72x72.png",
+                    "xhdpi" : "unpackage/res/icons/96x96.png",
+                    "xxhdpi" : "unpackage/res/icons/144x144.png",
+                    "xxxhdpi" : "unpackage/res/icons/192x192.png"
+                },
+                "ios" : {
+                    "appstore" : "unpackage/res/icons/1024x1024.png",
+                    "ipad" : {
+                        "app" : "unpackage/res/icons/76x76.png",
+                        "app@2x" : "unpackage/res/icons/152x152.png",
+                        "notification" : "unpackage/res/icons/20x20.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "proapp@2x" : "unpackage/res/icons/167x167.png",
+                        "settings" : "unpackage/res/icons/29x29.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "spotlight" : "unpackage/res/icons/40x40.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png"
+                    },
+                    "iphone" : {
+                        "app@2x" : "unpackage/res/icons/120x120.png",
+                        "app@3x" : "unpackage/res/icons/180x180.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "notification@3x" : "unpackage/res/icons/60x60.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "settings@3x" : "unpackage/res/icons/87x87.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png",
+                        "spotlight@3x" : "unpackage/res/icons/120x120.png"
+                    }
+                }
+            }
         }
-      }
     },
-    "modules": {},
-    "distribute": {
-      "android": {
-        "packagename": "com.zblog.app",
-        "versionCode": 1,
-        "permissions": [
-          "<uses-permission android:name=\"android.permission.INTERNET\"/>",
-          "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>"
-        ]
-      },
-      "ios": {},
-      "sdkConfigs": {}
+    "quickapp" : {},
+    "mp-weixin" : {
+        "appid" : "",
+        "setting" : {
+            "urlCheck" : false
+        },
+        "usingComponents" : true
+    },
+    "h5" : {
+        "title" : "Z-BLOG",
+        "router" : {
+            "mode" : "hash"
+        },
+        "devServer" : {
+            "port" : 8080
+        }
     }
-  },
-
-  "quickapp": {},
-
-  "mp-weixin": {
-    "appid": "",
-    "setting": { "urlCheck": false },
-    "usingComponents": true
-  },
-
-  "h5": {
-    "title": "Z-BLOG",
-    "router": { "mode": "hash" },
-    "devServer": { "port": 8080 }
-  }
 }
