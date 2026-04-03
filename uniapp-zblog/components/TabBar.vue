@@ -61,24 +61,26 @@ export default {
 <style lang="scss" scoped>
 .tabbar {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
-  height: 120rpx;
-  padding-bottom: env(safe-area-inset-bottom);
-  background: #fff;
-  border-top: 1rpx solid #e2e8f0;
+  left: 24rpx; right: 24rpx;
+  bottom: calc(16rpx + env(safe-area-inset-bottom));
+  height: 110rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 30rpx;
   display: flex; flex-direction: row; align-items: stretch;
-  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,.06);
+  box-shadow:
+    0 6rpx 30rpx rgba(0, 0, 0, 0.10),
+    0 1rpx 4rpx rgba(0, 0, 0, 0.06);
   z-index: 999;
 }
 .tabbar__item {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 6rpx; position: relative;
+  gap: 4rpx; position: relative;
 }
 .tabbar__icon-img { width: 48rpx; height: 48rpx; }
 .tabbar__label { font-size: 20rpx; color: #94a3b8; font-weight: 500; }
 .tabbar__dot {
-  position: absolute; bottom: 8rpx; left: 50%;
+  position: absolute; bottom: 10rpx; left: 50%;
   transform: translateX(-50%);
   width: 8rpx; height: 8rpx; border-radius: 50%;
 }

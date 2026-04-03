@@ -17,7 +17,17 @@
         :style="{ background: cat.color + '18', color: cat.color, borderColor: cat.color + '50' }">
         {{ cat.icon }} {{ cat.name }}
       </view>
-      <text v-for="tag in tags.slice(0, 3)" :key="tag.name" class="m-tag">{{ tag.name }}</text>
+      <view
+        v-for="tag in tags.slice(0, 3)" :key="tag.name"
+        class="m-tag"
+        :style="tag.color ? {
+          background: '#' + tag.color + '22',
+          borderColor: '#' + tag.color + '66',
+          borderWidth: '1rpx',
+          borderStyle: 'solid'
+        } : {}">
+        <text class="m-tag__text" :style="tag.color ? { color: '#' + tag.color } : {}">{{ tag.name }}</text>
+      </view>
     </view>
 
     <!-- 摘要（无图时显示） -->
@@ -156,8 +166,13 @@ export default {
   border-width: 1rpx; border-style: solid;
 }
 .m-tag {
-  font-size: 22rpx; color: #64748b;
-  background: #f1f5f9; padding: 4rpx 14rpx; border-radius: 99rpx;
+  padding: 4rpx 14rpx; border-radius: 99rpx;
+  background: #f1f5f9;
+  border-width: 1rpx; border-style: solid; border-color: #e2e8f0;
+  display: flex; flex-direction: row; align-items: center;
+}
+.m-tag__text {
+  font-size: 22rpx; color: #64748b; line-height: 1.4;
 }
 
 /* 摘要 */

@@ -190,7 +190,7 @@ function renderCategoryBadge(cat) {
 
 function renderTagBadge(tag) {
   const color = tag.color ? `#${tag.color}` : '#64748b';
-  return `<span class="tag" style="border-color:${color}40;color:${color}">${tag.name}</span>`;
+  return `<span class="tag" style="background:${color}18;border-color:${color}55;color:${color}">${tag.name}</span>`;
 }
 
 // ── 文章卡片（列表用）────────────────────────────────────────

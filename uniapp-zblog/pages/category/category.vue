@@ -112,8 +112,11 @@ export default {
   onHide() { clearInterval(this._timer) },
   methods: {
     openTag(tagName) {
-      uni.switchTab({ url: '/pages/index/index' })
-      setTimeout(() => uni.$emit('switchToTag', tagName), 200)
+      const tag = this.visibleTags.find(t => t.name === tagName)
+      const color = tag ? '#' + (tag.color || '64748b') : '#64748b'
+      uni.redirectTo({
+        url: `/pages/index/index?tag=${encodeURIComponent(tagName)}&tagColor=${encodeURIComponent(color)}`
+      })
     },
     async loadTags() {
       this.loadingTags = true
@@ -234,8 +237,10 @@ export default {
 .link-cell {
   width: 25%; /* 一行4个 */
   display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start;
   padding: 12rpx 8rpx;
   box-sizing: border-box;
+  text-align: center;
 }
 .link-cell__icon {
   width: 64rpx; height: 64rpx; border-radius: 16rpx;

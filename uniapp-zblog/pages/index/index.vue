@@ -105,8 +105,10 @@
     </scroll-view>
 
     <!-- 激活标签提示条 -->
-    <view v-if="!searchMode && activeTag" class="active-tag-bar">
-      <text class="active-tag-bar__label">🏷️ {{ activeTag }}</text>
+    <view v-if="!searchMode && activeTag" class="active-tag-bar"
+      :style="activeTagColor ? { background: activeTagColor + '15', borderColor: activeTagColor + '40' } : {}">
+      <view class="active-tag-bar__dot" :style="{ background: activeTagColor || '#3b82f6' }"></view>
+      <text class="active-tag-bar__label" :style="{ color: activeTagColor || '#1d4ed8' }">{{ activeTag }}</text>
       <text class="active-tag-bar__clear" @click="selectTag(null)">✕ 清除</text>
     </view>
 
@@ -184,6 +186,7 @@ export default {
       statusBarHeight: 0,
       themeColor:      getThemeColor(),
       activeTag:       null,
+      activeTagColor:  null,
     }
   },
   computed: {
@@ -207,6 +210,7 @@ export default {
     this.statusBarHeight = info.statusBarHeight || 20
     if (options && options.tag) {
       this.activeTag = decodeURIComponent(options.tag)
+      this.activeTagColor = options.tagColor ? decodeURIComponent(options.tagColor) : null
     }
     this.loadPosts()
   },
@@ -215,8 +219,14 @@ export default {
       this.switchCat(label)
       uni.$off('switchCategory')
     })
-    uni.$on('switchToTag', (tag) => {
-      this.activeTag = tag
+    uni.$on('switchToTag', (payload) => {
+      if (typeof payload === 'string') {
+        this.activeTag = payload
+        this.activeTagColor = null
+      } else {
+        this.activeTag = payload.name
+        this.activeTagColor = payload.color || null
+      }
       this.currentCat = null
       this.page = 1
       this.posts = []
@@ -250,7 +260,8 @@ export default {
 
     selectTag(tag) {
       if (this.activeTag === tag) return
-      this.activeTag = tag
+      this.activeTag      = tag
+      this.activeTagColor = null
       this.page      = 1
       this.posts     = []
       this.hasMore   = true
@@ -259,8 +270,9 @@ export default {
 
     switchCat(label) {
       if (this.currentCat === label && !this.searchMode && !this.activeTag) return
-      this.searchMode = false
-      this.activeTag  = null
+      this.searchMode     = false
+      this.activeTag      = null
+      this.activeTagColor = null
       this.currentCat = label
       this.page       = 1
       this.posts      = []
@@ -319,6 +331,7 @@ export default {
       this.searchMode     = false
       this.searchExpanded = false
       this.activeTag      = null
+      this.activeTagColor = null
       this.page           = 1
       this.posts          = []
       this.hasMore        = true
@@ -484,6 +497,10 @@ export default {
   margin: 0 20rpx 16rpx; padding: 14rpx 20rpx;
   background: #eff6ff; border-radius: 10rpx;
   border: 1.5rpx solid #bfdbfe;
+}
+.active-tag-bar__dot {
+  width: 14rpx; height: 14rpx; border-radius: 50%;
+  margin-right: 12rpx; flex-shrink: 0;
 }
 .active-tag-bar__label { flex: 1; font-size: 26rpx; color: #1d4ed8; font-weight: 600; }
 .active-tag-bar__clear { font-size: 24rpx; color: #94a3b8; padding: 4rpx 12rpx; }

@@ -18,7 +18,8 @@
             :style="{ background: cat.color+'18', color: cat.color, borderColor: cat.color+'50' }">
             {{ cat.icon }} {{ cat.name }}
           </view>
-          <view v-for="tag in tags" :key="tag.name" class="tag">{{ tag.name }}</view>
+          <view v-for="tag in tags" :key="tag.name" class="tag"
+            :style="tag.color ? { background: '#' + tag.color + '22', color: '#' + tag.color, borderColor: '#' + tag.color + '66' } : {}">{{ tag.name }}</view>
         </view>
 
         <!-- 标题 -->
@@ -225,7 +226,7 @@ export default {
 /* 头部 */
 .badges { display: flex; flex-direction: row; gap: 10rpx; flex-wrap: wrap; margin-bottom: 20rpx; }
 .badge  { font-size: 22rpx; font-weight: 600; padding: 4rpx 16rpx; border-radius: 99rpx; border: 1rpx solid; }
-.tag    { font-size: 22rpx; color: #64748b; background: #f1f5f9; padding: 4rpx 14rpx; border-radius: 99rpx; }
+.tag    { font-size: 22rpx; color: #64748b; background: #f1f5f9; padding: 4rpx 14rpx; border-radius: 99rpx; border: 1rpx solid #e2e8f0; display: flex; align-items: center; }
 .title  { font-size: 40rpx; font-weight: 800; color: #1e293b; line-height: 1.3; display: block; margin-bottom: 20rpx; }
 .meta   { display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 10rpx; }
 .avatar { width: 44rpx; height: 44rpx; border-radius: 50%; }
