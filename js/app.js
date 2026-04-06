@@ -3,18 +3,6 @@
  * Hash 路由 SPA：#/  #/post/123  #/category/article  #/search?q=xxx
  */
 
-// ── 简约 SVG 图标（细描边，currentColor）────────────────────
-const _SVG = {
-  all:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-  article: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>`,
-  image:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
-  video:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="2"/><polygon points="16 8 22 5 22 19 16 16"/></svg>`,
-  note:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4z"/></svg>`,
-  link:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`,
-  music:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
-};
-function _catIcon(label) { return _SVG[label] || _SVG.article; }
-
 class App {
   constructor() {
     this.api = new GitHubAPI(CONFIG);
@@ -161,13 +149,11 @@ class App {
       ]);
       const el = document.getElementById('sidebarRepo');
       if (el) {
-        const _locSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
-        const _lnkSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`;
         const locationHtml = user.location
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">${_locSvg}</span>${escapeHtml(user.location)}</p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">📍</span>${escapeHtml(user.location)}</p>`
           : '';
         const blogHtml = user.blog
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">${_lnkSvg}</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">🔗</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
           : '';
         el.innerHTML = `
           <a href="${user.html_url}" target="_blank" rel="noopener" class="sidebar-card__avatar-link">
@@ -180,42 +166,18 @@ class App {
             ${blogHtml}
           </div>
           <a class="sidebar-card__link" href="${repo.html_url}" target="_blank" rel="noopener">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            ${repo.stargazers_count}
-            &nbsp;·&nbsp;
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M6 8v2a4 4 0 004 4h4a4 4 0 004-4V8"/><line x1="12" y1="14" x2="12" y2="16"/></svg>
-            ${repo.forks_count}
+            ⭐ ${repo.stargazers_count} Stars &nbsp;·&nbsp; 🍴 ${repo.forks_count} Forks
           </a>`;
       }
     } catch {}
 
-    // 顶部导航栏追加分类按钮（SVG 图标）
-    const navEl = document.getElementById('headerNav');
-    if (navEl) {
-      navEl.insertAdjacentHTML('beforeend',
-        this.categories.map(c => `
-          <button class="header__nav-item" data-cat="${c.label}"
-            onclick="location.hash='#/category/${c.label}'">
-            ${_catIcon(c.label)}<span>${c.name}</span>
-          </button>`).join('')
-      );
-      // 补绑事件
-      navEl.querySelectorAll('.header__nav-item:not([data-bound])').forEach(el => {
-        el.dataset.bound = '1';
-        el.addEventListener('click', () => {
-          const cat = el.dataset.cat;
-          location.hash = cat === 'all' ? '#/' : `#/category/${cat}`;
-        });
-      });
-    }
-
-    // 分类列表（SVG 图标）
+    // 分类列表
     const catEl = document.getElementById('sidebarCats');
     if (catEl) {
       catEl.innerHTML = this.categories.map(c => `
         <li><button class="cat-list__item" data-cat="${c.label}"
           onclick="location.hash='#/category/${c.label}'">
-          <span class="cat-list__icon">${_catIcon(c.label)}</span>
+          <span class="cat-list__icon">${c.icon}</span>
           <span class="cat-list__name">${c.name}</span>
         </button></li>`).join('');
     }
@@ -229,18 +191,14 @@ class App {
     const cat = category ? this.categories.find(c => c.label === category) : null;
     const tagIndicatorHtml = this.activeTag ? `
       <div class="tag-active-bar">
-        <span class="tag-active-bar__label"># ${escapeHtml(this.activeTag)}</span>
+        <span class="tag-active-bar__label">🏷️ ${escapeHtml(this.activeTag)}</span>
         <button class="tag-active-bar__clear" onclick="app._selectTag(null)">✕ 清除筛选</button>
       </div>` : '';
 
     main.innerHTML = `
       <div class="section-header">
         <h1 class="section-header__title">
-          ${this.activeTag
-            ? `<span class="sh-icon">${_SVG.article}</span>${escapeHtml(this.activeTag)}`
-            : (cat
-              ? `<span class="sh-icon">${_catIcon(cat.label)}</span>${cat.name}`
-              : `<span class="sh-icon">${_SVG.all}</span>全部文章`)}
+          ${this.activeTag ? `🏷️ ${escapeHtml(this.activeTag)}` : (cat ? `${cat.icon} ${cat.name}` : '📚 全部文章')}
         </h1>
         <span class="section-header__sub" id="postCount"></span>
       </div>
