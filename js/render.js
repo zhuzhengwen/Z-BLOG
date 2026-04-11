@@ -353,7 +353,7 @@ function renderPostDetail(issue, categories) {
 
 // ── 空状态 ────────────────────────────────────────────────────
 function renderEmpty(msg = '暂无内容') {
-  return `<div class="empty-state"><span class="empty-state__icon">📭</span><p>${msg}</p></div>`;
+  return `<div class="empty-state"><span class="empty-state__icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></span><p>${msg}</p></div>`;
 }
 
 // ── 骨架屏 ────────────────────────────────────────────────────

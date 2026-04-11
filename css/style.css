@@ -575,7 +575,7 @@ button { cursor: pointer; font-family: inherit; }
   text-align: center; padding: 60px 20px;
   color: var(--text-muted);
 }
-.empty-state__icon { font-size: 3rem; display: block; margin-bottom: 12px; }
+.empty-state__icon { display: block; margin-bottom: 12px; color: var(--text-muted); }
 .error-msg {
   background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
   border-radius: 8px; padding: 16px 20px; font-size: .875rem;
