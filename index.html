@@ -72,6 +72,13 @@
       <span class="header__color-btn__ring" id="colorRing"></span>
     </button>
 
+    <!-- 汉堡菜单（仅移动端显示） -->
+    <button class="header__hamburger" id="mobileMenuBtn" aria-label="菜单" onclick="app && app._toggleMobileMenu()">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
   </div>
 </header>
 
@@ -84,6 +91,23 @@
     <span class="color-picker-custom__label">自定义</span>
     <input type="color" id="colorCustom" title="选择任意颜色">
     <button class="color-picker-custom__reset" onclick="app._resetColor()">重置</button>
+  </div>
+</div>
+
+<!-- ── 移动端导航面板 ──────────────────────────────────── -->
+<div class="mobile-nav-panel" id="mobileNavPanel">
+  <div class="container">
+    <div class="mobile-nav-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="mobileSearchInput" placeholder="搜索文章…" autocomplete="off">
+    </div>
+    <nav class="mobile-nav-links" id="mobileNavLinks">
+      <button class="mobile-nav-item active" data-cat="all" onclick="location.hash='#/';app&&app._closeMobileMenu()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        全部
+      </button>
+      <!-- 分类由 JS 动态插入 -->
+    </nav>
   </div>
 </div>
 
@@ -365,6 +389,33 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.innerHTML = `${NAV_ICONS[c.label] || ''}<span>${c.name}</span>`;
       nav.appendChild(btn);
     });
+
+    // 同步移动端导航
+    const mobileNav = document.getElementById('mobileNavLinks');
+    if (mobileNav) {
+      CONFIG.categories.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'mobile-nav-item';
+        btn.dataset.cat = c.label;
+        btn.innerHTML = `${NAV_ICONS[c.label] || ''} ${c.name}`;
+        btn.onclick = () => {
+          location.hash = `#/category/${c.label}`;
+          if (window.app) app._closeMobileMenu();
+        };
+        mobileNav.appendChild(btn);
+      });
+    }
+
+    // 移动端搜索
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    if (mobileSearchInput) {
+      mobileSearchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const q = mobileSearchInput.value.trim();
+          if (q) { location.hash = `#/search?q=${encodeURIComponent(q)}`; if(window.app) app._closeMobileMenu(); }
+        }
+      });
+    }
 
     // 更新站点标题
     const titleEl = document.getElementById('siteTitle');

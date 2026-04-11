@@ -23,6 +23,7 @@ class App {
     this._renderBeian();
     this._bindNav();
     this._bindSearch();
+    this._bindMobileMenu();
     this._bindLightbox();
     window.addEventListener('hashchange', () => this._route());
     document.addEventListener('click', e => this._onDocClick(e));
@@ -238,6 +239,9 @@ class App {
     document.querySelectorAll('.header__nav-item').forEach(el => {
       el.classList.toggle('active', el.dataset.cat === key);
     });
+    document.querySelectorAll('.mobile-nav-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.cat === key);
+    });
     document.querySelectorAll('.cat-list__item:not([data-tag])').forEach(el => {
       el.classList.toggle('active', el.dataset.cat === key);
     });
@@ -267,6 +271,40 @@ class App {
     };
     btn.addEventListener('click', go);
     input.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  }
+
+  // ── 移动端菜单 ─────────────────────────────────────────
+  _bindMobileMenu() {
+    // 点击页面其他区域关闭
+    document.addEventListener('click', e => {
+      const panel = document.getElementById('mobileNavPanel');
+      const btn   = document.getElementById('mobileMenuBtn');
+      if (!panel || !panel.classList.contains('open')) return;
+      if (!panel.contains(e.target) && btn && !btn.contains(e.target)) {
+        this._closeMobileMenu();
+      }
+    });
+    // 路由变化时自动关闭
+    window.addEventListener('hashchange', () => this._closeMobileMenu());
+  }
+
+  _toggleMobileMenu() {
+    const panel = document.getElementById('mobileNavPanel');
+    const btn   = document.getElementById('mobileMenuBtn');
+    if (!panel) return;
+    const isOpen = panel.classList.toggle('open');
+    if (btn) btn.classList.toggle('open', isOpen);
+    if (isOpen) {
+      const input = document.getElementById('mobileSearchInput');
+      if (input) setTimeout(() => input.focus(), 300);
+    }
+  }
+
+  _closeMobileMenu() {
+    const panel = document.getElementById('mobileNavPanel');
+    const btn   = document.getElementById('mobileMenuBtn');
+    if (panel) panel.classList.remove('open');
+    if (btn)   btn.classList.remove('open');
   }
 
   // ── 绑定灯箱 ───────────────────────────────────────────
