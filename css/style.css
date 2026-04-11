@@ -30,27 +30,29 @@
 /* 系统暗黑偏好（未手动设置时生效） */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:         #2b2b2b;
-    --surface:    #3c3f41;
-    --surface-2:  #45484a;
-    --border:     #515151;
-    --text:       #a9b7c6;
-    --text-muted: #808080;
-    --shadow-sm:  0 1px 3px rgba(0,0,0,.4);
-    --shadow-md:  0 4px 12px rgba(0,0,0,.5);
+    --bg:         #2b2b2b;   /* Darcula 背景，温暖深灰 */
+    --surface:    #3c3f41;   /* 卡片/面板背景 */
+    --surface-2:  #454a4d;   /* hover 态，略亮 */
+    --border:     #585c60;   /* 边框，可见但不刺眼 */
+    --text:       #d0d4d9;   /* 主文字：亮度83%，清晰不刺眼 */
+    --text-muted: #90959a;   /* 次要文字：日期/摘要，层次分明 */
+    --text-link:  #6b9de8;   /* 链接：IntelliJ 蓝，深色背景可见 */
+    --shadow-sm:  0 1px 4px rgba(0,0,0,.45);
+    --shadow-md:  0 4px 14px rgba(0,0,0,.55);
   }
 }
 
-/* 手动切换暗黑模式（IDEA Darcula 风格） */
+/* 手动切换暗黑模式（IDEA Darcula + 舒适度优化） */
 :root[data-theme="dark"] {
   --bg:         #2b2b2b;
   --surface:    #3c3f41;
-  --surface-2:  #45484a;
-  --border:     #515151;
-  --text:       #a9b7c6;
-  --text-muted: #808080;
-  --shadow-sm:  0 1px 3px rgba(0,0,0,.4);
-  --shadow-md:  0 4px 12px rgba(0,0,0,.5);
+  --surface-2:  #454a4d;
+  --border:     #585c60;
+  --text:       #d0d4d9;
+  --text-muted: #90959a;
+  --text-link:  #6b9de8;
+  --shadow-sm:  0 1px 4px rgba(0,0,0,.45);
+  --shadow-md:  0 4px 14px rgba(0,0,0,.55);
 }
 
 /* ── Reset ───────────────────────────────────────────────── */
@@ -957,4 +959,82 @@ button { cursor: pointer; font-family: inherit; }
   position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
   color: rgba(255,255,255,.7); font-size: .8rem; background: rgba(0,0,0,.4);
   padding: 4px 12px; border-radius: 99px;
+}
+
+/* ── 暗黑模式细节层级优化 ──────────────────────────────────── */
+
+/* 标题三层亮度：标题 > 正文 > 摘要/时间 */
+[data-theme="dark"] .moment-card__title,
+[data-theme="dark"] .post-detail__title,
+[data-theme="dark"] .section-header__title,
+[data-theme="dark"] .links-group__title {
+  color: #e4e6ea;  /* 近白，清晰突出 */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .moment-card__title,
+  :root:not([data-theme="light"]) .post-detail__title,
+  :root:not([data-theme="light"]) .section-header__title,
+  :root:not([data-theme="light"]) .links-group__title {
+    color: #e4e6ea;
+  }
+}
+
+/* 代码块：比卡片背景深一档，营造编辑器沉浸感 */
+[data-theme="dark"] .markdown-body pre {
+  background: #1e2124;
+  color: #d4d8de;
+  border: 1px solid #454a4e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .markdown-body pre {
+    background: #1e2124;
+    color: #d4d8de;
+    border: 1px solid #454a4e;
+  }
+}
+
+/* 行内代码 */
+[data-theme="dark"] .markdown-body code {
+  background: #3a3d40;
+  color: #c9a96e;  /* 温暖的琥珀色，IntelliJ 风格 */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .markdown-body code {
+    background: #3a3d40;
+    color: #c9a96e;
+  }
+}
+
+/* 引用块 */
+[data-theme="dark"] .markdown-body blockquote {
+  background: #363940;
+  border-left-color: var(--primary);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .markdown-body blockquote {
+    background: #363940;
+    border-left-color: var(--primary);
+  }
+}
+
+/* Header 暗黑下更深沉稳 */
+[data-theme="dark"] .header {
+  background: #313335;
+  border-bottom-color: #4a4d50;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .header {
+    background: #313335;
+    border-bottom-color: #4a4d50;
+  }
+}
+
+/* 侧边栏卡片微调 */
+[data-theme="dark"] .sidebar-card {
+  background: #383b3e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sidebar-card {
+    background: #383b3e;
+  }
 }
