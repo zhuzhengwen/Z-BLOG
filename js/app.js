@@ -18,12 +18,43 @@ class App {
   // ── 初始化 ─────────────────────────────────────────────
   async _init() {
     initMarked();
+    this._initTheme();
     this._bindNav();
     this._bindSearch();
     this._bindLightbox();
     window.addEventListener('hashchange', () => this._route());
     await Promise.all([this._loadSidebar(), this._loadTags()]);
     this._route();
+  }
+
+  // ── 主题切换 ───────────────────────────────────────────
+  _initTheme() {
+    const saved = localStorage.getItem('zblog-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = saved === 'dark' || (!saved && prefersDark);
+    this._applyTheme(isDark ? 'dark' : 'light');
+  }
+
+  _applyTheme(theme) {
+    const html = document.documentElement;
+    const hljsLight = document.getElementById('hljsLight');
+    const hljsDark  = document.getElementById('hljsDark');
+    if (theme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+      if (hljsLight) hljsLight.disabled = true;
+      if (hljsDark)  hljsDark.disabled  = false;
+    } else {
+      html.setAttribute('data-theme', 'light');
+      if (hljsLight) hljsLight.disabled = false;
+      if (hljsDark)  hljsDark.disabled  = true;
+    }
+  }
+
+  _toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    this._applyTheme(next);
+    localStorage.setItem('zblog-theme', next);
   }
 
   async _loadTags() {
