@@ -138,6 +138,30 @@
           <text class="empty-icon">📭</text>
           <text class="empty-text">暂无内容</text>
         </view>
+        <!-- 思考分类：Ant Design 时间线样式 -->
+        <template v-else-if="isThinkingView">
+          <view class="tl-wrap">
+            <view
+              v-for="(item, idx) in posts"
+              :key="item.id"
+              class="tl-item"
+              @click="openDetail(item)">
+              <view class="tl-left">
+                <view class="tl-dot"></view>
+                <view v-if="idx < posts.length - 1" class="tl-line"></view>
+              </view>
+              <view class="tl-body">
+                <text class="tl-date">{{ tlDate(item.created_at) }}</text>
+                <text class="tl-title">{{ item.title }}</text>
+                <text v-if="item.body" class="tl-excerpt">{{ tlExcerpt(item.body) }}</text>
+                <view class="tl-footer">
+                  <text class="tl-comments">💬 {{ item.comments }}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </template>
+        <!-- 普通列表 -->
         <template v-else>
           <post-card v-for="issue in posts" :key="issue.id" :issue="issue" @click="openDetail(issue)" />
         </template>
@@ -190,6 +214,9 @@ export default {
     }
   },
   computed: {
+    isThinkingView() {
+      return this.currentCat === 'video'
+    },
     currentCatName() {
       if (!this.currentCat) return this.siteTitle
       const cat = this.categories.find(c => c.label === this.currentCat)
@@ -300,6 +327,16 @@ export default {
 
     openDetail(issue) {
       uni.navigateTo({ url: `/pages/detail/detail?number=${issue.number}&title=${encodeURIComponent(issue.title)}` })
+    },
+
+    // 时间线辅助
+    tlDate(iso) {
+      const d = new Date(iso)
+      return `${d.getMonth() + 1}月${d.getDate()}日`
+    },
+    tlExcerpt(body) {
+      if (!body) return ''
+      return body.replace(/[#*`>\-_\[\]!~]/g, '').replace(/\n+/g, ' ').trim().slice(0, 80)
     },
 
     async doSearch() {
@@ -567,5 +604,48 @@ export default {
 
 .load-footer { padding: 30rpx 0 20rpx; text-align: center; }
 .load-text   { font-size: 26rpx; color: #94a3b8; }
+
+/* ── 思考时间线 ── */
+.tl-wrap { padding: 20rpx 24rpx 0; }
+
+.tl-item {
+  display: flex; flex-direction: row;
+  padding: 0 0 0 0;
+}
+
+.tl-left {
+  display: flex; flex-direction: column; align-items: center;
+  width: 40rpx; flex-shrink: 0; padding-top: 10rpx;
+}
+.tl-dot {
+  width: 20rpx; height: 20rpx; border-radius: 50%;
+  background: #d73a49;
+  border: 4rpx solid #fff;
+  box-shadow: 0 0 0 4rpx rgba(215,58,73,.22);
+  flex-shrink: 0; z-index: 1;
+}
+.tl-line {
+  width: 2rpx; flex: 1; min-height: 32rpx;
+  background: #e2e8f0; margin-top: 8rpx;
+}
+
+.tl-body {
+  flex: 1; padding: 0 0 36rpx 20rpx;
+}
+.tl-date {
+  font-size: 22rpx; color: #94a3b8; display: block; margin-bottom: 6rpx;
+}
+.tl-title {
+  font-size: 30rpx; font-weight: 700; color: #1e293b;
+  line-height: 1.5; display: block; margin-bottom: 6rpx;
+}
+.tl-excerpt {
+  font-size: 26rpx; color: #64748b; line-height: 1.5;
+  display: block; margin-bottom: 8rpx;
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.tl-footer { display: flex; flex-direction: row; align-items: center; }
+.tl-comments { font-size: 22rpx; color: #94a3b8; }
 
 </style>

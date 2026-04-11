@@ -259,6 +259,56 @@ function renderPostCard(issue, categories) {
   </article>`;
 }
 
+// ── 思考时间线 ─────────────────────────────────────────────────
+function renderTimeline(issues, categories) {
+  if (!issues.length) return renderEmpty('暂无思考内容');
+
+  // 按年分组，降序
+  const groups = {};
+  issues.forEach(issue => {
+    const y = new Date(issue.created_at).getFullYear();
+    (groups[y] || (groups[y] = [])).push(issue);
+  });
+  const years = Object.keys(groups).sort((a, b) => b - a);
+
+  const commentSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
+
+  return years.map(year => {
+    const items = groups[year];
+    return `<div class="tl-year-group">
+      <div class="tl-year">${year}</div>
+      ${items.map(issue => {
+        const tags    = getTagsFromLabels(issue.labels, categories);
+        const excerpt = extractExcerpt(issue.body);
+        const d       = new Date(issue.created_at);
+        const dateStr = `${d.getMonth() + 1}月${d.getDate()}日`;
+        const tagsHtml = tags.slice(0, 3).map(t => {
+          const c = t.color ? `#${t.color}` : '#64748b';
+          return `<span class="tl-tag" style="color:${c};background:${c}12;border-color:${c}35">${t.name}</span>`;
+        }).join('');
+        return `
+        <div class="tl-item" data-number="${issue.number}">
+          <div class="tl-left">
+            <div class="tl-dot"></div>
+            <div class="tl-line"></div>
+          </div>
+          <div class="tl-body">
+            <div class="tl-meta">
+              <span class="tl-date">${dateStr}</span>
+              ${tagsHtml}
+            </div>
+            <div class="tl-title">${escapeHtml(issue.title)}</div>
+            ${excerpt ? `<div class="tl-excerpt">${escapeHtml(excerpt)}</div>` : ''}
+            <div class="tl-footer">
+              <span class="tl-comments">${commentSvg} ${issue.comments}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
 // ── 图片分类的网格展示 ────────────────────────────────────────
 function renderImageGallery(images) {
   if (!images.length) return '';
