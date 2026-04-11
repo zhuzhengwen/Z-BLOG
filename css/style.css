@@ -244,7 +244,7 @@ button { cursor: pointer; font-family: inherit; }
 
 .moment-card {
   background: var(--surface);
-  padding: 16px 20px;
+  padding: 10px 20px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   cursor: pointer;
