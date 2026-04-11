@@ -19,10 +19,12 @@ class App {
   async _init() {
     initMarked();
     this._initTheme();
+    this._initColor();
     this._bindNav();
     this._bindSearch();
     this._bindLightbox();
     window.addEventListener('hashchange', () => this._route());
+    document.addEventListener('click', e => this._onDocClick(e));
     await Promise.all([this._loadSidebar(), this._loadTags()]);
     this._route();
   }
@@ -55,6 +57,72 @@ class App {
     const next = current === 'dark' ? 'light' : 'dark';
     this._applyTheme(next);
     localStorage.setItem('zblog-theme', next);
+  }
+
+  // ── 主题色 ─────────────────────────────────────────────
+  _PRESETS = [
+    '#2563eb','#4f46e5','#7c3aed','#9333ea',
+    '#ec4899','#f43f5e','#f97316','#f59e0b',
+    '#10b981','#14b8a6','#06b6d4','#0ea5e9',
+  ];
+  _DEFAULT_COLOR = '#2563eb';
+
+  _initColor() {
+    const saved = localStorage.getItem('zblog-color') || this._DEFAULT_COLOR;
+    this._buildSwatches();
+    this._applyColor(saved, false);
+    // 自定义拾色器事件
+    const input = document.getElementById('colorCustom');
+    if (input) input.addEventListener('input', e => this._applyColor(e.target.value, true));
+  }
+
+  _buildSwatches() {
+    const el = document.getElementById('colorSwatches');
+    if (!el) return;
+    el.innerHTML = this._PRESETS.map(c =>
+      `<button class="color-swatch" style="background:${c}" data-color="${c}" onclick="app._applyColor('${c}',true)" title="${c}"></button>`
+    ).join('');
+  }
+
+  _applyColor(hex, save = true) {
+    // 生成 hover 色（加深 15%）
+    const darken = (h, amt) => {
+      const n = parseInt(h.replace('#',''), 16);
+      const r = Math.max(0, (n >> 16) - amt);
+      const g = Math.max(0, ((n >> 8) & 0xff) - amt);
+      const b = Math.max(0, (n & 0xff) - amt);
+      return `#${[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')}`;
+    };
+    document.documentElement.style.setProperty('--primary', hex);
+    document.documentElement.style.setProperty('--primary-hover', darken(hex, 25));
+    document.documentElement.style.setProperty('--text-link', hex);
+    // 更新按钮环颜色（ring 本身用 CSS var，此处只需刷 active 态）
+    document.querySelectorAll('.color-swatch').forEach(s => {
+      s.classList.toggle('active', s.dataset.color === hex);
+    });
+    // 同步拾色器
+    const input = document.getElementById('colorCustom');
+    if (input) input.value = hex;
+    if (save) localStorage.setItem('zblog-color', hex);
+  }
+
+  _resetColor() {
+    this._applyColor(this._DEFAULT_COLOR, true);
+  }
+
+  _toggleColorPicker() {
+    const popup = document.getElementById('colorPickerPopup');
+    if (!popup) return;
+    popup.classList.toggle('open');
+  }
+
+  _onDocClick(e) {
+    const popup = document.getElementById('colorPickerPopup');
+    const btn   = document.getElementById('colorPickerBtn');
+    if (!popup || !popup.classList.contains('open')) return;
+    if (!popup.contains(e.target) && !btn.contains(e.target)) {
+      popup.classList.remove('open');
+    }
   }
 
   async _loadTags() {

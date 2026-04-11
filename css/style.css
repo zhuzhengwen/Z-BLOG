@@ -30,27 +30,27 @@
 /* 系统暗黑偏好（未手动设置时生效） */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:         #0f172a;
-    --surface:    #1e293b;
-    --surface-2:  #334155;
-    --border:     #334155;
-    --text:       #e2e8f0;
-    --text-muted: #94a3b8;
-    --shadow-sm:  0 1px 3px rgba(0,0,0,.3);
-    --shadow-md:  0 4px 12px rgba(0,0,0,.4);
+    --bg:         #000000;
+    --surface:    #111111;
+    --surface-2:  #1c1c1c;
+    --border:     #2a2a2a;
+    --text:       #e5e5e5;
+    --text-muted: #888888;
+    --shadow-sm:  0 1px 3px rgba(0,0,0,.5);
+    --shadow-md:  0 4px 12px rgba(0,0,0,.6);
   }
 }
 
 /* 手动切换暗黑模式 */
 :root[data-theme="dark"] {
-  --bg:         #0f172a;
-  --surface:    #1e293b;
-  --surface-2:  #334155;
-  --border:     #334155;
-  --text:       #e2e8f0;
-  --text-muted: #94a3b8;
-  --shadow-sm:  0 1px 3px rgba(0,0,0,.3);
-  --shadow-md:  0 4px 12px rgba(0,0,0,.4);
+  --bg:         #000000;
+  --surface:    #111111;
+  --surface-2:  #1c1c1c;
+  --border:     #2a2a2a;
+  --text:       #e5e5e5;
+  --text-muted: #888888;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.5);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.6);
 }
 
 /* ── Reset ───────────────────────────────────────────────── */
@@ -151,6 +151,83 @@ button { cursor: pointer; font-family: inherit; }
   html:not([data-theme="light"]) .header__theme-btn .icon-moon { opacity: 0; transform: rotate(-90deg) scale(.6); }
   html:not([data-theme="light"]) .header__theme-btn .icon-sun  { opacity: 1; transform: rotate(0deg) scale(1); }
 }
+
+/* ── Color Picker Button ──────────────────────────────── */
+.header__color-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: background var(--transition), border-color var(--transition), transform .15s ease;
+  position: relative;
+}
+.header__color-btn:hover {
+  background: var(--surface); border-color: var(--primary);
+  transform: scale(1.05);
+}
+.header__color-btn__ring {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2.5px solid var(--primary);
+  background: transparent;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--primary) 25%, transparent);
+  transition: border-color .2s, box-shadow .2s;
+  pointer-events: none;
+}
+
+/* ── Color Picker Popup ──────────────────────────────────── */
+.color-picker-popup {
+  position: absolute; top: calc(var(--header-h) + 6px); right: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(0,0,0,.04);
+  z-index: 200; width: 196px;
+  opacity: 0; transform: translateY(-8px) scale(.97);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.color-picker-popup.open {
+  opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+}
+.color-picker-popup__label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px;
+}
+.color-swatches {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
+  margin-bottom: 12px;
+}
+.color-swatch {
+  width: 100%; aspect-ratio: 1; border-radius: 6px;
+  border: 2px solid transparent; cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease;
+  position: relative;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
+}
+.color-picker-popup__divider {
+  height: 1px; background: var(--border); margin-bottom: 12px;
+}
+.color-picker-custom {
+  display: flex; align-items: center; gap: 8px;
+}
+.color-picker-custom__label {
+  font-size: .78rem; color: var(--text-muted); flex: 1;
+}
+.color-picker-custom input[type="color"] {
+  width: 32px; height: 26px; border-radius: 6px;
+  border: 1px solid var(--border); padding: 2px;
+  cursor: pointer; background: var(--surface-2);
+}
+.color-picker-custom__reset {
+  font-size: .72rem; color: var(--text-muted);
+  background: none; border: 1px solid var(--border);
+  border-radius: 5px; padding: 3px 7px; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.color-picker-custom__reset:hover { color: var(--primary); border-color: var(--primary); }
 
 /* ── Main area ───────────────────────────────────────────── */
 .main { min-width: 0; }
