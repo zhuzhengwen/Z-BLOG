@@ -30,27 +30,27 @@
 /* 系统暗黑偏好（未手动设置时生效） */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:         #000000;
-    --surface:    #111111;
-    --surface-2:  #1c1c1c;
-    --border:     #2a2a2a;
-    --text:       #e5e5e5;
-    --text-muted: #888888;
-    --shadow-sm:  0 1px 3px rgba(0,0,0,.5);
-    --shadow-md:  0 4px 12px rgba(0,0,0,.6);
+    --bg:         #2b2b2b;
+    --surface:    #3c3f41;
+    --surface-2:  #45484a;
+    --border:     #515151;
+    --text:       #a9b7c6;
+    --text-muted: #808080;
+    --shadow-sm:  0 1px 3px rgba(0,0,0,.4);
+    --shadow-md:  0 4px 12px rgba(0,0,0,.5);
   }
 }
 
-/* 手动切换暗黑模式 */
+/* 手动切换暗黑模式（IDEA Darcula 风格） */
 :root[data-theme="dark"] {
-  --bg:         #000000;
-  --surface:    #111111;
-  --surface-2:  #1c1c1c;
-  --border:     #2a2a2a;
-  --text:       #e5e5e5;
-  --text-muted: #888888;
-  --shadow-sm:  0 1px 3px rgba(0,0,0,.5);
-  --shadow-md:  0 4px 12px rgba(0,0,0,.6);
+  --bg:         #2b2b2b;
+  --surface:    #3c3f41;
+  --surface-2:  #45484a;
+  --border:     #515151;
+  --text:       #a9b7c6;
+  --text-muted: #808080;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.5);
 }
 
 /* ── Reset ───────────────────────────────────────────────── */
