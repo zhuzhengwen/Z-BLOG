@@ -20,6 +20,7 @@ class App {
     initMarked();
     this._initTheme();
     this._initColor();
+    this._renderBeian();
     this._bindNav();
     this._bindSearch();
     this._bindLightbox();
@@ -57,6 +58,41 @@ class App {
     const next = current === 'dark' ? 'light' : 'dark';
     this._applyTheme(next);
     localStorage.setItem('zblog-theme', next);
+  }
+
+  // ── 备案信息 ────────────────────────────────────────────
+  _renderBeian() {
+    const el = document.getElementById('footerBeian');
+    if (!el) return;
+    const b = CONFIG.beian || {};
+    const items = [];
+
+    // ICP 备案
+    if (b.icp) {
+      items.push(`
+        <a class="beian-item" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          ${b.icp}
+        </a>`);
+    }
+
+    // 公安网备案
+    if (b.police) {
+      const link = b.policeCode
+        ? `http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${b.policeCode}`
+        : 'http://www.beian.gov.cn/';
+      items.push(`
+        <a class="beian-item" href="${link}" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          ${b.police}
+        </a>`);
+    }
+
+    el.innerHTML = items.join('');
   }
 
   // ── 主题色 ─────────────────────────────────────────────

@@ -721,6 +721,24 @@ button { cursor: pointer; font-family: inherit; }
 .footer a { color: var(--text-muted); }
 .footer a:hover { color: var(--primary); }
 
+/* 备案信息 */
+.footer__beian {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 16px;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.footer__beian:empty { display: none; }
+.beian-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--text-muted); font-size: .75rem;
+  text-decoration: none; transition: color var(--transition);
+  white-space: nowrap;
+}
+.beian-item:hover { color: var(--primary); text-decoration: none; }
+.beian-item svg { flex-shrink: 0; opacity: .7; }
+.beian-item:hover svg { opacity: 1; }
+
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
