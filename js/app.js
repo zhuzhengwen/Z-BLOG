@@ -84,6 +84,8 @@ class App {
       this.activeTag = decodeURIComponent(parts[1]);
       this._showList(null);
       this._setActiveNav('all');
+    } else if (parts[0] === 'photos') {
+      this._showPhotos();
     } else if (parts[0] === 'search') {
       const params = new URLSearchParams(query);
       this._showSearch(params.get('q') || '');
@@ -150,23 +152,34 @@ class App {
       const el = document.getElementById('sidebarRepo');
       if (el) {
         const locationHtml = user.location
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">📍</span>${escapeHtml(user.location)}</p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span>${escapeHtml(user.location)}</p>`
           : '';
         const blogHtml = user.blog
-          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon">🔗</span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
+          ? `<p class="sidebar-card__meta"><span class="sidebar-meta-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></span><a href="${user.blog}" target="_blank" rel="noopener">${escapeHtml(user.blog.replace(/^https?:\/\//, ''))}</a></p>`
           : '';
         el.innerHTML = `
           <a href="${user.html_url}" target="_blank" rel="noopener" class="sidebar-card__avatar-link">
             <img class="sidebar-card__avatar" src="${user.avatar_url}" alt="${user.login}">
           </a>
           <p class="sidebar-card__name">${escapeHtml(user.name || user.login)}</p>
-          <p class="sidebar-card__desc">${escapeHtml(user.bio || repo.description || CONFIG.siteDesc || '')}</p>
+          ${(user.bio || repo.description || CONFIG.siteDesc) ? `<p class="sidebar-card__desc">${escapeHtml(user.bio || repo.description || CONFIG.siteDesc)}</p>` : ''}
           <div class="sidebar-card__metas">
             ${locationHtml}
             ${blogHtml}
           </div>
-          <a class="sidebar-card__link" href="${repo.html_url}" target="_blank" rel="noopener">
-            ⭐ ${repo.stargazers_count} Stars &nbsp;·&nbsp; 🍴 ${repo.forks_count} Forks
+          <div class="sidebar-card__stats">
+            <a class="sidebar-stat" href="${repo.html_url}/stargazers" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>${repo.stargazers_count}</span>
+            </a>
+            <a class="sidebar-stat" href="${repo.html_url}/network/members" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M6 8v2a4 4 0 004 4h4a4 4 0 004-4V8"/><line x1="12" y1="14" x2="12" y2="16"/></svg>
+              <span>${repo.forks_count}</span>
+            </a>
+          </div>
+          <a class="sidebar-card__github-btn" href="${repo.html_url}" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
           </a>`;
       }
     } catch {}
@@ -197,16 +210,17 @@ class App {
 
     const main = document.getElementById('main');
     const cat = category ? this.categories.find(c => c.label === category) : null;
+    const tagSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>`;
     const tagIndicatorHtml = this.activeTag ? `
       <div class="tag-active-bar">
-        <span class="tag-active-bar__label">🏷️ ${escapeHtml(this.activeTag)}</span>
+        <span class="tag-active-bar__label">${tagSvg} ${escapeHtml(this.activeTag)}</span>
         <button class="tag-active-bar__clear" onclick="app._selectTag(null)">✕ 清除筛选</button>
       </div>` : '';
 
     main.innerHTML = `
       <div class="section-header">
         <h1 class="section-header__title">
-          ${this.activeTag ? `🏷️ ${escapeHtml(this.activeTag)}` : (cat ? `${cat.icon} ${cat.name}` : '📚 全部文章')}
+          ${this.activeTag ? `${tagSvg} ${escapeHtml(this.activeTag)}` : (cat ? cat.name : '全部文章')}
         </h1>
         <span class="section-header__sub" id="postCount"></span>
       </div>
@@ -256,13 +270,133 @@ class App {
     window.scrollTo(0, 0);
   }
 
+  // ── 照片墙 ───────────────────────────────────────────
+  async _showPhotos() {
+    const main = document.getElementById('main');
+    main.innerHTML = `
+      <div class="section-header">
+        <h1 class="section-header__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> 照片墙</h1>
+        <span class="section-header__sub" id="photoCount">加载中…</span>
+      </div>
+      <div class="album-bar" id="albumBar"></div>
+      <div class="pw-grid" id="photoWall">
+        ${Array(12).fill('<div class="pw-cell"><div class="pw-skeleton"></div></div>').join('')}
+      </div>`;
+
+    this._allPhotos = [];
+    this._filteredPhotos = [];
+    this._selectedYear = null;
+    this._selectedMonth = null;
+    this._lbIndex = 0;
+
+    try {
+      let page = 1, issues = [];
+      while (true) {
+        const batch = await this.api.getIssues({ page, perPage: 100, label: 'image' });
+        issues = issues.concat(batch);
+        if (batch.length < 100) break;
+        page++;
+      }
+
+      issues.forEach(issue => {
+        const d = new Date(issue.created_at);
+        extractImages(issue.body || '').forEach(src => {
+          this._allPhotos.push({
+            src, title: issue.title,
+            date: formatDate(issue.created_at),
+            fullDate: formatFullDate(issue.created_at),
+            issueUrl: issue.html_url,
+            year: d.getFullYear(), month: d.getMonth() + 1,
+          });
+        });
+      });
+
+      this._filteredPhotos = [...this._allPhotos];
+      this._buildAlbumBar();
+      this._updatePhotoCount();
+      this._renderPhotoWall();
+    } catch (e) {
+      document.getElementById('photoWall').innerHTML = renderEmpty('加载失败：' + e.message);
+    }
+  }
+
+  _buildAlbumBar() {
+    const bar = document.getElementById('albumBar');
+    if (!bar) return;
+    const years = [...new Set(this._allPhotos.map(p => p.year))].sort((a, b) => b - a);
+    const months = this._selectedYear
+      ? [...new Set(this._allPhotos.filter(p => p.year === this._selectedYear).map(p => p.month))].sort((a, b) => a - b)
+      : [];
+
+    const yearChips = `
+      <button class="album-chip ${!this._selectedYear ? 'album-chip--active' : ''}" onclick="app._selectYear(null)">全部</button>
+      ${years.map(y => `<button class="album-chip ${this._selectedYear === y ? 'album-chip--active' : ''}" onclick="app._selectYear(${y})">${y}</button>`).join('')}`;
+
+    const monthRow = months.length > 1 ? `
+      <div class="month-bar">
+        <button class="album-chip album-chip--sm ${!this._selectedMonth ? 'album-chip--active' : ''}" onclick="app._selectMonth(null)">全部</button>
+        ${months.map(m => `<button class="album-chip album-chip--sm ${this._selectedMonth === m ? 'album-chip--active' : ''}" onclick="app._selectMonth(${m})">${m}月</button>`).join('')}
+      </div>` : '';
+
+    bar.innerHTML = `<div class="year-bar">${yearChips}</div>${monthRow}`;
+  }
+
+  _selectYear(y) { this._selectedYear = y; this._selectedMonth = null; this._buildAlbumBar(); this._applyPhotoFilter(); }
+  _selectMonth(m) { this._selectedMonth = m; this._buildAlbumBar(); this._applyPhotoFilter(); }
+
+  _applyPhotoFilter() {
+    this._filteredPhotos = this._allPhotos.filter(p => {
+      if (this._selectedYear && p.year !== this._selectedYear) return false;
+      if (this._selectedMonth && p.month !== this._selectedMonth) return false;
+      return true;
+    });
+    this._updatePhotoCount();
+    this._renderPhotoWall();
+  }
+
+  _updatePhotoCount() {
+    const el = document.getElementById('photoCount');
+    if (!el) return;
+    const t = this._allPhotos.length, c = this._filteredPhotos.length;
+    el.textContent = c < t ? `${c} / ${t} 张` : `共 ${t} 张`;
+  }
+
+  _renderPhotoWall() {
+    const wall = document.getElementById('photoWall');
+    if (!this._filteredPhotos.length) { wall.innerHTML = renderEmpty('暂无图片'); return; }
+    wall.innerHTML = this._filteredPhotos.map((p, i) => `
+      <div class="pw-cell" onclick="app._openLb(${i})" title="${escapeHtml(p.title)}">
+        <div class="pw-skeleton"></div>
+        <img class="pw-img" src="${compressImg(p.src, 400)}" alt="${escapeHtml(p.title)}"
+          loading="lazy" onload="this.classList.add('loaded')" onerror="this.parentElement.style.display='none'">
+        <div class="pw-title-bar"><span class="pw-title">${escapeHtml(p.title)}</span></div>
+        <div class="pw-date-bar"><span class="pw-date">${p.date}</span></div>
+      </div>`).join('');
+  }
+
+  _openLb(i) {
+    this._lbIndex = i; this._showLb();
+    document.getElementById('photoLightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  _showLb() {
+    const p = this._filteredPhotos[this._lbIndex]; if (!p) return;
+    document.getElementById('lbImg').src = p.src;
+    document.getElementById('lbTitle').textContent = p.title;
+    document.getElementById('lbMeta').innerHTML = `${p.fullDate} · <a href="${p.issueUrl}" target="_blank">GitHub</a>`;
+    document.getElementById('lbCounter').textContent = `${this._lbIndex + 1} / ${this._filteredPhotos.length}`;
+  }
+  _closeLb() { document.getElementById('photoLightbox').classList.remove('open'); document.body.style.overflow = ''; }
+  _lbPrev() { this._lbIndex = (this._lbIndex - 1 + this._filteredPhotos.length) % this._filteredPhotos.length; this._showLb(); }
+  _lbNext() { this._lbIndex = (this._lbIndex + 1) % this._filteredPhotos.length; this._showLb(); }
+
   // ── 显示收藏链接页（含主题标签） ──────────────────────
   async _showLinks() {
     const COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1','#14b8a6','#f97316'];
     const main = document.getElementById('main');
     main.innerHTML = `
       <div class="section-header">
-        <h1 class="section-header__title">🔗 收藏链接</h1>
+        <h1 class="section-header__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> 收藏链接</h1>
         <span class="section-header__sub" id="linkCount"></span>
       </div>
       <div id="linksList" class="links-grid-pc">${renderSkeletons(3)}</div>
@@ -319,7 +453,7 @@ class App {
 
     sec.innerHTML = `
       <div class="section-header" style="margin-bottom:12px">
-        <h2 class="section-header__title" style="font-size:1.1rem">🏷️ 主题标签</h2>
+        <h2 class="section-header__title" style="font-size:1.1rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> 主题标签</h2>
         <span class="section-header__sub">${this.repoTags.length} 个</span>
       </div>
       <div class="tags-grid-pc">
@@ -328,7 +462,6 @@ class App {
           const count = t.count >= 100 ? '99+' : t.count;
           return `<button class="tag-pc" onclick="app._selectTag('${escapeHtml(t.name)}')"
             style="--tc:${color}">
-            <span class="tag-pc__dot" style="background:${color}"></span>
             <span class="tag-pc__name">${escapeHtml(t.name)}</span>
             <span class="tag-pc__count">${count}</span>
           </button>`;
@@ -363,7 +496,7 @@ class App {
     const main = document.getElementById('main');
     main.innerHTML = `
       <div class="section-header">
-        <h1 class="section-header__title">🔍 搜索：${escapeHtml(query)}</h1>
+        <h1 class="section-header__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 搜索：${escapeHtml(query)}</h1>
       </div>
       <div class="post-list" id="postList">${renderSkeletons(4)}</div>`;
 

@@ -8,8 +8,7 @@
 
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
-  <!-- Mobile 跳转 -->
-  <link rel="alternate" media="only screen and (max-width:768px)" href="mobile.html">
+
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/style.css">
@@ -45,9 +44,6 @@
       <input type="search" id="searchInput" placeholder="搜索…" autocomplete="off">
     </div>
 
-    <a class="header__mobile-link" href="mobile.html" title="手机版">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-    </a>
   </div>
 </header>
 
@@ -58,7 +54,7 @@
   <main class="main" id="main">
     <!-- 骨架屏（JS 接管前） -->
     <div class="section-header">
-      <h1 class="section-header__title">📚 全部文章</h1>
+      <h1 class="section-header__title">全部文章</h1>
     </div>
     <div class="post-list" id="postListInit">
       <div class="skeleton-card">
@@ -83,7 +79,7 @@
   <aside class="sidebar">
 
     <!-- 博主信息 -->
-    <div class="sidebar-card">
+    <div class="sidebar-card" style="margin-top:48px">
       <div id="sidebarRepo">
         <div class="skeleton" style="width:64px;height:64px;border-radius:50%;margin:0 auto 12px"></div>
         <div class="skeleton skeleton--medium" style="margin:0 auto 8px;width:60%"></div>
@@ -105,14 +101,13 @@
     <!-- 关于 -->
     <div class="sidebar-card">
       <p class="sidebar-card__title">使用说明</p>
-      <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7">
+      <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;margin-bottom:10px">
         本博客由 <strong>GitHub Issues</strong> 驱动。<br>
         创建 Issue 即可发布文章，<br>
-        添加 Label 即可分类。<br><br>
-        支持的分类标签：<br>
-        📝 article &nbsp; 🖼️ image<br>
-        🎬 video &nbsp; 📌 note &nbsp; 🔗 link
+        添加 Label 即可分类。
       </p>
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px">支持的分类标签：</p>
+      <div class="sidebar-tags-list" id="sidebarUsageTags"></div>
     </div>
 
   </aside>
@@ -123,10 +118,9 @@
   <div class="container">
     <p>
       由 <a href="https://github.com" target="_blank">GitHub Issues</a> 驱动 ·
-      <a href="photos.html">🖼️ 照片墙</a> ·
-      <a href="mobile.html">📱 手机版</a> ·
+      <a href="#/photos">照片墙</a> ·
       <a href="#" onclick="app&&app.api.clearCache();showToast('缓存已清除');return false">刷新缓存</a> ·
-      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">⚙️ Token</a>
+      <a href="#" id="tokenEntryBtn" onclick="showTokenDialog();return false">Token</a>
     </p>
     <p style="margin-top:6px">
       <span id="siteRuntime"></span> ·
@@ -140,6 +134,21 @@
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
   <button class="lightbox__close" onclick="closeLightbox()" aria-label="关闭">✕</button>
   <img src="" alt="图片预览">
+</div>
+
+<!-- ── 照片灯箱（增强版，prev/next） ─────────────────────── -->
+<div class="photo-lightbox" id="photoLightbox">
+  <button class="photo-lightbox__close" onclick="app._closeLb()">✕</button>
+  <span class="photo-lightbox__counter" id="lbCounter"></span>
+  <button class="photo-lightbox__nav photo-lightbox__prev" onclick="app._lbPrev()">‹</button>
+  <div class="photo-lightbox__img-wrap" onclick="app._closeLb()">
+    <img class="photo-lightbox__img" id="lbImg" src="" alt="" onclick="event.stopPropagation()">
+  </div>
+  <button class="photo-lightbox__nav photo-lightbox__next" onclick="app._lbNext()">›</button>
+  <div class="photo-lightbox__info">
+    <p class="photo-lightbox__title" id="lbTitle"></p>
+    <p class="photo-lightbox__meta" id="lbMeta"></p>
+  </div>
 </div>
 
 <!-- ── Toast ─────────────────────────────────────────────── -->
@@ -313,6 +322,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const titleEl = document.getElementById('siteTitle');
     if (titleEl) titleEl.textContent = CONFIG.siteTitle;
     document.title = CONFIG.siteTitle;
+
+    // 使用说明中的分类标签
+    const usageTags = document.getElementById('sidebarUsageTags');
+    if (usageTags && CONFIG.categories) {
+      usageTags.innerHTML = CONFIG.categories.map(c =>
+        `<span class="tag" style="background:${c.color}12;color:${c.color};border-color:${c.color}35">${c.label}</span>`
+      ).join('');
+    }
   });
 </script>
 <script src="js/theme.js"></script>

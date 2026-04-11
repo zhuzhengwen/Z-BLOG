@@ -183,14 +183,12 @@ function renderVideosFromMarkdown(markdown) {
 // ── 标签徽章 ─────────────────────────────────────────────────
 function renderCategoryBadge(cat) {
   if (!cat) return '';
-  return `<span class="badge" style="background:${cat.color}20;color:${cat.color};border-color:${cat.color}40">
-    ${cat.icon} ${cat.name}
-  </span>`;
+  return `<span class="badge" style="background:${cat.color}15;color:${cat.color};border-color:${cat.color}40">${cat.label}</span>`;
 }
 
 function renderTagBadge(tag) {
   const color = tag.color ? `#${tag.color}` : '#64748b';
-  return `<span class="tag" style="background:${color}18;border-color:${color}55;color:${color}">${tag.name}</span>`;
+  return `<span class="tag" style="background:${color}12;color:${color};border-color:${color}35">${tag.name}</span>`;
 }
 
 // ── 文章卡片（列表用）────────────────────────────────────────
@@ -256,7 +254,7 @@ function renderPostCard(issue, categories) {
     ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
     ${gridHtml}
     <div class="moment-card__footer">
-      <span class="moment-card__comments">💬 ${issue.comments}</span>
+      <span class="moment-card__comments"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> ${issue.comments}</span>
     </div>
   </article>`;
 }
