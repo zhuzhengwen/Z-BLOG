@@ -362,7 +362,7 @@ class App {
     const SIDEBAR_ICONS = {
       article: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`,
       image:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
-      video:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`,
+      think:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`,
       note:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>`,
       link:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
       music:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
@@ -380,7 +380,7 @@ class App {
   // ── 显示列表页 ─────────────────────────────────────────
   async _showList(category) {
     if (category === 'link')  { await this._showLinks();   return; }
-    if (category === 'video') { await this._showTimeline(); return; }
+    if (category === 'think') { await this._showTimeline(); return; }
 
     const main = document.getElementById('main');
     const cat = category ? this.categories.find(c => c.label === category) : null;
@@ -437,7 +437,7 @@ class App {
 
   // ── 思考时间线 ─────────────────────────────────────────
   async _showTimeline() {
-    const cat   = this.categories.find(c => c.label === 'video');
+    const cat   = this.categories.find(c => c.label === 'think');
     const color = cat ? cat.color : '#d73a49';
     const lbSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`;
     const main  = document.getElementById('main');
@@ -454,7 +454,7 @@ class App {
     try {
       let all = [], page = 1;
       while (page <= 5) {
-        const batch = await this.api.getIssues({ page, perPage: 100, label: 'video' });
+        const batch = await this.api.getIssues({ page, perPage: 100, label: 'think' });
         all = all.concat(batch);
         if (batch.length < 100) break;
         page++;
@@ -469,6 +469,64 @@ class App {
       }
       if (countEl) countEl.textContent = `共 ${all.length} 条`;
       tlEl.innerHTML = renderTimeline(all, this.categories);
+
+      // ── 年/月 筛选栏 ──────────────────────────────────
+      const ymMap = {};
+      all.forEach(issue => {
+        const d = new Date(issue.created_at);
+        const y = String(d.getFullYear());
+        const m = String(d.getMonth() + 1);
+        if (!ymMap[y]) ymMap[y] = new Set();
+        ymMap[y].add(m);
+      });
+      const years = Object.keys(ymMap).sort((a, b) => b - a);
+
+      const filterEl = document.createElement('div');
+      filterEl.className = 'tl-filter';
+      filterEl.innerHTML = `
+        <div class="tl-filter__years" id="tlYears">
+          <button class="tl-filter__pill active" data-year="all">全部</button>
+          ${years.map(y => `<button class="tl-filter__pill" data-year="${y}">${y}</button>`).join('')}
+        </div>
+        <div class="tl-filter__months" id="tlMonths"></div>`;
+      tlEl.parentElement.insertBefore(filterEl, tlEl);
+
+      let curYear = 'all', curMonth = 'all';
+      const applyTlFilter = () => {
+        tlEl.querySelectorAll('.tl-item').forEach(el => {
+          const showY = curYear === 'all' || el.dataset.year === curYear;
+          const showM = curMonth === 'all' || el.dataset.month === curMonth;
+          el.style.display = (showY && showM) ? '' : 'none';
+        });
+      };
+
+      filterEl.querySelector('#tlYears').addEventListener('click', e => {
+        const btn = e.target.closest('.tl-filter__pill[data-year]');
+        if (!btn) return;
+        filterEl.querySelectorAll('#tlYears .tl-filter__pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        curYear = btn.dataset.year;
+        curMonth = 'all';
+        const monthsEl = filterEl.querySelector('#tlMonths');
+        if (curYear === 'all') {
+          monthsEl.innerHTML = '';
+        } else {
+          const months = [...ymMap[curYear]].sort((a, b) => a - b);
+          monthsEl.innerHTML = `
+            <button class="tl-filter__pill tl-filter__pill--sm active" data-month="all">全部</button>
+            ${months.map(m => `<button class="tl-filter__pill tl-filter__pill--sm" data-month="${m}">${m}月</button>`).join('')}`;
+          monthsEl.onclick = e2 => {
+            const mb = e2.target.closest('.tl-filter__pill[data-month]');
+            if (!mb) return;
+            monthsEl.querySelectorAll('.tl-filter__pill').forEach(b => b.classList.remove('active'));
+            mb.classList.add('active');
+            curMonth = mb.dataset.month;
+            applyTlFilter();
+          };
+        }
+        applyTlFilter();
+      });
+
       tlEl.querySelectorAll('.tl-item').forEach(el => {
         el.addEventListener('click', () => { location.hash = `#/post/${el.dataset.number}`; });
       });

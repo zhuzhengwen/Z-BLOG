@@ -134,7 +134,7 @@ export default {
     images()      { return this.issue ? extractImages(this.issue.body || '') : [] },
     videos()      { return this.issue ? extractVideos(this.issue.body || '') : [] },
     isImagePost() { return this.cat && this.cat.label === 'image' },
-    isVideoPost() { return this.cat && this.cat.label === 'video' },
+    isVideoPost() { return this.cat && this.cat.label === 'think' },
     renderedHtml() {
       if (!this.issue) return ''
       let body = this.issue.body || ''

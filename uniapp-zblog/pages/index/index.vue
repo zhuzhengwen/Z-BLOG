@@ -215,7 +215,7 @@ export default {
   },
   computed: {
     isThinkingView() {
-      return this.currentCat === 'video'
+      return this.currentCat === 'think'
     },
     currentCatName() {
       if (!this.currentCat) return this.siteTitle

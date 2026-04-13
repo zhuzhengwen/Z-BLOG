@@ -129,7 +129,7 @@ function extractCover(markdown) {
 // ── 获取列表缩略图（图片/视频封面）──────────────────────────
 function extractThumb(markdown, category) {
   if (!markdown) return null;
-  const isVideo = category && category.label === 'video';
+  const isVideo = category && category.label === 'think';
   if (isVideo) {
     const videos = extractVideos(markdown);
     if (videos.length) {
@@ -263,48 +263,36 @@ function renderPostCard(issue, categories) {
 function renderTimeline(issues, categories) {
   if (!issues.length) return renderEmpty('暂无思考内容');
 
-  // 按年分组，降序
-  const groups = {};
-  issues.forEach(issue => {
-    const y = new Date(issue.created_at).getFullYear();
-    (groups[y] || (groups[y] = [])).push(issue);
-  });
-  const years = Object.keys(groups).sort((a, b) => b - a);
-
   const commentSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
 
-  return years.map(year => {
-    const items = groups[year];
-    return `<div class="tl-year-group">
-      <div class="tl-year">${year}</div>
-      ${items.map(issue => {
-        const tags    = getTagsFromLabels(issue.labels, categories);
-        const excerpt = extractExcerpt(issue.body);
-        const d       = new Date(issue.created_at);
-        const dateStr = `${d.getMonth() + 1}月${d.getDate()}日`;
-        const tagsHtml = tags.slice(0, 3).map(t => {
-          const c = t.color ? `#${t.color}` : '#64748b';
-          return `<span class="tl-tag" style="color:${c};background:${c}12;border-color:${c}35">${t.name}</span>`;
-        }).join('');
-        return `
-        <div class="tl-item" data-number="${issue.number}">
-          <div class="tl-left">
-            <div class="tl-dot"></div>
-            <div class="tl-line"></div>
-          </div>
-          <div class="tl-body">
-            <div class="tl-meta">
-              <span class="tl-date">${dateStr}</span>
-              ${tagsHtml}
-            </div>
-            <div class="tl-title">${escapeHtml(issue.title)}</div>
-            ${excerpt ? `<div class="tl-excerpt">${escapeHtml(excerpt)}</div>` : ''}
-            <div class="tl-footer">
-              <span class="tl-comments">${commentSvg} ${issue.comments}</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
+  return issues.map(issue => {
+    const tags    = getTagsFromLabels(issue.labels, categories);
+    const excerpt = extractExcerpt(issue.body);
+    const d       = new Date(issue.created_at);
+    const year    = d.getFullYear();
+    const month   = d.getMonth() + 1;
+    const dateStr = `${month}月${d.getDate()}日`;
+    const tagsHtml = tags.slice(0, 3).map(t => {
+      const c = t.color ? `#${t.color}` : '#64748b';
+      return `<span class="tl-tag" style="color:${c};background:${c}12;border-color:${c}35">${t.name}</span>`;
+    }).join('');
+    return `
+    <div class="tl-item" data-number="${issue.number}" data-year="${year}" data-month="${month}">
+      <div class="tl-left">
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-head">
+          <div class="tl-title">${escapeHtml(issue.title)}</div>
+          <time class="tl-date">${dateStr}</time>
+        </div>
+        ${tagsHtml ? `<div class="tl-tags">${tagsHtml}</div>` : ''}
+        ${excerpt ? `<div class="tl-excerpt">${escapeHtml(excerpt)}</div>` : ''}
+        <div class="tl-footer">
+          <span class="tl-comments">${commentSvg} ${issue.comments}</span>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
@@ -345,7 +333,7 @@ function renderPostDetail(issue, categories) {
   const tags = getTagsFromLabels(issue.labels, categories);
   const isImagePost = cat && cat.label === 'image';
   const isLinkPost = cat && cat.label === 'link';
-  const isVideoPost = cat && cat.label === 'video';
+  const isVideoPost = cat && cat.label === 'think';
 
   // 从正文剥离视频链接，避免嵌入播放器下方再出现裸链接
   function stripVideoUrls(text) {

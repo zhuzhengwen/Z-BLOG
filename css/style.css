@@ -872,81 +872,97 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 /* ── 思考时间线 ──────────────────────────────────────────────── */
-.timeline-list {
-  --tl-color: #d73a49;
-  padding: 4px 0 40px;
+/* ── 思考时间线 ───────────────────────────────────────────── */
+.timeline-list { padding: 4px 0 40px; }
+
+/* 年/月 筛选栏 */
+.tl-filter { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+.tl-filter__years { display: flex; flex-wrap: wrap; gap: 6px; }
+.tl-filter__months {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding-top: 8px; border-top: 1px solid var(--border);
 }
-.tl-year-group { margin-bottom: 4px; }
-.tl-year {
-  padding: 12px 0 8px 32px;
-  font-size: .7rem; font-weight: 700; color: var(--text-muted);
-  letter-spacing: .08em; text-transform: uppercase;
-  border-bottom: 1px solid var(--border); margin-bottom: 4px;
+.tl-filter__months:empty { display: none; padding: 0; border: none; }
+.tl-filter__pill {
+  display: inline-flex; align-items: center;
+  padding: 0 14px; height: 28px;
+  border-radius: 99px; font-size: .8rem; font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; font-family: inherit;
+  transition: all var(--transition);
 }
-.tl-item {
-  display: flex; cursor: pointer; padding: 2px 0;
-  border-radius: 8px; transition: background .15s;
-}
-.tl-item:hover { background: var(--surface-2); }
-.tl-item:hover .tl-title { color: var(--primary); }
+.tl-filter__pill:hover { border-color: var(--primary); color: var(--primary); background: var(--surface-2); }
+.tl-filter__pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.tl-filter__pill--sm { height: 24px; padding: 0 10px; font-size: .75rem; }
+
+/* 时间轴行 */
+.tl-item { display: flex; cursor: pointer; align-items: flex-start; }
 
 .tl-left {
-  width: 32px; flex-shrink: 0;
+  width: 22px; flex-shrink: 0;
   display: flex; flex-direction: column; align-items: center;
-  padding-top: 6px;
+  padding-top: 18px;
 }
 .tl-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--tl-color);
-  border: 2px solid var(--bg);
-  box-shadow: 0 0 0 2px var(--tl-color);
-  flex-shrink: 0; z-index: 1;
-  transition: transform .15s;
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; z-index: 1;
+  background: color-mix(in srgb, var(--tl-color, #d73a49) 55%, transparent);
+  transition: background var(--transition), transform var(--transition);
 }
-.tl-item:hover .tl-dot { transform: scale(1.3); }
+.tl-item:hover .tl-dot { background: var(--tl-color, #d73a49); transform: scale(1.3); }
 .tl-line {
-  width: 2px; flex: 1; min-height: 16px;
-  background: var(--border); margin-top: 4px;
+  width: 1px; flex: 1; min-height: 10px; margin-top: 3px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--tl-color, #d73a49) 25%, transparent) 0%, var(--border) 100%);
 }
 .tl-item:last-child .tl-line { opacity: 0; }
 
-.tl-body { flex: 1; padding: 2px 8px 20px 10px; }
-.tl-meta {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  margin-bottom: 5px;
+/* 卡片 */
+.tl-body {
+  flex: 1; margin: 0 0 10px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  transition: background var(--transition);
 }
-.tl-date { font-size: .72rem; color: var(--text-muted); }
+.tl-item:hover .tl-body { background: var(--surface-2); }
+.tl-item:hover .tl-title { color: var(--primary); }
+
+.tl-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 5px;
+}
+.tl-date { font-size: .73rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; margin-top: 3px; }
+.tl-title {
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  line-height: 1.5; flex: 1; transition: color var(--transition);
+}
+.tl-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; }
 .tl-tag {
   display: inline-flex; align-items: center;
-  padding: 0 5px; height: 17px; line-height: 17px;
-  font-size: .68rem; border-radius: 3px; border: 1px solid;
-  white-space: nowrap;
-}
-.tl-title {
-  font-size: .95rem; font-weight: 700; color: var(--text);
-  line-height: 1.5; margin-bottom: 3px;
-  transition: color .15s;
+  padding: 0 6px; height: 18px; line-height: 18px;
+  font-size: .68rem; border-radius: 4px; border: 1px solid; white-space: nowrap;
 }
 .tl-excerpt {
-  font-size: .82rem; color: var(--text-muted); line-height: 1.5;
-  display: -webkit-box; -webkit-line-clamp: 2;
+  font-size: .85rem; color: var(--text-muted); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 3;
   -webkit-box-orient: vertical; overflow: hidden;
-  margin-bottom: 4px;
+  margin-top: 4px;
 }
-.tl-footer { display: flex; align-items: center; gap: 10px; }
+.tl-footer { display: flex; justify-content: flex-end; margin-top: 8px; }
 .tl-comments {
   display: inline-flex; align-items: center; gap: 3px;
-  font-size: .72rem; color: var(--text-muted);
+  font-size: .78rem; color: var(--text-muted);
 }
-/* 加载骨架 */
 .tl-skeleton {
   height: 72px; background: var(--surface-2);
-  border-radius: 8px; margin-bottom: 10px;
+  border-radius: var(--radius); margin-bottom: 10px;
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
 @media (max-width: 600px) {
-  .tl-left { width: 24px; }
-  .tl-body { padding: 2px 4px 16px 10px; }
+  .tl-left { width: 18px; }
+  .tl-body { padding: 10px 14px; margin-left: 8px; }
+  .tl-filter__pill { height: 26px; padding: 0 10px; font-size: .75rem; }
 }
 
 /* ── 照片墙（内嵌在主内容区）───────────────────────────────── */
@@ -1043,6 +1059,7 @@ button { cursor: pointer; font-family: inherit; }
 
 /* 标题三层亮度：标题 > 正文 > 摘要/时间 */
 [data-theme="dark"] .moment-card__title,
+[data-theme="dark"] .tl-title,
 [data-theme="dark"] .post-detail__title,
 [data-theme="dark"] .section-header__title,
 [data-theme="dark"] .links-group__title {
@@ -1050,6 +1067,7 @@ button { cursor: pointer; font-family: inherit; }
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .moment-card__title,
+  :root:not([data-theme="light"]) .tl-title,
   :root:not([data-theme="light"]) .post-detail__title,
   :root:not([data-theme="light"]) .section-header__title,
   :root:not([data-theme="light"]) .links-group__title {

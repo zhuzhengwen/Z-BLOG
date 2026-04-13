@@ -22,7 +22,7 @@ const CONFIG = {
   categories: [
     { label: 'article', name: '文章', icon: '📝', color: '#28a745', desc: '长篇文章与教程' },
     { label: 'image',   name: '图片', icon: '🖼️', color: '#0969da', desc: '图片与摄影作品' },
-    { label: 'video',   name: '思考', icon: '💡', color: '#d73a49', desc: '思考与随想' },
+    { label: 'think',   name: '思考', icon: '💡', color: '#d73a49', desc: '思考与随想' },
     { label: 'note',    name: '笔记', icon: '📌', color: '#6f42c1', desc: '随记与短笔记' },
     { label: 'link',    name: '链接', icon: '🔗', color: '#e36209', desc: '收藏的链接' },
     { label: 'music',   name: '音乐', icon: '🎵', color: '#ec4899', desc: '背景音乐歌单' },

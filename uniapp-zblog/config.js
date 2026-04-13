@@ -12,7 +12,7 @@ const CONFIG = {
   categories: [
     { label: 'article', name: '文章', icon: '📝', color: '#28a745' },
     { label: 'image',   name: '图片', icon: '🖼️', color: '#0969da' },
-    { label: 'video',   name: '思考', icon: '💡', color: '#d73a49' },
+    { label: 'think',   name: '思考', icon: '💡', color: '#d73a49' },
     { label: 'note',    name: '笔记', icon: '📌', color: '#6f42c1' },
     { label: 'link',    name: '链接', icon: '🔗', color: '#e36209' },
     { label: 'music',   name: '音乐', icon: '🎵', color: '#ec4899' },

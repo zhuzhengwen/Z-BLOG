@@ -80,7 +80,7 @@ export function extractVideos(markdown = '') {
 
 // ── 获取缩略图（返回 URL 或 '__video__' 占位）────────────
 export function extractThumb(markdown = '', category = null) {
-  const isVideo = category && category.label === 'video'
+  const isVideo = category && category.label === 'think'
   if (isVideo) {
     const videos = extractVideos(markdown)
     if (videos.length) return videos[0].thumb || '__video__'

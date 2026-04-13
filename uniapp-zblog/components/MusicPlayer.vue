@@ -84,44 +84,41 @@
         <view class="music-bar__controls">
 
           <!-- 上一曲 -->
-          <view class="music-bar__btn" @click="onPrev">
-            <view class="ic ic-prev">
-              <view class="ic-prev__bar"></view>
-              <view class="ic-prev__tri"></view>
-            </view>
+          <view class="ctrl-btn" @click="onPrev">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+            </svg>
           </view>
 
           <!-- 播放 / 暂停 -->
-          <view class="music-bar__btn music-bar__btn--main" @click="onToggle">
-            <view v-if="isPlaying" class="ic ic-pause">
-              <view class="ic-pause__bar"></view>
-              <view class="ic-pause__bar"></view>
-            </view>
-            <view v-else class="ic ic-play"></view>
+          <view class="ctrl-btn ctrl-btn--play" @click="onToggle">
+            <svg v-if="isPlaying" xmlns="http://www.w3.org/2000/svg" class="ctrl-svg ctrl-svg--play" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="ctrl-svg ctrl-svg--play" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
           </view>
 
           <!-- 下一曲 -->
-          <view class="music-bar__btn" @click="onNext">
-            <view class="ic ic-next">
-              <view class="ic-next__tri"></view>
-              <view class="ic-next__bar"></view>
-            </view>
+          <view class="ctrl-btn" @click="onNext">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 18 14.5 12 6 6v12zM16 6v12h2V6h-2z"/>
+            </svg>
           </view>
 
           <!-- 歌单列表 -->
-          <view class="music-bar__btn" @click="toggleList">
-            <view class="ic ic-list" :class="{ 'ic-list--on': showList }">
-              <view class="ic-list__line"></view>
-              <view class="ic-list__line ic-list__line--s"></view>
-              <view class="ic-list__line"></view>
-            </view>
+          <view class="ctrl-btn" @click="toggleList">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" :style="{ color: showList ? '#2563eb' : '' }" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+            </svg>
           </view>
 
           <!-- 收起为 CD -->
-          <view class="music-bar__btn" @click="collapsed = true">
-            <view class="ic ic-collapse">
-              <view class="ic-collapse__chevron"></view>
-            </view>
+          <view class="ctrl-btn" @click="collapsed = true">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"/>
+            </svg>
           </view>
 
         </view>
@@ -436,79 +433,29 @@ export default {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .music-bar__controls {
-  display: flex; align-items: center; gap: 4rpx; flex-shrink: 0;
+  display: flex; align-items: center; gap: 0; flex-shrink: 0;
 }
-.music-bar__btn {
-  width: 52rpx; height: 52rpx; border-radius: 50%;
+
+/* ── 控制按钮 ── */
+.ctrl-btn {
+  width: 54rpx; height: 54rpx; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+  color: #64748b;
+  opacity: 1; transition: opacity .15s;
+  &:active { opacity: .5; }
 }
-.music-bar__btn--main {
-  width: 64rpx; height: 64rpx;
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  box-shadow: 0 4rpx 14rpx rgba(0,0,0,.25);
+.ctrl-btn--play {
+  width: 72rpx; height: 72rpx;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,.28), 0 1rpx 4rpx rgba(0,0,0,.16);
+  color: #fff;
+  margin: 0 6rpx;
+  flex-shrink: 0;
 }
-
-/* 通用图标容器 */
-.ic { display: flex; align-items: center; justify-content: center; }
-
-/* ── 上一曲：竖条 + 左三角 ── */
-.ic-prev { flex-direction: row; gap: 4rpx; }
-.ic-prev__bar {
-  width: 4rpx; height: 22rpx; border-radius: 2rpx;
-  background: #64748b;
+.ctrl-svg {
+  width: 36rpx; height: 36rpx;
 }
-.ic-prev__tri {
-  width: 0; height: 0;
-  border-top: 10rpx solid transparent;
-  border-bottom: 10rpx solid transparent;
-  border-right: 14rpx solid #64748b;
-}
-
-/* ── 播放：右三角 ── */
-.ic-play {
-  width: 0; height: 0;
-  border-top: 11rpx solid transparent;
-  border-bottom: 11rpx solid transparent;
-  border-left: 18rpx solid #fff;
-  margin-left: 4rpx;
-}
-
-/* ── 暂停：两竖条 ── */
-.ic-pause { flex-direction: row; gap: 7rpx; }
-.ic-pause__bar {
-  width: 5rpx; height: 20rpx; border-radius: 3rpx;
-  background: #fff;
-}
-
-/* ── 下一曲：右三角 + 竖条 ── */
-.ic-next { flex-direction: row; gap: 4rpx; }
-.ic-next__tri {
-  width: 0; height: 0;
-  border-top: 10rpx solid transparent;
-  border-bottom: 10rpx solid transparent;
-  border-left: 14rpx solid #64748b;
-}
-.ic-next__bar {
-  width: 4rpx; height: 22rpx; border-radius: 2rpx;
-  background: #64748b;
-}
-
-/* ── 歌单：三横线 ── */
-.ic-list { flex-direction: column; gap: 5rpx; }
-.ic-list__line {
-  width: 22rpx; height: 3rpx; border-radius: 2rpx;
-  background: #64748b; transition: background .2s;
-}
-.ic-list__line--s { width: 15rpx; }
-.ic-list--on .ic-list__line { background: #2563eb; }
-
-/* ── 收起：向下折角（chevron） ── */
-.ic-collapse { padding-top: 4rpx; }
-.ic-collapse__chevron {
-  width: 16rpx; height: 16rpx;
-  border-right: 3rpx solid #64748b;
-  border-bottom: 3rpx solid #64748b;
-  border-radius: 1rpx;
-  transform: rotate(45deg);
+.ctrl-svg--play {
+  width: 30rpx; height: 30rpx;
 }
 </style>
