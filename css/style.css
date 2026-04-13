@@ -15,7 +15,7 @@
   --text-link:      #2563eb;
   --shadow-sm:      0 1px 3px rgba(0,0,0,.07), 0 2px 8px rgba(0,0,0,.05);
   --shadow-md:      0 4px 20px rgba(0,0,0,.11), 0 2px 8px rgba(0,0,0,.06);
-  --radius:         0px;
+  --radius:         10px;
   --transition:     .2s ease;
   --header-h:       60px;
 
