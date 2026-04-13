@@ -375,6 +375,36 @@ class App {
           <span class="cat-list__name">${c.name}</span>
         </button></li>`).join('');
     }
+
+    // ── 顶部导航图标（只插入一次）──
+    const headerNav = document.getElementById('headerNav');
+    if (headerNav && !headerNav.dataset.built) {
+      headerNav.dataset.built = '1';
+      this.categories.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'header__nav-item';
+        btn.dataset.cat = c.label;
+        btn.innerHTML = `${SIDEBAR_ICONS[c.label] || ''}<span>${c.name}</span>`;
+        btn.addEventListener('click', () => {
+          location.hash = `#/category/${c.label}`;
+        });
+        headerNav.appendChild(btn);
+      });
+    }
+
+    // ── 手机端导航图标（只插入一次）──
+    const mobileNav = document.getElementById('mobileNavLinks');
+    if (mobileNav && !mobileNav.dataset.built) {
+      mobileNav.dataset.built = '1';
+      this.categories.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'mobile-nav-item';
+        btn.dataset.cat = c.label;
+        btn.innerHTML = `${SIDEBAR_ICONS[c.label] || ''} ${c.name}`;
+        btn.onclick = () => { location.hash = `#/category/${c.label}`; this._closeMobileMenu(); };
+        mobileNav.appendChild(btn);
+      });
+    }
   }
 
   // ── 显示列表页 ─────────────────────────────────────────
