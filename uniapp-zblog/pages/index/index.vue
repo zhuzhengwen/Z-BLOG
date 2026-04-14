@@ -138,26 +138,65 @@
           <text class="empty-icon">📭</text>
           <text class="empty-text">暂无内容</text>
         </view>
-        <!-- 思考分类：Ant Design 时间线样式 -->
+        <!-- 思考分类：时间线样式（含年月筛选） -->
         <template v-else-if="isThinkingView">
+          <!-- 年月筛选栏 -->
+          <view class="tl-filter">
+            <scroll-view scroll-x class="tl-filter__scroll">
+              <view class="tl-filter__row">
+                <view
+                  v-for="y in tlYears" :key="y"
+                  class="tl-pill"
+                  :class="{ 'tl-pill--active': curYear === y }"
+                  @click="setYear(y)">
+                  <text class="tl-pill__text">{{ y === 'all' ? '全部' : y }}</text>
+                </view>
+              </view>
+            </scroll-view>
+            <scroll-view v-if="curYear !== 'all'" scroll-x class="tl-filter__scroll tl-filter__scroll--sm">
+              <view class="tl-filter__row">
+                <view
+                  v-for="m in tlMonths" :key="m"
+                  class="tl-pill tl-pill--sm"
+                  :class="{ 'tl-pill--active': curMonth === m }"
+                  @click="setMonth(m)">
+                  <text class="tl-pill__text">{{ m === 'all' ? '全部' : m + '月' }}</text>
+                </view>
+              </view>
+            </scroll-view>
+          </view>
+
           <view class="tl-wrap">
             <view
-              v-for="(item, idx) in posts"
+              v-for="(item, idx) in filteredThinkPosts"
               :key="item.id"
               class="tl-item"
               @click="openDetail(item)">
               <view class="tl-left">
                 <view class="tl-dot"></view>
-                <view v-if="idx < posts.length - 1" class="tl-line"></view>
+                <view v-if="idx < filteredThinkPosts.length - 1" class="tl-line"></view>
               </view>
               <view class="tl-body">
-                <text class="tl-date">{{ tlDate(item.created_at) }}</text>
-                <text class="tl-title">{{ item.title }}</text>
+                <view class="tl-head">
+                  <text class="tl-title">{{ item.title }}</text>
+                  <text class="tl-date">{{ tlDate(item.created_at) }}</text>
+                </view>
+                <view v-if="tlTags(item).length" class="tl-tags">
+                  <text
+                    v-for="tag in tlTags(item)" :key="tag.name"
+                    class="tl-tag"
+                    :style="{ color: '#' + (tag.color || '64748b'), background: '#' + (tag.color || '64748b') + '18', borderColor: '#' + (tag.color || '64748b') + '50' }">
+                    {{ tag.name }}
+                  </text>
+                </view>
                 <text v-if="item.body" class="tl-excerpt">{{ tlExcerpt(item.body) }}</text>
                 <view class="tl-footer">
                   <text class="tl-comments">💬 {{ item.comments }}</text>
                 </view>
               </view>
+            </view>
+            <view v-if="!filteredThinkPosts.length" class="tl-empty">
+              <text class="tl-empty__text">该时间段暂无内容</text>
             </view>
           </view>
         </template>
@@ -211,11 +250,37 @@ export default {
       themeColor:      getThemeColor(),
       activeTag:       null,
       activeTagColor:  null,
+      curYear:         'all',
+      curMonth:        'all',
     }
   },
   computed: {
     isThinkingView() {
       return this.currentCat === 'think'
+    },
+    // 时间线年份列表
+    tlYears() {
+      const years = new Set(this.posts.map(p => new Date(p.created_at).getFullYear()))
+      return ['all', ...[...years].sort((a, b) => b - a)]
+    },
+    // 当前年份的月份列表
+    tlMonths() {
+      if (this.curYear === 'all') return []
+      const months = new Set(
+        this.posts
+          .filter(p => new Date(p.created_at).getFullYear() == this.curYear)
+          .map(p => new Date(p.created_at).getMonth() + 1)
+      )
+      return ['all', ...[...months].sort((a, b) => a - b)]
+    },
+    // 按年月筛选后的列表
+    filteredThinkPosts() {
+      return this.posts.filter(p => {
+        const d = new Date(p.created_at)
+        if (this.curYear !== 'all' && d.getFullYear() != this.curYear) return false
+        if (this.curMonth !== 'all' && (d.getMonth() + 1) != this.curMonth) return false
+        return true
+      })
     },
     currentCatName() {
       if (!this.currentCat) return this.siteTitle
@@ -275,6 +340,21 @@ export default {
         // 组合分类 + 主题标签
         let label = this.currentCat || null
         if (this.activeTag) label = label ? `${label},${this.activeTag}` : this.activeTag
+
+        // 思考分类：一次性全量加载，以支持年月筛选
+        if (this.currentCat === 'think' && !append) {
+          let allIssues = [], pg = 1
+          while (true) {
+            const batch = await api.getIssues({ page: pg, perPage: 100, label })
+            allIssues = allIssues.concat(batch)
+            if (batch.length < 100) break
+            pg++
+          }
+          this.posts   = allIssues
+          this.hasMore = false
+          return
+        }
+
         const issues = await api.getIssues({ page: this.page, label })
         this.posts   = append ? [...this.posts, ...issues] : issues
         this.hasMore = issues.length >= CONFIG.postsPerPage
@@ -301,6 +381,8 @@ export default {
       this.activeTag      = null
       this.activeTagColor = null
       this.currentCat = label
+      this.curYear    = 'all'
+      this.curMonth   = 'all'
       this.page       = 1
       this.posts      = []
       this.hasMore    = true
@@ -332,11 +414,22 @@ export default {
     // 时间线辅助
     tlDate(iso) {
       const d = new Date(iso)
-      return `${d.getMonth() + 1}月${d.getDate()}日`
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     },
     tlExcerpt(body) {
       if (!body) return ''
       return body.replace(/[#*`>\-_\[\]!~]/g, '').replace(/\n+/g, ' ').trim().slice(0, 80)
+    },
+    tlTags(item) {
+      const catLabels = new Set(CONFIG.categories.map(c => c.label))
+      return (item.labels || []).filter(l => !catLabels.has(l.name))
+    },
+    setYear(y) {
+      this.curYear = y
+      this.curMonth = 'all'
+    },
+    setMonth(m) {
+      this.curMonth = m
     },
 
     async doSearch() {
@@ -606,46 +699,96 @@ export default {
 .load-text   { font-size: 26rpx; color: #94a3b8; }
 
 /* ── 思考时间线 ── */
-.tl-wrap { padding: 20rpx 24rpx 0; }
+
+/* 年月筛选栏 */
+.tl-filter {
+  padding: 16rpx 20rpx 4rpx;
+  display: flex; flex-direction: column; gap: 10rpx;
+}
+.tl-filter__scroll { width: 100%; }
+.tl-filter__scroll--sm { margin-top: 4rpx; padding-top: 10rpx; border-top: 1rpx solid #e2e8f0; }
+.tl-filter__row {
+  display: flex; flex-direction: row; gap: 10rpx;
+  padding-bottom: 4rpx;
+  /* #ifdef H5 */
+  flex-wrap: nowrap;
+  /* #endif */
+}
+.tl-pill {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 22rpx; height: 52rpx; border-radius: 99rpx;
+  border: 1.5rpx solid #e2e8f0;
+  background: rgba(255,255,255,.7);
+  flex-shrink: 0;
+}
+.tl-pill--sm { height: 44rpx; padding: 0 18rpx; }
+.tl-pill--active {
+  background: #d73a49; border-color: #d73a49;
+}
+.tl-pill--active .tl-pill__text { color: #fff; font-weight: 700; }
+.tl-pill__text { font-size: 24rpx; color: #475569; white-space: nowrap; }
+.tl-pill--sm .tl-pill__text { font-size: 22rpx; }
+
+.tl-wrap { padding: 16rpx 20rpx 0; }
 
 .tl-item {
   display: flex; flex-direction: row;
-  padding: 0 0 0 0;
 }
 
 .tl-left {
   display: flex; flex-direction: column; align-items: center;
-  width: 40rpx; flex-shrink: 0; padding-top: 10rpx;
+  width: 40rpx; flex-shrink: 0; padding-top: 28rpx;
 }
 .tl-dot {
-  width: 20rpx; height: 20rpx; border-radius: 50%;
-  background: #d73a49;
-  border: 4rpx solid #fff;
-  box-shadow: 0 0 0 4rpx rgba(215,58,73,.22);
+  width: 18rpx; height: 18rpx; border-radius: 50%;
+  background: rgba(215,58,73,.55);
+  border: 3rpx solid #fff;
+  box-shadow: 0 0 0 4rpx rgba(215,58,73,.2);
   flex-shrink: 0; z-index: 1;
 }
 .tl-line {
   width: 2rpx; flex: 1; min-height: 32rpx;
-  background: #e2e8f0; margin-top: 8rpx;
+  background: linear-gradient(to bottom, rgba(215,58,73,.25) 0%, #e2e8f0 100%);
+  margin-top: 6rpx;
 }
 
 .tl-body {
-  flex: 1; padding: 0 0 36rpx 20rpx;
+  flex: 1; margin: 0 0 16rpx 16rpx;
+  background: #fff;
+  border-radius: 14rpx;
+  border: 1rpx solid #f1f5f9;
+  padding: 20rpx 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,.06);
+}
+.tl-head {
+  display: flex; flex-direction: row; align-items: flex-start;
+  justify-content: space-between; gap: 12rpx; margin-bottom: 8rpx;
 }
 .tl-date {
-  font-size: 22rpx; color: #94a3b8; display: block; margin-bottom: 6rpx;
+  font-size: 20rpx; color: #94a3b8; flex-shrink: 0; margin-top: 4rpx;
+  white-space: nowrap;
 }
 .tl-title {
   font-size: 30rpx; font-weight: 700; color: #1e293b;
-  line-height: 1.5; display: block; margin-bottom: 6rpx;
+  line-height: 1.5; flex: 1;
+}
+.tl-tags {
+  display: flex; flex-direction: row; flex-wrap: wrap; gap: 8rpx; margin-bottom: 10rpx;
+}
+.tl-tag {
+  font-size: 20rpx; padding: 2rpx 12rpx; border-radius: 6rpx;
+  border: 1rpx solid transparent;
 }
 .tl-excerpt {
   font-size: 26rpx; color: #64748b; line-height: 1.5;
-  display: block; margin-bottom: 8rpx;
+  display: block; margin-bottom: 10rpx;
   overflow: hidden; text-overflow: ellipsis;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
-.tl-footer { display: flex; flex-direction: row; align-items: center; }
+.tl-footer { display: flex; flex-direction: row; align-items: center; justify-content: flex-end; }
 .tl-comments { font-size: 22rpx; color: #94a3b8; }
+
+.tl-empty { padding: 60rpx 0; text-align: center; }
+.tl-empty__text { font-size: 28rpx; color: #94a3b8; }
 
 </style>
