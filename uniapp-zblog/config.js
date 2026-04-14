@@ -2,7 +2,7 @@
 const CONFIG = {
   owner: 'zhuzhengwen',
   repo:  'Z-BLOG',
-  token: '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',  // 只读 Token，提高 API 频率限制至 5000次/小时
+  token: '',  // 不在代码中存储，防止 GitHub 自动吊销
 
   siteTitle:     'Z-BLOG',
   siteDesc:      '基于 GitHub Issues 的个人博客',

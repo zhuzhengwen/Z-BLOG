@@ -6,7 +6,10 @@ const CONFIG = {
   // ========== 必填：GitHub 仓库信息 ==========
   owner: 'zhuzhengwen',   // GitHub 用户名或组织名
   repo:  'Z-BLOG',       // 仓库名称（Issues 所在仓库）
-  token: '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',  // 只读 Token，提高 API 频率限制至 5000次/小时
+  // token 不存在代码里，防止 GitHub 自动吊销
+  // 访问量不大时无需 token（60次/小时已够）
+  // 如需提高限额，在浏览器控制台执行：localStorage.setItem('zblog_user_token', '你的token')
+  token: '',
 
   // ========== 博客基本信息 ==========
   siteTitle:  'Z-BLOG',
