@@ -105,7 +105,7 @@
 
           <!-- 收起为 CD -->
           <view class="ctrl-btn" @click="collapsed = true">
-            <text class="ctrl-icon">⌃</text>
+            <text class="ctrl-icon">⊙</text>
           </view>
 
         </view>
