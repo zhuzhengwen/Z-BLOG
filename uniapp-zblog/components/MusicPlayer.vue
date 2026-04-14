@@ -85,40 +85,27 @@
 
           <!-- 上一曲 -->
           <view class="ctrl-btn" @click="onPrev">
-            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
-            </svg>
+            <text class="ctrl-icon">⏮</text>
           </view>
 
           <!-- 播放 / 暂停 -->
           <view class="ctrl-btn ctrl-btn--play" @click="onToggle">
-            <svg v-if="isPlaying" xmlns="http://www.w3.org/2000/svg" class="ctrl-svg ctrl-svg--play" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="ctrl-svg ctrl-svg--play" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
+            <text class="ctrl-icon ctrl-icon--play">{{ isPlaying ? '⏸' : '▶' }}</text>
           </view>
 
           <!-- 下一曲 -->
           <view class="ctrl-btn" @click="onNext">
-            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 18 14.5 12 6 6v12zM16 6v12h2V6h-2z"/>
-            </svg>
+            <text class="ctrl-icon">⏭</text>
           </view>
 
           <!-- 歌单列表 -->
           <view class="ctrl-btn" @click="toggleList">
-            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" :style="{ color: showList ? '#2563eb' : '' }" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
-            </svg>
+            <text class="ctrl-icon" :style="{ color: showList ? '#2563eb' : '#64748b' }">☰</text>
           </view>
 
           <!-- 收起为 CD -->
           <view class="ctrl-btn" @click="collapsed = true">
-            <svg xmlns="http://www.w3.org/2000/svg" class="ctrl-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="18 15 12 9 6 15"/>
-            </svg>
+            <text class="ctrl-icon">∧</text>
           </view>
 
         </view>
@@ -440,22 +427,20 @@ export default {
 .ctrl-btn {
   width: 54rpx; height: 54rpx; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: #64748b;
-  opacity: 1; transition: opacity .15s;
+  opacity: 1;
   &:active { opacity: .5; }
 }
 .ctrl-btn--play {
   width: 72rpx; height: 72rpx;
   background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
   box-shadow: 0 4rpx 16rpx rgba(0,0,0,.28), 0 1rpx 4rpx rgba(0,0,0,.16);
-  color: #fff;
   margin: 0 6rpx;
   flex-shrink: 0;
 }
-.ctrl-svg {
-  width: 36rpx; height: 36rpx;
+.ctrl-icon {
+  font-size: 34rpx; color: #64748b; line-height: 1;
 }
-.ctrl-svg--play {
-  width: 30rpx; height: 30rpx;
+.ctrl-icon--play {
+  font-size: 30rpx; color: #fff;
 }
 </style>
