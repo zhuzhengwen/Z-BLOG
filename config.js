@@ -6,7 +6,7 @@ const CONFIG = {
   // ========== 必填：GitHub 仓库信息 ==========
   owner: 'zhuzhengwen',   // GitHub 用户名或组织名
   repo:  'Z-BLOG',       // 仓库名称（Issues 所在仓库）
-  token: '',                // 可选：GitHub Personal Access Token（提高 API 频率限制至 5000次/小时）
+  token: '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',  // 只读 Token，提高 API 频率限制至 5000次/小时
 
   // ========== 博客基本信息 ==========
   siteTitle:  'Z-BLOG',
