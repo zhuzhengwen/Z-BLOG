@@ -105,6 +105,11 @@
       <view class="section">
         <view class="section-title">⚙️ 设置</view>
         <view class="action-list">
+          <view class="action-item" @click="openTokenModal">
+            <text class="action-icon">🔑</text>
+            <text class="action-text">设置 GitHub Token</text>
+            <text class="action-arrow">›</text>
+          </view>
           <view class="action-item" @click="clearCache">
             <text class="action-icon">🗑️</text>
             <text class="action-text">清除缓存</text>
@@ -134,19 +139,21 @@
     <!-- 自定义底部导航 -->
     <music-player></music-player>
     <tab-bar current="profile"></tab-bar>
+    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
 import TabBar      from '../../components/TabBar.vue'
 import MusicPlayer from '../../components/MusicPlayer.vue'
+import TokenModal  from '../../components/TokenModal.vue'
 import CONFIG from '../../config.js'
 import api    from '../../utils/api.js'
 import { THEME_PRESETS, getThemeColor, saveThemeColor, darkenColor } from '../../utils/theme.js'
 import { extractImages } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar, MusicPlayer },
+  components: { TabBar, MusicPlayer, TokenModal },
   data() {
     return {
       config:          CONFIG,
@@ -274,6 +281,10 @@ export default {
     applyTheme(color) {
       this.themeColor = color
       saveThemeColor(color)
+    },
+
+    openTokenModal() {
+      uni.$emit('showTokenModal')
     },
   }
 }
