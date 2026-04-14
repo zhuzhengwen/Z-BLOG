@@ -213,14 +213,12 @@
 
     <music-player></music-player>
     <tab-bar current="index"></tab-bar>
-    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
 import PostCard    from '../../components/PostCard.vue'
 import TabBar      from '../../components/TabBar.vue'
-import TokenModal  from '../../components/TokenModal.vue'
 import MusicPlayer from '../../components/MusicPlayer.vue'
 import CONFIG      from '../../config.js'
 import api         from '../../utils/api.js'
@@ -228,7 +226,7 @@ import { getThemeColor, darkenColor } from '../../utils/theme.js'
 import { musicState } from '../../utils/music.js'
 
 export default {
-  components: { PostCard, TabBar, TokenModal, MusicPlayer },
+  components: { PostCard, TabBar, MusicPlayer },
   data() {
     return {
       posts:          [],

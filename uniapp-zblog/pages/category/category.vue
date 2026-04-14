@@ -76,13 +76,11 @@
     <!-- 自定义底部导航 -->
     <music-player></music-player>
     <tab-bar current="category"></tab-bar>
-    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
 import TabBar      from '../../components/TabBar.vue'
-import TokenModal  from '../../components/TokenModal.vue'
 import MusicPlayer from '../../components/MusicPlayer.vue'
 import CONFIG from '../../config.js'
 import api from '../../utils/api.js'
@@ -91,7 +89,7 @@ import { getRuntimeStr } from '../../utils/helper.js'
 const COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1','#14b8a6','#f97316']
 
 export default {
-  components: { TabBar, TokenModal, MusicPlayer },
+  components: { TabBar, MusicPlayer },
   data() {
     return {
       runtimeStr: getRuntimeStr(),

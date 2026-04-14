@@ -57,8 +57,7 @@ class GitHubAPI {
             this._setCache(full, res.data)
             resolve(res.data)
           } else if (res.statusCode === 403) {
-            uni.$emit('showTokenModal')
-            reject(new Error('GitHub API 频率限制，请设置 Token 后重试'))
+            reject(new Error('GitHub API 频率限制，请稍后再试'))
           } else {
             reject(new Error(`请求失败: ${res.statusCode}`))
           }

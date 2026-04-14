@@ -105,12 +105,6 @@
       <view class="section">
         <view class="section-title">⚙️ 设置</view>
         <view class="action-list">
-          <view class="action-item" @click="openTokenModal">
-            <text class="action-icon">🔑</text>
-            <text class="action-text">设置 GitHub Token</text>
-            <text class="action-tag">{{ hasToken ? '✅ 已设置' : '未设置' }}</text>
-            <text class="action-arrow">›</text>
-          </view>
           <view class="action-item" @click="clearCache">
             <text class="action-icon">🗑️</text>
             <text class="action-text">清除缓存</text>
@@ -140,13 +134,11 @@
     <!-- 自定义底部导航 -->
     <music-player></music-player>
     <tab-bar current="profile"></tab-bar>
-    <token-modal></token-modal>
   </view>
 </template>
 
 <script>
 import TabBar      from '../../components/TabBar.vue'
-import TokenModal  from '../../components/TokenModal.vue'
 import MusicPlayer from '../../components/MusicPlayer.vue'
 import CONFIG from '../../config.js'
 import api    from '../../utils/api.js'
@@ -154,7 +146,7 @@ import { THEME_PRESETS, getThemeColor, saveThemeColor, darkenColor } from '../..
 import { extractImages } from '../../utils/helper.js'
 
 export default {
-  components: { TabBar, TokenModal, MusicPlayer },
+  components: { TabBar, MusicPlayer },
   data() {
     return {
       config:          CONFIG,
@@ -183,7 +175,6 @@ export default {
       return `linear-gradient(135deg, ${this.themeColor} 0%, ${darkenColor(this.themeColor)} 100%)`
     },
     displayName()   { return this.name || this.login || CONFIG.siteTitle },
-    hasToken()      { return !!uni.getStorageSync('zblog_user_token') },
     totalArticles() { return Object.values(this.catCount).reduce((a, b) => a + b, 0) },
     blogDisplay() {
       return (this.blog || '').replace(/^https?:\/\//, '').replace(/\/$/, '')
@@ -255,9 +246,6 @@ export default {
       this.runtimeSecs  = s % 60
     },
 
-    openTokenModal() {
-      uni.$emit('showTokenModal', '')
-    },
 
     clearCache() {
       api.clearCache()
