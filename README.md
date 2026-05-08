@@ -14,11 +14,13 @@ PC 端通过 GitHub Pages 静态托管，移动端基于 UniApp 构建，支持 
 - 原生 JS 单页应用（SPA），Hash 路由，无需构建工具
 - 文章列表、分类筛选、全文搜索
 - Markdown 渲染 + 代码高亮（highlight.js，自动跟随主题）
+- **极简模式**：一键切换仿 imzm.im 风格，纯文字列表 + 简洁排版，偏好持久化
 - **思考分类**：Ant Design 风格时间线展示，支持年份 / 月份筛选
 - 侧边栏展示 GitHub 个人信息（头像、简介、Stars / Forks）
 - 照片墙（`#/photos`）：年月筛选、灯箱预览
 - 链接收藏（`#/category/link`）：卡片式图标展示
-- 背景音乐播放器：支持歌单、上一曲 / 下一曲、CD 浮钮收起态
+- 关于我页面（`#/about`）：直接展示 label 为 `about` 的文章
+- 背景音乐播放器：支持歌单、上一曲 / 下一曲、CD 浮钮收起态（极简模式下自动隐藏）
 - 暗黑模式：一键切换，跟随系统偏好，刷新不闪烁
 - 主题色选择器：12 套预设色 + 自定义拾色器，设置持久化
 - 完全响应式，适配手机 H5 访问，侧滑菜单
@@ -120,6 +122,8 @@ const CONFIG = {
   },
 
   cacheDuration: 5 * 60 * 1000,  // API 缓存时长（毫秒）
+
+  defaultMinimal: false,  // true = 默认极简模式，false = 默认正常模式
 };
 ```
 
@@ -129,14 +133,15 @@ const CONFIG = {
 
 进入仓库 → **Issues** → **Labels** → 新建以下标签：
 
-| Label 名称 | 颜色       | 说明       |
-|-----------|------------|----------|
-| `article` | `#28a745`  | 文章       |
-| `image`   | `#0969da`  | 图片 / 照片  |
-| `think`   | `#d73a49`  | 思考 / 随想  |
-| `note`    | `#6f42c1`  | 笔记       |
-| `link`    | `#e36209`  | 链接收藏    |
-| `music`   | `#ec4899`  | 音乐歌单    |
+| Label 名称 | 颜色       | 说明          |
+|-----------|------------|-------------|
+| `article` | `#28a745`  | 文章          |
+| `image`   | `#0969da`  | 图片 / 照片     |
+| `think`   | `#d73a49`  | 思考 / 随想     |
+| `note`    | `#6f42c1`  | 笔记          |
+| `link`    | `#e36209`  | 链接收藏        |
+| `music`   | `#ec4899`  | 音乐歌单        |
+| `about`   | 任意颜色     | 关于我（仅一篇）   |
 
 > Label 颜色会自动同步到博客标签展示色。
 
@@ -170,6 +175,10 @@ const CONFIG = {
 **链接（`link`）**
 - 正文中粘贴 URL，分类页以图标卡片展示
 
+**关于我（`about`）**
+- 只需创建一篇打上 `about` Label 的 Issue
+- 极简模式导航「关于我」直接跳转展示该文章全文
+
 **音乐（`music`）**
 - 正文格式：
   ```
@@ -182,6 +191,25 @@ const CONFIG = {
 ---
 
 ## 外观定制
+
+### 极简模式
+
+点击导航栏右上角 **三横线图标** 切换极简 / 正常模式：
+
+- **极简模式**：纯文字列表（`YYYY-MM-DD  标题`）、无侧边栏、无卡片边框、无背景音乐播放器，页面顶部显示站点名 + 分类导航，底部显示「返回顶部」和版权信息
+- **正常模式**：完整卡片布局 + 侧边栏 + 所有功能组件
+
+用户手动切换后偏好持久化（`localStorage`），优先级高于配置文件默认值。
+
+**设置默认风格**（在 `config.js` 中）：
+
+```js
+defaultMinimal: true,   // 默认打开为极简模式
+defaultMinimal: false,  // 默认打开为正常模式（默认值）
+```
+
+> 重置用户偏好（让 `defaultMinimal` 重新生效）：
+> 在浏览器控制台执行 `localStorage.removeItem('zblog-minimal')`
 
 ### 暗黑模式
 点击导航栏右上角 **月亮 / 太阳图标** 切换亮暗模式，偏好保存至 `localStorage`，未手动设置时跟随系统。
@@ -230,6 +258,7 @@ const CONFIG = {
 ## 参考与致谢
 
 - 灵感来源：[Gmeek](https://github.com/Meekdai/Gmeek)
+- 极简模式参考：[imzm.im](https://imzm.im)
 - GitHub Issues API：[官方文档](https://docs.github.com/en/rest/issues)
 - UniApp：[官方文档](https://uniapp.dcloud.net.cn/)
 

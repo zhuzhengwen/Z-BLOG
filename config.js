@@ -41,4 +41,12 @@ const CONFIG = {
 
   // ========== 缓存时长（毫秒）==========
   cacheDuration: 5 * 60 * 1000, // 5 分钟
+
+  // ========== 默认风格 ==========
+  // true = 默认极简模式，false = 默认正常模式
+  // 用户手动切换后会记住偏好，不受此项影响
+  defaultMinimal: true,
 };
+
+// 将默认值写入 localStorage，供 <head> 反闪脚本在下次加载时读取
+localStorage.setItem('zblog-minimal-default', CONFIG.defaultMinimal ? '1' : '0');

@@ -22,6 +22,12 @@
         document.documentElement.style.setProperty('--primary', c);
         document.documentElement.style.setProperty('--text-link', c);
       }
+      (function(){
+        var pref = localStorage.getItem('zblog-minimal');
+        var def  = localStorage.getItem('zblog-minimal-default');
+        if (pref === '1' || (pref === null && def === '1'))
+          document.documentElement.setAttribute('data-minimal','1');
+      })();
     })();
   </script>
 
@@ -72,6 +78,14 @@
       <span class="header__color-btn__ring" id="colorRing"></span>
     </button>
 
+    <!-- 极简模式切换（仅 PC 端显示） -->
+    <button class="header__minimal-btn" id="minimalToggle" title="切换极简/标准模式" onclick="app && app._toggleMinimalMode()">
+      <!-- 列表图标：标准模式下显示，点击切换为极简 -->
+      <svg class="icon-minimal" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <!-- 卡片图标：极简模式下显示，点击切换为标准 -->
+      <svg class="icon-standard" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+
     <!-- 汉堡菜单（仅移动端显示） -->
     <button class="header__hamburger" id="mobileMenuBtn" aria-label="菜单" onclick="app && app._toggleMobileMenu()">
       <span class="hamburger-line"></span>
@@ -92,6 +106,18 @@
     <input type="color" id="colorCustom" title="选择任意颜色">
     <button class="color-picker-custom__reset" onclick="app._resetColor()">重置</button>
   </div>
+</div>
+
+<!-- ── 极简模式头部（默认隐藏） ──────────────────────────── -->
+<div class="minimal-page-header" id="minimalPageHeader">
+  <div class="minimal-page-header__top">
+    <a class="minimal-page-header__title" href="#/" id="minimalPageTitle">Z-BLOG</a>
+    <button class="minimal-page-header__toggle" title="切换回标准模式"
+      onclick="app && app._toggleMinimalMode()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="minimal-page-header__nav" id="minimalPageNav"></nav>
 </div>
 
 <!-- ── 移动端导航面板 ──────────────────────────────────── -->
@@ -175,6 +201,13 @@
     </div>
 
   </aside>
+</div>
+
+<!-- ── 极简模式底部（默认隐藏） ──────────────────────────── -->
+<div class="minimal-footer" id="minimalFooter">
+  <a class="minimal-footer__top" href="#"
+    onclick="window.scrollTo({top:0,behavior:'smooth'});return false">返回顶部 ↑</a>
+  <p class="minimal-footer__copy" id="minimalFooterCopy"></p>
 </div>
 
 <!-- ── Footer ──────────────────────────────────────────── -->

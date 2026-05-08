@@ -19,6 +19,7 @@ class App {
   async _init() {
     initMarked();
     this._initTheme();
+    this._initMinimalMode();
     this._initColor();
     this._renderBeian();
     this._bindNav();
@@ -59,6 +60,75 @@ class App {
     const next = current === 'dark' ? 'light' : 'dark';
     this._applyTheme(next);
     localStorage.setItem('zblog-theme', next);
+  }
+
+  // ── 极简模式 ───────────────────────────────────────────
+  _isMinimal() {
+    return document.documentElement.getAttribute('data-minimal') === '1';
+  }
+
+  _siteTitle() {
+    return this._isMinimal() ? '朱正文' : CONFIG.siteTitle;
+  }
+
+  _updateFavicon() {
+    const link = document.querySelector('link[rel="icon"]');
+    if (!link) return;
+    if (this._isMinimal()) {
+      link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/>";
+    } else {
+      link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232563eb'/><path d='M8 9h16L9 23h15' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>";
+    }
+  }
+
+  _initMinimalMode() {
+    const pref = localStorage.getItem('zblog-minimal');
+    const isMinimal = pref === '1' || (pref === null && CONFIG.defaultMinimal);
+    if (isMinimal) {
+      document.documentElement.setAttribute('data-minimal', '1');
+      this._buildMinimalHeader();
+      document.title = '朱正文';
+      this._updateFavicon();
+    }
+  }
+
+  _buildMinimalHeader() {
+    // 站点标题
+    const titleEl = document.getElementById('minimalPageTitle');
+    if (titleEl) titleEl.textContent = '朱正文';
+
+    // 版权行
+    const copyEl = document.getElementById('minimalFooterCopy');
+    if (copyEl) copyEl.innerHTML = `© ${new Date().getFullYear()} <span class="minimal-name">朱正文</span>`;
+
+    // 导航链接（只构建一次）
+    const nav = document.getElementById('minimalPageNav');
+    if (!nav || nav.dataset.built) return;
+    nav.dataset.built = '1';
+
+    const items = [
+      { name: '全部', href: '#/' },
+      ...this.categories.map(c => ({ name: c.name, href: `#/category/${c.label}` })),
+      { name: '关于我', href: '#/about' },
+    ];
+    nav.innerHTML = items.map((item, i) => {
+      const sep = i > 0 ? '<span class="minimal-nav-sep">·</span>' : '';
+      return `${sep}<a href="${item.href}">${escapeHtml(item.name)}</a>`;
+    }).join('');
+  }
+
+  _toggleMinimalMode() {
+    if (this._isMinimal()) {
+      document.documentElement.removeAttribute('data-minimal');
+      localStorage.setItem('zblog-minimal', '0');
+    } else {
+      document.documentElement.setAttribute('data-minimal', '1');
+      localStorage.setItem('zblog-minimal', '1');
+      this._buildMinimalHeader();
+    }
+    document.title = this._siteTitle();
+    this._updateFavicon();
+    this._route();
   }
 
   // ── 备案信息 ────────────────────────────────────────────
@@ -206,7 +276,9 @@ class App {
     const [path, query] = hash.slice(1).split('?');
     const parts = path.split('/').filter(Boolean);
 
-    if (parts[0] === 'post' && parts[1]) {
+    if (parts[0] === 'about') {
+      this._showAbout();
+    } else if (parts[0] === 'post' && parts[1]) {
       this._showPost(parseInt(parts[1]));
     } else if (parts[0] === 'category' && parts[1]) {
       this.page = 1;
@@ -247,6 +319,15 @@ class App {
     });
     document.querySelectorAll('.cat-list__item[data-tag]').forEach(el => {
       el.classList.toggle('active', el.dataset.tag === this.activeTag);
+    });
+    // 极简导航高亮
+    document.querySelectorAll('.minimal-page-header__nav a').forEach(el => {
+      const href = el.getAttribute('href');
+      const active =
+        (href === '#/' && key === 'all') ||
+        (href === `#/category/${key}`) ||
+        (href === '#/about' && key === 'about');
+      el.classList.toggle('active', active);
     });
   }
 
@@ -414,6 +495,10 @@ class App {
 
     const main = document.getElementById('main');
     const cat = category ? this.categories.find(c => c.label === category) : null;
+    if (this._isMinimal()) {
+      const name = this.activeTag ? this.activeTag : (cat ? cat.name : null);
+      document.title = name ? `${name} - 朱正文` : '朱正文-博客';
+    }
     const tagSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>`;
     const tagIndicatorHtml = this.activeTag ? `
       <div class="tag-active-bar">
@@ -467,6 +552,7 @@ class App {
 
   // ── 思考时间线 ─────────────────────────────────────────
   async _showTimeline() {
+    if (this._isMinimal()) document.title = `${this.categories.find(c => c.label === 'think')?.name || '思考'} - 朱正文`;
     const cat   = this.categories.find(c => c.label === 'think');
     const color = cat ? cat.color : '#d73a49';
     const lbSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 006 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`;
@@ -697,6 +783,7 @@ class App {
 
   // ── 显示收藏链接页（含主题标签） ──────────────────────
   async _showLinks() {
+    if (this._isMinimal()) document.title = `${this.categories.find(c => c.label === 'link')?.name || '链接'} - 朱正文`;
     const COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1','#14b8a6','#f97316'];
     const main = document.getElementById('main');
     main.innerHTML = `
@@ -774,6 +861,27 @@ class App {
       </div>`;
   }
 
+  // ── 关于我（直接展示 about label 的第一篇文章）──────────
+  async _showAbout() {
+    this._setActiveNav('about');
+    const main = document.getElementById('main');
+    main.innerHTML = `<div id="postContent">${renderSkeletons(1)}</div>`;
+    try {
+      const issues = await this.api.getIssues({ label: 'about', perPage: 1 });
+      if (!issues || issues.length === 0) {
+        document.getElementById('postContent').innerHTML = `<div class="error-msg">暂无关于我的内容</div>`;
+        return;
+      }
+      document.getElementById('postContent').innerHTML = renderPostDetail(issues[0], this.categories);
+      if (typeof hljs !== 'undefined') {
+        document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+      }
+      document.title = `${issues[0].title} - ${this._siteTitle()}`;
+    } catch (e) {
+      document.getElementById('postContent').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+    }
+  }
+
   // ── 显示文章详情 ───────────────────────────────────────
   async _showPost(number) {
     const main = document.getElementById('main');
@@ -789,7 +897,7 @@ class App {
         document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
       }
       // 更新页面标题
-      document.title = `${issue.title} - ${CONFIG.siteTitle}`;
+      document.title = `${issue.title} - ${this._siteTitle()}`;
     } catch (e) {
       document.getElementById('postContent').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }

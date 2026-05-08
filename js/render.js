@@ -30,6 +30,14 @@ function initMarked() {
 }
 
 // ── 日期 ────────────────────────────────────────────────────
+function formatISODate(dateStr) {
+  const d = new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   const now = new Date();
@@ -244,6 +252,7 @@ function renderPostCard(issue, categories) {
 
   return `
   <article class="moment-card" data-number="${issue.number}">
+    <span class="moment-card__date-minimal">${formatISODate(issue.created_at)}</span>
     <div class="moment-card__author">
       <img class="moment-card__avatar" src="${avatarUrl}" alt="${escapeHtml(author.login || '')}" loading="lazy">
       <span class="moment-card__username">${escapeHtml(author.login || '')}</span>
@@ -376,6 +385,13 @@ function renderPostDetail(issue, categories) {
         <a class="post-detail__github-link" href="${issue.html_url}" target="_blank" rel="noopener">
           在 GitHub 查看
         </a>
+      </div>
+      <div class="post-detail__meta-minimal">
+        ${[cat ? `<a class="post-detail__meta-tag" href="#/category/${cat.label}">${escapeHtml(cat.name)}</a>` : '',
+           ...tags.map(t => `<a class="post-detail__meta-tag" href="#/tag/${encodeURIComponent(t.name)}">${escapeHtml(t.name)}</a>`)
+          ].filter(Boolean).join('<span class="post-detail__meta-comma">, </span>')}
+        <span class="post-detail__meta-dot"> · </span>
+        <time class="post-detail__meta-date">${new Date(issue.created_at).toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric'})}</time>
       </div>
     </header>
     <div class="post-detail__content markdown-body">
