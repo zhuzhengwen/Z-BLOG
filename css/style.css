@@ -1197,8 +1197,8 @@ html[data-minimal="1"] .minimal-footer      { display: block; }
 }
 .minimal-page-header__title:hover { text-decoration: none; }
 .minimal-page-header__toggle {
-  width: 26px; height: 26px; flex-shrink: 0;
-  border-radius: 5px; border: 1px solid var(--border);
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 7px; border: 1px solid var(--border);
   background: transparent; color: var(--text-muted);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
