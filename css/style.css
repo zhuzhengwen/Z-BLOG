@@ -1262,6 +1262,9 @@ html[data-minimal="1"] #music-player        { display: none !important; }
     margin-left: calc(50% - 162px);
     margin-right: auto;
   }
+  html[data-minimal="1"][data-view="post"] .layout {
+    padding-top: 40px;
+  }
   html[data-minimal="1"] .minimal-footer {
     max-width: 540px;
     margin: 32px auto 64px calc(50% - 162px);
