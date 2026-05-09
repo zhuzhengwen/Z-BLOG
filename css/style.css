@@ -179,19 +179,17 @@ button { cursor: pointer; font-family: inherit; }
 /* ── Minimal Mode Toggle Button ──────────────────────────── */
 .header__minimal-btn {
   display: none;
-  position: fixed; top: 13px; right: 20px;
+  position: fixed; top: 13px; right: 20px; z-index: 200;
   width: 34px; height: 34px;
   align-items: center; justify-content: center;
   border-radius: 8px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-muted);
-  cursor: pointer; z-index: 200;
-  box-shadow: var(--shadow-sm);
-  transition: background var(--transition), color var(--transition), border-color var(--transition), opacity var(--transition), transform .15s ease;
-  overflow: hidden;
+  background: var(--surface-2); color: var(--text-muted);
+  cursor: pointer; overflow: hidden;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform .15s ease;
 }
 @media (min-width: 769px) { .header__minimal-btn { display: flex; } }
 .header__minimal-btn:hover {
-  background: var(--surface-2); color: var(--text);
+  background: var(--surface); color: var(--text);
   border-color: var(--primary); transform: scale(1.05);
 }
 .header__minimal-btn svg {
@@ -202,6 +200,7 @@ button { cursor: pointer; font-family: inherit; }
 .header__minimal-btn .icon-standard { opacity: 0; transform: scale(.65); }
 html[data-minimal="1"] .header__minimal-btn .icon-minimal  { opacity: 0; transform: scale(.65); }
 html[data-minimal="1"] .header__minimal-btn .icon-standard { opacity: 1; transform: scale(1); }
+html[data-minimal="1"] .header__minimal-btn { background: var(--surface); box-shadow: var(--shadow-sm); }
 
 /* ── Color Picker Popup ──────────────────────────────────── */
 .color-picker-popup {
