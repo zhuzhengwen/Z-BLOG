@@ -94,6 +94,21 @@ class GitHubAPI {
     return this._request(`https://api.github.com/users/${this.owner}`);
   }
 
+  // ── 获取文章总数（搜索 API，带缓存）────────────────────────
+  async getTotalCount(label = null) {
+    const labelPart = label ? label.split(',').map(l => `label:"${l}"`).join(' ') : '';
+    const q = `repo:${this.owner}/${this.repo} is:issue is:open ${labelPart}`.trim();
+    const cacheKey = `total_count:${q}`;
+    const cached = this._getCache(cacheKey);
+    if (cached !== null) return cached;
+    try {
+      const data = await this._request('https://api.github.com/search/issues', { q, per_page: 1 });
+      const count = data.total_count || 0;
+      this._setCache(cacheKey, count);
+      return count;
+    } catch { return null; }
+  }
+
   // ── 搜索帖子 ─────────────────────────────────────────────
   async searchIssues(query, page = 1, perPage = 10) {
     const q = `${query} repo:${this.owner}/${this.repo} is:issue is:open`;

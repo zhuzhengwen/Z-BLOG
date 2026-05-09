@@ -206,9 +206,9 @@ function renderPostCard(issue, categories) {
   const imgs   = extractImages(issue.body || '');
   const videos = extractVideos(issue.body || '');
 
-  // 媒体列表：图片帖取全部（最多9张），其他只取封面
+  // 媒体列表：图片帖取全部（最多9张），其他不显示图片
   const isImagePost = cat && cat.label === 'image';
-  let mediaList = isImagePost ? imgs.slice(0, 9) : (imgs.length ? imgs.slice(0, 1) : []);
+  let mediaList = isImagePost ? imgs.slice(0, 9) : [];
   if (!mediaList.length && videos.length && videos[0].thumb) {
     mediaList = [videos[0].thumb];
   }
@@ -251,7 +251,7 @@ function renderPostCard(issue, categories) {
     : `https://github.com/${author.login || 'ghost'}.png`;
 
   return `
-  <article class="moment-card" data-number="${issue.number}">
+  <article class="moment-card${isImagePost ? ' moment-card--image' : ''}" data-number="${issue.number}">
     <span class="moment-card__date-minimal">${formatISODate(issue.created_at)}</span>
     <div class="moment-card__author">
       <img class="moment-card__avatar" src="${avatarUrl}" alt="${escapeHtml(author.login || '')}" loading="lazy">
@@ -421,11 +421,15 @@ function renderSkeletons(count = 5) {
 }
 
 // ── 分页 ─────────────────────────────────────────────────────
-function renderPagination(page, hasNext) {
+function renderPagination(page, hasNext, totalCount) {
+  const totalHtml = totalCount != null
+    ? `<span class="pagination__total">共 ${totalCount} 篇</span>`
+    : '';
   return `
   <div class="pagination">
     <button class="btn btn--ghost" onclick="app.prevPage()" ${page <= 1 ? 'disabled' : ''}>← 上一页</button>
-    <span class="pagination__page">第 ${page} 页</span>
+    <span class="pagination__page">第 ${page} 页${totalHtml ? '' : ''}</span>
+    ${totalHtml}
     <button class="btn btn--ghost" onclick="app.nextPage()" ${!hasNext ? 'disabled' : ''}>下一页 →</button>
   </div>`;
 }

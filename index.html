@@ -32,7 +32,7 @@
   </script>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260508">
+  <link rel="stylesheet" href="css/style.css?v=20260509s">
   <!-- highlight.js -->
   <link id="hljsLight" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
   <link id="hljsDark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" disabled>
@@ -108,16 +108,29 @@
   </div>
 </div>
 
+<!-- 极简模式：右上角固定切换按钮 -->
+<button class="minimal-page-header__toggle" title="切换回标准模式"
+  onclick="app && app._toggleMinimalMode()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+</button>
+
 <!-- ── 极简模式头部（默认隐藏） ──────────────────────────── -->
-<div class="minimal-page-header" id="minimalPageHeader">
-  <div class="minimal-page-header__top">
-    <a class="minimal-page-header__title" href="#/" id="minimalPageTitle">Z-BLOG</a>
-    <button class="minimal-page-header__toggle" title="切换回标准模式"
-      onclick="app && app._toggleMinimalMode()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
+<aside class="minimal-page-header" id="minimalPageHeader">
+  <div class="minimal-page-header__inner">
+    <a class="minimal-page-header__avatar" href="#/" id="minimalPageAvatarLink" aria-label="预览头像"
+       onclick="event.preventDefault();document.getElementById('avatarLightbox').classList.add('active')">
+      <img class="minimal-page-header__avatar-img" id="minimalPageAvatar" alt="" loading="lazy">
+    </a>
+    <a class="minimal-page-header__title" href="#/" id="minimalPageTitle">朱正文</a>
+    <p class="minimal-page-header__bio" id="minimalPageBio"></p>
+    <nav class="minimal-page-header__nav" id="minimalPageNav"></nav>
   </div>
-  <nav class="minimal-page-header__nav" id="minimalPageNav"></nav>
+</aside>
+
+<!-- ── 头像预览 Lightbox ─────────────────────────────── -->
+<div class="avatar-lightbox" id="avatarLightbox"
+     onclick="this.classList.remove('active')">
+  <img class="avatar-lightbox__img" id="avatarLightboxImg" alt="">
 </div>
 
 <!-- ── 移动端导航面板 ──────────────────────────────────── -->
@@ -205,9 +218,14 @@
 
 <!-- ── 极简模式底部（默认隐藏） ──────────────────────────── -->
 <div class="minimal-footer" id="minimalFooter">
-  <a class="minimal-footer__top" href="#"
-    onclick="window.scrollTo({top:0,behavior:'smooth'});return false">返回顶部 ↑</a>
-  <p class="minimal-footer__copy" id="minimalFooterCopy"></p>
+  <div class="minimal-footer__left">
+    <a class="minimal-footer__top" href="#"
+      onclick="window.scrollTo({top:0,behavior:'smooth'});return false">返回顶部 ↑</a>
+    <p class="minimal-footer__copy" id="minimalFooterCopy"></p>
+  </div>
+  <div class="minimal-footer__right">
+    <div class="minimal-footer__beian" id="minimalFooterBeian"></div>
+  </div>
 </div>
 
 <!-- ── Footer ──────────────────────────────────────────── -->

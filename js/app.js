@@ -97,9 +97,52 @@ class App {
     const titleEl = document.getElementById('minimalPageTitle');
     if (titleEl) titleEl.textContent = '朱正文';
 
+    // 头像
+    const avatarEl = document.getElementById('minimalPageAvatar');
+    if (avatarEl && !avatarEl.src) {
+      const url = CONFIG.siteAvatar || `https://github.com/${CONFIG.owner}.png?size=120`;
+      avatarEl.src = url;
+      const lbImg = document.getElementById('avatarLightboxImg');
+      if (lbImg) lbImg.src = url;
+    }
+
+    // 简介
+    const bioEl = document.getElementById('minimalPageBio');
+    if (bioEl && !bioEl.textContent) bioEl.textContent = '一个写字的地方';
+
     // 版权行
     const copyEl = document.getElementById('minimalFooterCopy');
     if (copyEl) copyEl.innerHTML = `© ${new Date().getFullYear()} <span class="minimal-name">朱正文</span>`;
+
+    // 备案号
+    const beianEl = document.getElementById('minimalFooterBeian');
+    if (beianEl && !beianEl.dataset.rendered) {
+      beianEl.dataset.rendered = '1';
+      const b = (typeof CONFIG !== 'undefined' && CONFIG.beian) || {};
+      const items = [];
+      if (b.icp) items.push(`<a class="beian-item" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>${b.icp}</a>`);
+      if (b.police) {
+        const link = b.policeCode ? `http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=${b.policeCode}` : 'http://www.beian.gov.cn/';
+        items.push(`<a class="beian-item" href="${link}" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>${b.police}</a>`);
+      }
+      beianEl.innerHTML = items.join('');
+    }
+
+    // 竖线底部跟随 footer 顶部（只注册一次）
+    if (!this._dividerSyncBound) {
+      this._dividerSyncBound = true;
+      this._syncDivider = () => {
+        const footer = document.querySelector('.minimal-footer');
+        if (!footer) return;
+        const fromBottom = window.innerHeight - footer.getBoundingClientRect().top;
+        document.documentElement.style.setProperty('--divider-bottom', Math.max(0, fromBottom) + 'px');
+      };
+      window.addEventListener('scroll', this._syncDivider, { passive: true });
+      window.addEventListener('resize', this._syncDivider, { passive: true });
+      // 页面内容高度变化时自动重同步（骨架屏→真实内容）
+      const ro = new ResizeObserver(this._syncDivider);
+      ro.observe(document.getElementById('main') || document.body);
+    }
 
     // 导航链接（只构建一次）
     const nav = document.getElementById('minimalPageNav');
@@ -490,6 +533,8 @@ class App {
 
   // ── 显示列表页 ─────────────────────────────────────────
   async _showList(category) {
+    window.scrollTo(0, 0);
+    document.documentElement.removeAttribute('data-view');
     if (category === 'link')  { await this._showLinks();   return; }
     if (category === 'think') { await this._showTimeline(); return; }
 
@@ -506,6 +551,14 @@ class App {
         <button class="tag-active-bar__clear" onclick="app._selectTag(null)">✕ 清除筛选</button>
       </div>` : '';
 
+    const imageToggleHtml = (category === 'image' && !this.activeTag) ? `
+      <div class="minimal-img-bar">
+        <button class="minimal-img-bar__btn" onclick="app._showImageGrid()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          全部图片
+        </button>
+      </div>` : '';
+
     main.innerHTML = `
       <div class="section-header">
         <h1 class="section-header__title">
@@ -514,6 +567,7 @@ class App {
         <span class="section-header__sub" id="postCount"></span>
       </div>
       ${tagIndicatorHtml}
+      ${imageToggleHtml}
       <div class="post-list" id="postList">${renderSkeletons(5)}</div>
       <div id="pagination"></div>`;
 
@@ -522,11 +576,10 @@ class App {
       let label = category || null;
       if (this.activeTag) label = label ? `${label},${this.activeTag}` : this.activeTag;
 
-      const issues = await this.api.getIssues({
-        page: this.page,
-        perPage: CONFIG.postsPerPage,
-        label,
-      });
+      const [issues, totalCount] = await Promise.all([
+        this.api.getIssues({ page: this.page, perPage: CONFIG.postsPerPage, label }),
+        this.api.getTotalCount(label),
+      ]);
       this.lastIssuesCount = issues.length;
 
       const listEl = document.getElementById('postList');
@@ -544,10 +597,11 @@ class App {
 
       document.getElementById('postCount').textContent = `第 ${this.page} 页`;
       document.getElementById('pagination').innerHTML =
-        renderPagination(this.page, issues.length >= CONFIG.postsPerPage);
+        renderPagination(this.page, issues.length >= CONFIG.postsPerPage, totalCount);
     } catch (e) {
       document.getElementById('postList').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
     }
+    if (this._syncDivider) setTimeout(this._syncDivider, 50);
   }
 
   // ── 思考时间线 ─────────────────────────────────────────
@@ -711,6 +765,58 @@ class App {
     }
   }
 
+  // ── 极简图片九宫格 ──────────────────────────────────────
+  async _showImageGrid() {
+    const main = document.getElementById('main');
+    main.innerHTML = `
+      <div class="minimal-img-bar">
+        <button class="minimal-img-bar__btn" onclick="app._showList('image')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          文章列表
+        </button>
+        <span class="minimal-img-bar__count" id="imgGridCount"></span>
+      </div>
+      <div class="img-mosaic" id="imgMosaic">
+        ${Array(9).fill('<div class="img-mosaic__cell img-mosaic__cell--skeleton"></div>').join('')}
+      </div>
+      <div class="avatar-lightbox" id="imgLightbox" onclick="this.classList.remove('active')">
+        <img class="avatar-lightbox__img" id="imgLightboxImg" style="border-radius:4px" alt="">
+      </div>`;
+
+    try {
+      let page = 1, issues = [];
+      while (true) {
+        const batch = await this.api.getIssues({ page, perPage: 100, label: 'image' });
+        issues = issues.concat(batch);
+        if (batch.length < 100) break;
+        page++;
+      }
+
+      const imgs = [];
+      issues.forEach(issue => {
+        extractImages(issue.body || '').forEach(src => imgs.push({ src, title: issue.title }));
+      });
+
+      const countEl = document.getElementById('imgGridCount');
+      if (countEl) countEl.textContent = `共 ${imgs.length} 张`;
+
+      const mosaic = document.getElementById('imgMosaic');
+      if (!imgs.length) { mosaic.innerHTML = '<p style="padding:20px 0;color:var(--text-muted)">暂无图片</p>'; return; }
+
+      mosaic.innerHTML = imgs.map((img, i) => `
+        <div class="img-mosaic__cell" onclick="(function(){
+          var lb=document.getElementById('imgLightbox');
+          var im=document.getElementById('imgLightboxImg');
+          im.src='${escapeHtml(img.src)}'; lb.classList.add('active');
+        })()">
+          <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.title)}" loading="lazy">
+        </div>`).join('');
+    } catch (e) {
+      const mosaic = document.getElementById('imgMosaic');
+      if (mosaic) mosaic.innerHTML = `<p style="color:var(--text-muted)">⚠️ ${e.message}</p>`;
+    }
+  }
+
   _buildAlbumBar() {
     const bar = document.getElementById('albumBar');
     if (!bar) return;
@@ -863,6 +969,8 @@ class App {
 
   // ── 关于我（直接展示 about label 的第一篇文章）──────────
   async _showAbout() {
+    window.scrollTo(0, 0);
+    document.documentElement.setAttribute('data-view','post');
     this._setActiveNav('about');
     const main = document.getElementById('main');
     main.innerHTML = `<div id="postContent">${renderSkeletons(1)}</div>`;
@@ -884,6 +992,8 @@ class App {
 
   // ── 显示文章详情 ───────────────────────────────────────
   async _showPost(number) {
+    window.scrollTo(0, 0);
+    document.documentElement.setAttribute('data-view','post');
     const main = document.getElementById('main');
     main.innerHTML = `
       <button class="back-btn" onclick="history.back()">← 返回列表</button>
@@ -947,6 +1057,8 @@ class App {
 
 // ── 启动 ───────────────────────────────────────────────────
 let app;
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!CONFIG.owner || CONFIG.owner === 'your-username') {
     document.getElementById('main').innerHTML = `
