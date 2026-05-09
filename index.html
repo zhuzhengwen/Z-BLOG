@@ -78,14 +78,6 @@
       <span class="header__color-btn__ring" id="colorRing"></span>
     </button>
 
-    <!-- 极简模式切换（仅 PC 端显示） -->
-    <button class="header__minimal-btn" id="minimalToggle" title="切换极简/标准模式" onclick="app && app._toggleMinimalMode()">
-      <!-- 列表图标：标准模式下显示，点击切换为极简 -->
-      <svg class="icon-minimal" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      <!-- 卡片图标：极简模式下显示，点击切换为标准 -->
-      <svg class="icon-standard" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    </button>
-
     <!-- 汉堡菜单（仅移动端显示） -->
     <button class="header__hamburger" id="mobileMenuBtn" aria-label="菜单" onclick="app && app._toggleMobileMenu()">
       <span class="hamburger-line"></span>
@@ -108,10 +100,10 @@
   </div>
 </div>
 
-<!-- 极简模式：右上角固定切换按钮 -->
-<button class="minimal-page-header__toggle" title="切换回标准模式"
-  onclick="app && app._toggleMinimalMode()">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+<!-- 极简模式切换（固定右上角，PC 端两种模式共用） -->
+<button class="header__minimal-btn" id="minimalToggle" title="切换极简/标准模式" onclick="app && app._toggleMinimalMode()">
+  <svg class="icon-minimal" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  <svg class="icon-standard" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
 </button>
 
 <!-- ── 极简模式头部（默认隐藏） ──────────────────────────── -->
