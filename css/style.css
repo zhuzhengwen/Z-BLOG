@@ -179,7 +179,8 @@ button { cursor: pointer; font-family: inherit; }
 /* ── Minimal Mode Toggle Button ──────────────────────────── */
 .header__minimal-btn {
   display: none;
-  position: fixed; top: 13px; right: 20px; z-index: 200;
+  position: fixed; top: 13px; z-index: 200;
+  right: max(20px, calc((100vw - 1140px) / 2 + 20px));
   width: 34px; height: 34px;
   align-items: center; justify-content: center;
   border-radius: 8px; border: 1px solid var(--border);
