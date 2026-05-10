@@ -1484,7 +1484,7 @@ html[data-minimal="1"] .post-detail__footer .btn:hover {
 .minimal-footer {
   max-width: 600px; margin: 32px auto 64px; padding: 0 24px;
   border-top: none;
-  display: flex; justify-content: space-between; align-items: flex-start;
+  justify-content: space-between; align-items: flex-start;
 }
 .minimal-footer__left {
   display: flex; flex-direction: column; gap: 4px;
