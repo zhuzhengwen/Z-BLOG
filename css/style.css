@@ -1185,7 +1185,7 @@ html[data-minimal="1"] .footer             { display: none; }
 html[data-minimal="1"] .mobile-nav-panel   { display: none !important; }
 html[data-minimal="1"] .color-picker-popup { display: none !important; }
 html[data-minimal="1"] .minimal-page-header { display: block; }
-html[data-minimal="1"] .minimal-footer      { display: block; }
+html[data-minimal="1"] .minimal-footer      { display: flex; }
 html[data-minimal="1"] #music-player        { display: none !important; }
 
 /* ── 名片栏（左侧固定） ── */
