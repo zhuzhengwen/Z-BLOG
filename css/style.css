@@ -125,6 +125,8 @@ button { cursor: pointer; font-family: inherit; }
 }
 .header__search input::placeholder { color: var(--text-muted); }
 
+.header__btn-group { display: flex; align-items: center; gap: 8px; }
+
 /* ── Theme Toggle Button ──────────────────────────────── */
 .header__theme-btn {
   display: flex; align-items: center; justify-content: center;

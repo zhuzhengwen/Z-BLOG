@@ -185,10 +185,10 @@ class App {
       btn.style.right = '';
       return;
     }
-    const colorBtn = document.getElementById('colorPickerBtn');
-    if (!colorBtn) return;
-    const r = colorBtn.getBoundingClientRect();
-    const right = window.innerWidth - r.right - 16 - 34;
+    const group = document.getElementById('headerBtnGroup');
+    if (!group) return;
+    const r = group.getBoundingClientRect();
+    const right = document.documentElement.clientWidth - r.right - 8 - 34;
     btn.style.right = Math.max(8, right) + 'px';
   }
 
