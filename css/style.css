@@ -203,7 +203,35 @@ button { cursor: pointer; font-family: inherit; }
 .header__minimal-btn .icon-standard { opacity: 0; transform: scale(.65); }
 html[data-minimal="1"] .header__minimal-btn .icon-minimal  { opacity: 0; transform: scale(.65); }
 html[data-minimal="1"] .header__minimal-btn .icon-standard { opacity: 1; transform: scale(1); }
-html[data-minimal="1"] .header__minimal-btn { background: var(--surface); box-shadow: var(--shadow-sm); }
+html[data-minimal="1"] .header__minimal-btn { display: none; }
+
+/* ── Minimal Mode Switch (inside minimal-page-header) ────── */
+.minimal-mode-switch {
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: none; cursor: pointer;
+  padding: 2px 0; color: var(--text-muted);
+  font-size: 0.75rem; letter-spacing: 0.04em;
+  margin-top: 6px;
+}
+.minimal-mode-switch__track {
+  position: relative;
+  width: 34px; height: 19px;
+  border-radius: 10px;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background var(--transition);
+}
+.minimal-mode-switch__thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  transition: transform .2s ease;
+  transform: translateX(15px);
+}
+.minimal-mode-switch:hover .minimal-mode-switch__track { opacity: 0.82; }
 
 /* ── Color Picker Popup ──────────────────────────────────── */
 .color-picker-popup {
@@ -407,10 +435,7 @@ html[data-minimal="1"] .header__minimal-btn { background: var(--surface); box-sh
   box-shadow: var(--shadow-md);
 }
 
-.moment-card__author {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 10px;
-}
+.moment-card__author { display: none; }
 .moment-card__avatar {
   width: 26px; height: 26px; border-radius: 50%;
   object-fit: cover; flex-shrink: 0;
@@ -462,7 +487,7 @@ html[data-minimal="1"] .header__minimal-btn { background: var(--surface); box-sh
 .moment-card__photos-link:hover { text-decoration: underline; }
 
 .moment-card__footer {
-  display: flex; justify-content: flex-end; align-items: center;
+  display: flex; justify-content: space-between; align-items: center;
   margin-top: 8px;
 }
 .moment-card__date     { font-size: .78rem; color: var(--text-muted); }
@@ -1306,6 +1331,18 @@ html[data-minimal="1"] #music-player        { display: none !important; }
     align-self: center;
   }
 }
+
+/* 极简模式滑动动画 */
+@keyframes slideFromRight {
+  from { transform: translateX(48px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slideFromLeft {
+  from { transform: translateX(-48px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+html[data-minimal="1"] .main.slide-from-right { animation: slideFromRight .28s cubic-bezier(.25,.46,.45,.94); }
+html[data-minimal="1"] .main.slide-from-left  { animation: slideFromLeft  .28s cubic-bezier(.25,.46,.45,.94); }
 
 /* 极简布局（共用） */
 html[data-minimal="1"] .layout {

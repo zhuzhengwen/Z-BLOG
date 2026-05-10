@@ -549,9 +549,21 @@ class App {
     }
   }
 
+  // 极简模式滑动动画
+  _slideMain(dir) {
+    if (!document.documentElement.hasAttribute('data-minimal')) return;
+    const main = document.getElementById('main');
+    const cls = dir === 'right' ? 'slide-from-right' : 'slide-from-left';
+    main.classList.remove('slide-from-right', 'slide-from-left');
+    void main.offsetWidth;
+    main.classList.add(cls);
+    main.addEventListener('animationend', () => main.classList.remove(cls), { once: true });
+  }
+
   // ── 显示列表页 ─────────────────────────────────────────
   async _showList(category) {
     window.scrollTo(0, 0);
+    this._slideMain('left');
     document.documentElement.removeAttribute('data-view');
     if (category === 'link')  { await this._showLinks();   return; }
     if (category === 'think') { await this._showTimeline(); return; }
@@ -1011,6 +1023,7 @@ class App {
   // ── 显示文章详情 ───────────────────────────────────────
   async _showPost(number) {
     window.scrollTo(0, 0);
+    this._slideMain('right');
     document.documentElement.setAttribute('data-view','post');
     const main = document.getElementById('main');
     main.innerHTML = `

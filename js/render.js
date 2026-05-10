@@ -253,16 +253,12 @@ function renderPostCard(issue, categories) {
   return `
   <article class="moment-card${isImagePost ? ' moment-card--image' : ''}" data-number="${issue.number}">
     <span class="moment-card__date-minimal">${formatISODate(issue.created_at)}</span>
-    <div class="moment-card__author">
-      <img class="moment-card__avatar" src="${avatarUrl}" alt="${escapeHtml(author.login || '')}" loading="lazy">
-      <span class="moment-card__username">${escapeHtml(author.login || '')}</span>
-      <time class="moment-card__date">${formatDate(issue.created_at)}</time>
-    </div>
     <div class="moment-card__title">${escapeHtml(issue.title)}</div>
     ${badgesHtml ? `<div class="moment-card__badges">${badgesHtml}</div>` : ''}
     ${excerpt ? `<div class="moment-card__excerpt">${escapeHtml(excerpt)}</div>` : ''}
     ${gridHtml}
     <div class="moment-card__footer">
+      <time class="moment-card__date">${formatDate(issue.created_at)}</time>
       <span class="moment-card__comments"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> ${issue.comments}</span>
     </div>
   </article>`;
