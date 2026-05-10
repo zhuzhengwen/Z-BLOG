@@ -1381,10 +1381,7 @@ html[data-minimal="1"] .moment-grid                { display: none !important; }
 html[data-minimal="1"] .moment-card__photos-link   { display: none !important; }
 html[data-minimal="1"] .moment-card__footer        { display: none !important; }
 
-/* 极简模式：图片文章显示完整图片 */
-html[data-minimal="1"] .moment-card--image {
-  flex-direction: column; align-items: flex-start; gap: 6px;
-}
+/* 极简模式：图片文章与普通文章布局一致（图片等已隐藏，无需 column 方向） */
 html[data-minimal="1"] .moment-card__title {
   order: 1; flex: 1;
   font-size: 1rem; font-weight: 500;
