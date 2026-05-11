@@ -22,8 +22,6 @@ class App {
     this._initMinimalMode();
     this._initColor();
     this._renderBeian();
-    this._syncTogglePos();
-    window.addEventListener('resize', () => this._syncTogglePos(), { passive: true });
     this._bindNav();
     this._bindSearch();
     this._bindMobileMenu();
@@ -173,26 +171,10 @@ class App {
     }
     document.title = this._siteTitle();
     this._updateFavicon();
-    this._syncTogglePos();
     this._route();
   }
 
-  // 让切换按钮紧贴 colorPickerBtn 右侧（正常模式），极简模式用 CSS 默认值
-  _syncTogglePos() {
-    const btn = document.getElementById('minimalToggle');
-    if (!btn || window.innerWidth <= 768) return;
-    if (this._isMinimal()) {
-      btn.style.right = '';
-      return;
-    }
-    const group = document.getElementById('headerBtnGroup');
-    if (!group) return;
-    const r = group.getBoundingClientRect();
-    const right = document.documentElement.clientWidth - r.right - 8 - 34;
-    btn.style.right = Math.max(8, right) + 'px';
-  }
-
-  // ── 备案信息 ────────────────────────────────────────────
+// ── 备案信息 ────────────────────────────────────────────
   _renderBeian() {
     const el = document.getElementById('footerBeian');
     if (!el) return;
