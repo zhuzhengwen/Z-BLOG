@@ -48,12 +48,13 @@ async function loadPlaylistFromGitHub() {
   try {
     const owner   = CONFIG.owner
     const repo    = CONFIG.repo
-    const token   = localStorage.getItem('zblog_user_token') || CONFIG.token || ''
-    const headers = { Accept: 'application/vnd.github.v3+json' }
-    if (token) headers.Authorization = `token ${token}`
+    const proxyBase = (CONFIG.proxyUrl || '').replace(/\/$/, '') || 'https://api.github.com'
+    const token     = localStorage.getItem('zblog_user_token') || CONFIG.token || ''
+    const headers   = { Accept: 'application/vnd.github.v3+json' }
+    if (token && proxyBase === 'https://api.github.com') headers.Authorization = `token ${token}`
 
     const res    = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/issues?labels=music&state=open&per_page=100`,
+      `${proxyBase}/repos/${owner}/${repo}/issues?labels=music&state=open&per_page=100`,
       { headers }
     )
     if (!res.ok) return

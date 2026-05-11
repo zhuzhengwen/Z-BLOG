@@ -6,10 +6,12 @@ const CONFIG = {
   // ========== 必填：GitHub 仓库信息 ==========
   owner: 'zhuzhengwen',   // GitHub 用户名或组织名
   repo:  'Z-BLOG',       // 仓库名称（Issues 所在仓库）
-  // token 不存在代码里，防止 GitHub 自动吊销
-  // 访问量不大时无需 token（60次/小时已够）
-  // 如需提高限额，在浏览器控制台执行：localStorage.setItem('zblog_user_token', '你的token')
   token: '',
+
+  // Cloudflare Worker 代理地址（推荐填写，所有访客共享 Token 额度）
+  // 部署 worker/index.js 后填入，如：https://zblog-proxy.your-name.workers.dev
+  // 留空则直接请求 GitHub API（60次/小时/IP 限制）
+  proxyUrl: '',
 
   // ========== 博客基本信息 ==========
   siteTitle:  'Z-BLOG',

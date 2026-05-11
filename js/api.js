@@ -3,12 +3,14 @@
  * 支持缓存、分页、标签过滤、搜索
  */
 class GitHubAPI {
-  constructor({ owner, repo, token, cacheDuration }) {
+  constructor({ owner, repo, token, cacheDuration, proxyUrl }) {
     this.owner = owner;
     this.repo = repo;
-    // 优先用 localStorage 中用户自己设置的 token
     this.token = localStorage.getItem('zblog_user_token') || token || '';
-    this.baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
+    // 有代理时走代理，无代理直接请求 GitHub
+    const base = (proxyUrl || '').replace(/\/$/, '') || 'https://api.github.com';
+    this.baseUrl = `${base}/repos/${owner}/${repo}`;
+    this.apiBase = base;
     this.cacheDuration = cacheDuration || 5 * 60 * 1000;
     this._cache = {};
     // 清理旧版遗留在 localStorage 里的 API 缓存
@@ -49,7 +51,10 @@ class GitHubAPI {
     if (cached) return cached;
 
     const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    if (this.token) headers['Authorization'] = `token ${this.token}`;
+    // 走代理时不带 token（代理服务端已有 token）；直连时带用户 token
+    if (this.token && this.apiBase === 'https://api.github.com') {
+      headers['Authorization'] = `token ${this.token}`;
+    }
 
     const res = await fetch(full, { headers });
 
@@ -92,7 +97,7 @@ class GitHubAPI {
 
   // ── 获取用户信息（头像、昵称、简介、地区等）────────────────
   async getUser() {
-    return this._request(`https://api.github.com/users/${this.owner}`);
+    return this._request(`${this.apiBase}/users/${this.owner}`);
   }
 
   // ── 获取文章总数（搜索 API，带缓存）────────────────────────
@@ -103,7 +108,7 @@ class GitHubAPI {
     const cached = this._getCache(cacheKey);
     if (cached !== null) return cached;
     try {
-      const data = await this._request('https://api.github.com/search/issues', { q, per_page: 1 });
+      const data = await this._request('${this.apiBase}/search/issues', { q, per_page: 1 });
       const count = data.total_count || 0;
       this._setCache(cacheKey, count);
       return count;
@@ -113,7 +118,7 @@ class GitHubAPI {
   // ── 搜索帖子 ─────────────────────────────────────────────
   async searchIssues(query, page = 1, perPage = 10) {
     const q = `${query} repo:${this.owner}/${this.repo} is:issue is:open`;
-    const data = await this._request('https://api.github.com/search/issues', { q, page, per_page: perPage, sort: 'created' });
+    const data = await this._request('${this.apiBase}/search/issues', { q, page, per_page: perPage, sort: 'created' });
     return { items: (data.items || []).filter(i => !i.pull_request), total: data.total_count };
   }
 
