@@ -48,7 +48,9 @@ async function loadPlaylistFromGitHub() {
   try {
     const owner   = CONFIG.owner
     const repo    = CONFIG.repo
-    const proxyBase = (CONFIG.proxyUrl || '').replace(/\/$/, '') || 'https://api.github.com'
+    const proxyBase = (CONFIG.useProxy && CONFIG.proxyUrl)
+      ? CONFIG.proxyUrl.replace(/\/$/, '')
+      : 'https://api.github.com'
     const token     = localStorage.getItem('zblog_user_token') || CONFIG.token || ''
     const headers   = { Accept: 'application/vnd.github.v3+json' }
     if (token && proxyBase === 'https://api.github.com') headers.Authorization = `token ${token}`

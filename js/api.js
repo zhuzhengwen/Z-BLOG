@@ -3,12 +3,14 @@
  * 支持缓存、分页、标签过滤、搜索
  */
 class GitHubAPI {
-  constructor({ owner, repo, token, cacheDuration, proxyUrl }) {
+  constructor({ owner, repo, token, cacheDuration, proxyUrl, useProxy }) {
     this.owner = owner;
     this.repo = repo;
     this.token = localStorage.getItem('zblog_user_token') || token || '';
-    // 有代理时走代理，无代理直接请求 GitHub
-    const base = (proxyUrl || '').replace(/\/$/, '') || 'https://api.github.com';
+    // useProxy=true 且填了 proxyUrl 才走代理，否则直接请求 GitHub
+    const base = (useProxy && proxyUrl)
+      ? proxyUrl.replace(/\/$/, '')
+      : 'https://api.github.com';
     this.baseUrl = `${base}/repos/${owner}/${repo}`;
     this.apiBase = base;
     this.cacheDuration = cacheDuration || 5 * 60 * 1000;

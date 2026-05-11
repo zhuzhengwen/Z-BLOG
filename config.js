@@ -8,10 +8,13 @@ const CONFIG = {
   repo:  'Z-BLOG',       // 仓库名称（Issues 所在仓库）
   token: '',
 
-  // Cloudflare Worker 代理地址（推荐填写，所有访客共享 Token 额度）
-  // 部署 worker/index.js 后填入，如：https://zblog-proxy.your-name.workers.dev
-  // 留空则直接请求 GitHub API（60次/小时/IP 限制）
+  // Cloudflare Worker 代理地址，部署 worker/index.js 后填入
+  // 如：https://zblog-proxy.your-name.workers.dev
   proxyUrl: '',
+
+  // true = 走 Cloudflare Worker 代理（所有访客共享 Token，无限流）
+  // false = 直接请求 GitHub API（60次/小时/IP 限制）
+  useProxy: true,
 
   // ========== 博客基本信息 ==========
   siteTitle:  'Z-BLOG',
