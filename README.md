@@ -41,7 +41,7 @@ PC 端通过 GitHub Pages 静态托管，移动端基于 UniApp 构建，支持 
 - GitHub Issues 作为文章数据库，无需后端
 - Issue Label 对应文章分类，支持自定义颜色
 - 每篇文章可附加多个主题标签（非分类 Label），列表页和详情页均显示
-- API 无 Token 限额 60 次/小时，足够个人博客日常使用
+- API 无 Token 限额 60 次/小时；配置 Cloudflare Worker 代理后所有访客共享 5000 次/小时
 
 ---
 
@@ -51,6 +51,8 @@ PC 端通过 GitHub Pages 静态托管，移动端基于 UniApp 构建，支持 
 Z-BLOG/
 ├── index.html              # PC 端主页（SPA）
 ├── config.js               # 博客配置文件（必改）
+├── worker/
+│   └── index.js            # Cloudflare Worker 代理脚本
 ├── css/
 │   └── style.css           # PC 端样式
 ├── js/
@@ -123,6 +125,9 @@ const CONFIG = {
 
   cacheDuration: 5 * 60 * 1000,  // API 缓存时长（毫秒）
 
+  proxyUrl: '',   // Cloudflare Worker 地址（见下方说明），留空直连 GitHub
+  useProxy: true, // true = 走代理，false = 直连 GitHub API
+
   defaultMinimal: false,  // true = 默认极简模式，false = 默认正常模式
 };
 ```
@@ -152,6 +157,47 @@ const CONFIG = {
 3. 推送代码到 `main` 分支，Actions 自动部署
 
 部署完成后访问：`https://your-username.github.io/Z-BLOG`
+
+---
+
+## Cloudflare Worker 代理（解决访客限流）
+
+GitHub API 未认证限额为 **60 次/小时/IP**，访客多时容易触发。通过 Cloudflare Worker 代理，所有访客共享你的 Token 额度（**5000 次/小时**），且 Worker 缓存 5 分钟，实际消耗极少。
+
+### 工作原理
+
+```
+访客浏览器 → Cloudflare Worker（带 Token，缓存 5 分钟）→ GitHub API
+```
+
+### 部署步骤
+
+**1. 创建 Worker**
+
+1. 登录 [dash.cloudflare.com](https://dash.cloudflare.com)（免费注册）
+2. 左侧菜单 → **Workers & Pages** → **创建** → **从 Hello World! 开始**
+3. 起名（如 `zblog-proxy`）→ **部署**
+4. 部署后进入编辑器，把 `worker/index.js` 的内容全部粘贴进去 → **部署**
+
+**2. 设置 GitHub Token**
+
+1. 前往 [github.com/settings/tokens](https://github.com/settings/tokens) → **Generate new token (classic)**
+2. Expiration 选 **No expiration**，勾选 **public_repo** → 生成并复制 Token
+3. 回到 Cloudflare Worker → **Settings** → **Variables and Secrets** → **Add**
+4. Type 选 **Secret**，Variable name 填 `GITHUB_TOKEN`，Value 粘贴 Token → **Save**
+
+**3. 填入博客配置**
+
+复制 Worker 地址（格式：`https://zblog-proxy.你的账号.workers.dev`），填入 `config.js`：
+
+```js
+proxyUrl: 'https://zblog-proxy.你的账号.workers.dev',
+useProxy: true,
+```
+
+推送后生效。将 `useProxy` 改为 `false` 可随时切回直连 GitHub。
+
+> **安全说明**：`proxyUrl` 只是普通网址，可以公开。`GITHUB_TOKEN` 存在 Cloudflare 环境变量中，不在代码里，不会被扫描吊销。
 
 ---
 
@@ -247,6 +293,7 @@ defaultMinimal: false,  // 默认打开为正常模式（默认值）
 | 移动端      | UniApp + Vue 2                             |
 | 内容存储     | GitHub Issues                              |
 | 数据接口     | GitHub REST API v3                         |
+| API 代理    | Cloudflare Worker（可选，解决访客限流）             |
 | 部署       | GitHub Actions + GitHub Pages              |
 | Markdown  | marked.js                                  |
 | 代码高亮     | highlight.js（亮 / 暗双主题自动切换）                |
