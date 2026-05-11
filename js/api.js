@@ -11,32 +11,33 @@ class GitHubAPI {
     this.baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
     this.cacheDuration = cacheDuration || 5 * 60 * 1000;
     this._cache = {};
+    // 清理旧版遗留在 localStorage 里的 API 缓存
+    try {
+      Object.keys(localStorage).forEach(k => { if (k.startsWith('zblog_https')) localStorage.removeItem(k); });
+    } catch {}
   }
 
   // 更新 token（存入 localStorage 并立即生效）
   setToken(token) {
     this.token = token;
-    if (token) localStorage.setItem('zblog_user_token', token);
-    else localStorage.removeItem('zblog_user_token');
+    try {
+      if (token) localStorage.setItem('zblog_user_token', token);
+      else localStorage.removeItem('zblog_user_token');
+    } catch {}
   }
 
   getToken() { return this.token; }
 
-  // ── 缓存 ──────────────────────────────────────────────────
-  _cacheKey(url) { return `zblog_${url}`; }
-
+  // ── 缓存（内存，避免 localStorage 被大量 JSON 占满导致 Token 丢失）──
   _getCache(url) {
-    try {
-      const raw = localStorage.getItem(this._cacheKey(url));
-      if (!raw) return null;
-      const { data, ts } = JSON.parse(raw);
-      if (Date.now() - ts > this.cacheDuration) { localStorage.removeItem(this._cacheKey(url)); return null; }
-      return data;
-    } catch { return null; }
+    const entry = this._cache[url];
+    if (!entry) return null;
+    if (Date.now() - entry.ts > this.cacheDuration) { delete this._cache[url]; return null; }
+    return entry.data;
   }
 
   _setCache(url, data) {
-    try { localStorage.setItem(this._cacheKey(url), JSON.stringify({ data, ts: Date.now() })); } catch {}
+    this._cache[url] = { data, ts: Date.now() };
   }
 
   // ── HTTP 请求 ─────────────────────────────────────────────
