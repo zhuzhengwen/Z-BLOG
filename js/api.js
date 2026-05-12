@@ -110,7 +110,7 @@ class GitHubAPI {
     const cached = this._getCache(cacheKey);
     if (cached !== null) return cached;
     try {
-      const data = await this._request('${this.apiBase}/search/issues', { q, per_page: 1 });
+      const data = await this._request(`${this.apiBase}/search/issues`, { q, per_page: 1 });
       const count = data.total_count || 0;
       this._setCache(cacheKey, count);
       return count;
@@ -120,7 +120,7 @@ class GitHubAPI {
   // ── 搜索帖子 ─────────────────────────────────────────────
   async searchIssues(query, page = 1, perPage = 10) {
     const q = `${query} repo:${this.owner}/${this.repo} is:issue is:open`;
-    const data = await this._request('${this.apiBase}/search/issues', { q, page, per_page: perPage, sort: 'created' });
+    const data = await this._request(`${this.apiBase}/search/issues`, { q, page, per_page: perPage, sort: 'created' });
     return { items: (data.items || []).filter(i => !i.pull_request), total: data.total_count };
   }
 
