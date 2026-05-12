@@ -10,9 +10,9 @@ const CONFIG = {
 
   // Cloudflare Worker 代理地址，部署 worker/index.js 后填入
   // 如：https://zblog-proxy.your-name.workers.dev
-  proxyUrl: 'https://zblog-proxy.1186284384.workers.dev',
+  proxyUrl: '',
 
-  // true = 走 Cloudflare Worker 代理（所有访客共享 Token，无限流）
+  // true = 走 Cloudflare Worker 代理（所有访客共享 Token，无限流）https://zblog-proxy.1186284384.workers.dev
   // false = 直接请求 GitHub API（60次/小时/IP 限制）
   useProxy: false,
 
