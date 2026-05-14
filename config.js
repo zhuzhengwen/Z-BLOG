@@ -14,7 +14,7 @@ const CONFIG = {
 
   // true = 走 Cloudflare Worker 代理（所有访客共享 Token，无限流）https://zblog-proxy.1186284384.workers.dev
   // false = 直接请求 GitHub API（60次/小时/IP 限制）
-  useProxy: false,
+  useProxy: true,
 
   // ========== 博客基本信息 ==========
   siteTitle:  'Z-BLOG',
