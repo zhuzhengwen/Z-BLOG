@@ -1562,7 +1562,7 @@ html[data-minimal="1"] .post-detail__footer .btn:hover {
 /* 极简：图片切换栏 */
 .minimal-img-bar {
   display: none;
-  align-items: center; justify-content: flex-end;
+  align-items: center; justify-content: space-between;
   margin-bottom: 8px;
 }
 html[data-minimal="1"] .minimal-img-bar { display: flex; }
@@ -1574,7 +1574,7 @@ html[data-minimal="1"] .minimal-img-bar { display: flex; }
   transition: color var(--transition);
 }
 .minimal-img-bar__btn:hover { color: var(--text); }
-.minimal-img-bar__count { font-size: 0.78rem; color: var(--text-muted); opacity: 0.5; margin-right: auto; }
+.minimal-img-bar__count { font-size: 0.78rem; color: var(--text-muted); opacity: 0.5; margin-left: 10px; }
 
 /* 极简：图片九宫格 */
 .img-mosaic {
