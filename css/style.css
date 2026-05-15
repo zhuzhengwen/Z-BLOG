@@ -1214,7 +1214,7 @@ html[data-minimal="1"] #music-player        { display: none !important; }
 
 /* ── 名片栏（左侧固定） ── */
 .minimal-page-header__inner {
-  display: flex; flex-direction: column; align-items: center;
+  display: flex; flex-direction: column; align-items: flex-end;
   gap: 14px;
 }
 .minimal-page-header__avatar {
@@ -1244,7 +1244,7 @@ html[data-minimal="1"] #music-player        { display: none !important; }
 
 /* 垂直导航（桌面） */
 .minimal-page-header__nav {
-  display: flex; flex-direction: column; align-items: center;
+  display: flex; flex-direction: column; align-items: flex-end;
   gap: 0; margin-top: 6px;
 }
 .minimal-page-header__nav a {
@@ -1265,8 +1265,8 @@ html[data-minimal="1"] #music-player        { display: none !important; }
 @media (min-width: 1024px) {
   html[data-minimal="1"] .minimal-page-header {
     position: fixed; top: 88px;
-    left: calc(50% - 370px);
-    width: 180px;
+    left: calc(50% - 390px);
+    width: 210px;
     z-index: 10;
   }
   /* 竖线分隔：名片栏右侧 28px 处，底部跟随 footer */
@@ -1348,7 +1348,7 @@ html[data-minimal="1"] .layout {
 
 /* 极简模式比例调整：左右视觉重量对齐 */
 html[data-minimal="1"] .minimal-page-header__avatar {
-  width: 80px; height: 80px;
+  width: 96px; height: 96px;
   cursor: zoom-in;
 }
 html[data-minimal="1"] .minimal-page-header__title {
@@ -1358,7 +1358,7 @@ html[data-minimal="1"] .minimal-page-header__bio {
   font-size: 0.88rem;
 }
 html[data-minimal="1"] .minimal-page-header__nav a {
-  font-size: 0.92rem;
+  font-size: 1rem;
 }
 
 /* ── 头像预览 Lightbox ───────────────────────────────── */
