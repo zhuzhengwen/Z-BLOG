@@ -821,7 +821,7 @@ class App {
           var im=document.getElementById('imgLightboxImg');
           im.src='${escapeHtml(img.src)}'; lb.classList.add('active');
         })()">
-          <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.title)}" loading="lazy">
+          <img src="${escapeHtml(compressImg(img.src, 300))}" alt="${escapeHtml(img.title)}" loading="lazy">
         </div>`).join('');
     } catch (e) {
       const mosaic = document.getElementById('imgMosaic');
