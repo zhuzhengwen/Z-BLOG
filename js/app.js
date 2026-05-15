@@ -100,7 +100,7 @@ class App {
     // 头像
     const avatarEl = document.getElementById('minimalPageAvatar');
     if (avatarEl && !avatarEl.src) {
-      const url = CONFIG.siteAvatar || `https://github.com/${CONFIG.owner}.png?size=120`;
+      const url = CONFIG.siteAvatar || `https://github.com/${CONFIG.owner}.png?size=400`;
       avatarEl.src = url;
       const lbImg = document.getElementById('avatarLightboxImg');
       if (lbImg) lbImg.src = url;
