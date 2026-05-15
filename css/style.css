@@ -1214,8 +1214,8 @@ html[data-minimal="1"] #music-player        { display: none !important; }
 
 /* ── 名片栏（左侧固定） ── */
 .minimal-page-header__inner {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 14px;
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 14px; width: 100%;
 }
 .minimal-page-header__avatar {
   display: block; width: 56px; height: 56px;
@@ -1244,8 +1244,8 @@ html[data-minimal="1"] #music-player        { display: none !important; }
 
 /* 垂直导航（桌面） */
 .minimal-page-header__nav {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0; margin-top: 6px;
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 0; margin-top: 6px; width: 100%;
 }
 .minimal-page-header__nav a {
   color: var(--text-muted); font-size: 0.85rem; font-weight: 400;
