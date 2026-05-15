@@ -277,7 +277,7 @@ class App {
 
   async _loadTags() {
     try {
-      const catLabels = new Set(this.categories.map(c => c.label));
+      const catLabels = new Set([...this.categories.map(c => c.label), 'about']);
       const tagMap = {}; // { name -> { name, color, count } }
 
       // 拉取所有文章，从每篇文章的 labels 提取子标签
