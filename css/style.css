@@ -1253,11 +1253,10 @@ html[data-minimal="1"] #music-player        { display: none !important; }
   padding: 5px 0; position: relative;
   transition: color var(--transition);
 }
-.minimal-page-header__nav a:hover  { color: var(--text); text-decoration: none; }
+.minimal-page-header__nav a:hover  { color: var(--text); opacity: 1; text-decoration: none; }
 .minimal-page-header__nav a.active {
-  color: var(--text);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--text) 30%, transparent),
-               0 0 4px  color-mix(in srgb, var(--text) 15%, transparent);
+  color: var(--text); font-weight: 500; opacity: 1;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
 }
 .minimal-nav-sep { display: none; }
 
@@ -1278,7 +1277,7 @@ html[data-minimal="1"] #music-player        { display: none !important; }
     bottom: var(--divider-bottom, 0px);
     width: 1px;
     background: var(--border);
-    opacity: 0.6;
+    opacity: 0.4;
   }
   html[data-minimal="1"] .layout {
     max-width: 540px;
@@ -1429,7 +1428,7 @@ html[data-minimal="1"] .moment-card__title {
   transition: color 0.18s ease;
   -webkit-font-smoothing: antialiased;
 }
-html[data-minimal="1"] .moment-card:hover .moment-card__title { color: var(--text-link); }
+html[data-minimal="1"] .moment-card:hover .moment-card__title { opacity: 0.6; }
 
 html[data-minimal="1"] #pagination { margin-top: 32px; }
 
@@ -1496,10 +1495,11 @@ html[data-minimal="1"] .post-detail__meta-minimal {
   -webkit-font-smoothing: antialiased;
 }
 html[data-minimal="1"] .post-detail__meta-tag {
-  color: var(--text-link); text-decoration: none; font-weight: 400;
+  color: var(--text-muted); text-decoration: none; font-weight: 400;
+  transition: color var(--transition);
 }
-html[data-minimal="1"] .post-detail__meta-tag:hover { text-decoration: underline; text-underline-offset: 3px; }
-html[data-minimal="1"] .post-detail__meta-comma { color: var(--text-link); }
+html[data-minimal="1"] .post-detail__meta-tag:hover { color: var(--text); text-decoration: none; }
+html[data-minimal="1"] .post-detail__meta-comma { color: var(--text-muted); }
 html[data-minimal="1"] .post-detail__meta-dot   { color: var(--text-muted); margin: 0 0.3em; opacity: 0.5; }
 html[data-minimal="1"] .post-detail__meta-date  { color: var(--text-muted); }
 html[data-minimal="1"] .post-detail__content {
