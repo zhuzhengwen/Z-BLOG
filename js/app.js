@@ -93,9 +93,9 @@ class App {
   }
 
   _buildMinimalHeader() {
-    // 站点标题
+    // 站点标题（logo）
     const titleEl = document.getElementById('minimalPageTitle');
-    if (titleEl) titleEl.textContent = '朱正文';
+    if (titleEl) titleEl.textContent = (typeof CONFIG !== 'undefined' && CONFIG.siteTitle) || 'Z-BLOG';
 
     // 头像
     const avatarEl = document.getElementById('minimalPageAvatar');
@@ -128,35 +128,21 @@ class App {
       beianEl.innerHTML = items.join('');
     }
 
-    // 竖线底部跟随 footer 顶部（只注册一次）
-    if (!this._dividerSyncBound) {
-      this._dividerSyncBound = true;
-      this._syncDivider = () => {
-        const footer = document.querySelector('.minimal-footer');
-        if (!footer) return;
-        const fromBottom = window.innerHeight - footer.getBoundingClientRect().top;
-        document.documentElement.style.setProperty('--divider-bottom', Math.max(0, fromBottom) + 'px');
-      };
-      window.addEventListener('scroll', this._syncDivider, { passive: true });
-      window.addEventListener('resize', this._syncDivider, { passive: true });
-      // 页面内容高度变化时自动重同步（骨架屏→真实内容）
-      const ro = new ResizeObserver(this._syncDivider);
-      ro.observe(document.getElementById('main') || document.body);
-    }
-
     // 导航链接（只构建一次）
     const nav = document.getElementById('minimalPageNav');
     if (!nav || nav.dataset.built) return;
     nav.dataset.built = '1';
 
+    const allIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
+    const aboutIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
     const items = [
-      { name: '全部', href: '#/' },
-      ...this.categories.map(c => ({ name: c.name, href: `#/category/${c.label}` })),
-      { name: '关于我', href: '#/about' },
+      { name: '全部', href: '#/', icon: allIcon },
+      ...this.categories.map(c => ({ name: c.name, href: `#/category/${c.label}`, icon: (window.NAV_ICONS && NAV_ICONS[c.label]) || '' })),
+      { name: '关于我', href: '#/about', icon: aboutIcon },
     ];
     nav.innerHTML = items.map((item, i) => {
       const sep = i > 0 ? '<span class="minimal-nav-sep">·</span>' : '';
-      return `${sep}<a href="${item.href}">${escapeHtml(item.name)}</a>`;
+      return `${sep}<a href="${item.href}" class="minimal-nav-item">${item.icon}<span>${escapeHtml(item.name)}</span></a>`;
     }).join('');
   }
 

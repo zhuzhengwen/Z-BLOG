@@ -32,7 +32,7 @@
   </script>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260527">
+  <link rel="stylesheet" href="css/style.css?v=20260529">
   <!-- highlight.js -->
   <link id="hljsLight" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
   <link id="hljsDark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" disabled>
@@ -103,24 +103,6 @@
 </div>
 
 
-<!-- ── 极简模式头部（默认隐藏） ──────────────────────────── -->
-<aside class="minimal-page-header" id="minimalPageHeader">
-  <div class="minimal-page-header__inner">
-    <a class="minimal-page-header__avatar" href="#/" id="minimalPageAvatarLink" aria-label="预览头像"
-       onclick="event.preventDefault();document.getElementById('avatarLightbox').classList.add('active')">
-      <img class="minimal-page-header__avatar-img" id="minimalPageAvatar" alt="" loading="lazy">
-    </a>
-    <a class="minimal-page-header__title" href="#/" id="minimalPageTitle">朱正文</a>
-    <p class="minimal-page-header__bio" id="minimalPageBio"></p>
-    <nav class="minimal-page-header__nav" id="minimalPageNav"></nav>
-    <button class="minimal-mode-switch" onclick="app && app._toggleMinimalMode()" title="切换为标准模式" aria-label="切换为标准模式">
-      <span class="minimal-mode-switch__track">
-        <span class="minimal-mode-switch__thumb"></span>
-      </span>
-    </button>
-  </div>
-</aside>
-
 <!-- ── 头像预览 Lightbox ─────────────────────────────── -->
 <div class="avatar-lightbox" id="avatarLightbox"
      onclick="this.classList.remove('active')">
@@ -146,6 +128,25 @@
 
 <!-- ── Main Layout ─────────────────────────────────────── -->
 <div class="container layout">
+
+  <!-- 极简模式左侧分类导航（默认隐藏，极简模式下为第一列） -->
+  <aside class="minimal-page-header" id="minimalPageHeader">
+    <div class="minimal-page-header__inner">
+      <a class="minimal-page-header__logo" href="#/" id="minimalPageTitle">Z-BLOG</a>
+      <a class="minimal-page-header__avatar" href="#/" id="minimalPageAvatarLink" aria-label="预览头像"
+         onclick="event.preventDefault();document.getElementById('avatarLightbox').classList.add('active')">
+        <img class="minimal-page-header__avatar-img" id="minimalPageAvatar" alt="" loading="lazy">
+      </a>
+      <p class="minimal-page-header__bio" id="minimalPageBio"></p>
+      <nav class="minimal-page-header__nav" id="minimalPageNav"></nav>
+      <button class="minimal-mode-switch" onclick="app && app._toggleMinimalMode()" title="切换为标准模式" aria-label="切换为标准模式">
+        <span class="minimal-mode-switch__track">
+          <span class="minimal-mode-switch__thumb"></span>
+        </span>
+        <span class="minimal-mode-switch__label">退出极简</span>
+      </button>
+    </div>
+  </aside>
 
   <!-- 主内容区 -->
   <main class="main" id="main">
